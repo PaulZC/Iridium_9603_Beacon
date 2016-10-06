@@ -1,0 +1,64 @@
+#######################
+# Iridium 9603 Beacon #
+#######################
+
+With grateful thanks to Mikal Hart:
+Based on Mikal's IridiumSBD Beacon example: https://github.com/mikalhart/IridiumSBD
+Requires Mikal's TinyGPS library: https://github.com/mikalhart/TinyGPS
+and PString: http://arduiniana.org/libraries/pstring/
+
+With grateful thanks to:
+Adafruit: https://learn.adafruit.com/using-atsamd21-sercom-to-add-more-spi-i2c-serial-ports/creating-a-new-serial
+MartinL: https://forum.arduino.cc/index.php?topic=341054.msg2443086#msg2443086
+
+See Iridium_9603_Beacon.pdf for the PCB schematics
+The Iridium_9603_Beacon PCB is based extensively on the Adafruit Feather M0 (Adalogger)
+https://www.adafruit.com/products/2796
+https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather-m0-adalogger.pdf
+Set the Arduino Board to Adafruit Feather M0
+GPS data provided by Adafruit Ultimate GPS
+https://www.adafruit.com/products/790
+Pressure (altitude) and temperature provided by MPL3115A2
+Requires Adafruit's MPL3115A2 library
+https://github.com/adafruit/Adafruit_MPL3115A2_Library
+
+Uses RTCZero to provide sleep functionality (on the M0)
+https://github.com/arduino-libraries/RTCZero
+
+With grateful thanks to CaveMoa for his SimpleSleepUSB example
+https://github.com/cavemoa/Feather-M0-Adalogger
+https://github.com/cavemoa/Feather-M0-Adalogger/tree/master/SimpleSleepUSB
+Note: you will need to close and re-open your serial monitor each time the M0 wakes up
+
+Iridium 9603 is interfaced to the M0 using Serial2
+D6 (Port A Pin 20) = Enable (Sleep) : Connected to 9603 ON/OFF Pin 5
+D10 (Port A Pin 18) = Serial2 TX : Connected to 9603 Pin 6
+D12 (Port A Pin 19) = Serial2 RX : Connected to 9603 Pin 7
+A3 / D17 (Port A Pin 4) = Network Available : Connected to 9603 Pin 19
+
+Iridium 9603 is powered from Linear Technology LTC3225 SuperCapacitor Charger
+(fitted with 2 x 1F 2.7V caps e.g. Bussmann HV0810-2R7105-R)
+to provide the 1.3A peak current when the 9603 is transmitting
+http://www.linear.com/product/LTC3225
+D5 (Port A Pin 15) = LTC3225 ~Shutdown
+A1 / D15 (Port B Pin 8) = LTC3225 PGOOD
+
+Ultimate GPS is interfaced to the M0 using Serial1
+D1 (Port A Pin 10) = Serial1 TX : Connected to GPS RX
+D0 (Port A Pin 11) = Serial1 RX : Connected to GPS TX
+D11 (Port A Pin 16) = GPS ENable : Connected to Q1 (DMG3415U-7) Gate
+
+MPL3115A2 Pressure (Altitude) and Temperature Sensor
+D20 (Port A Pin 22) = SDA : Connected to MPL3115A2 SDA
+D21 (Port A Pin 23) = SCL : Connected to MPL3115A2 SCL
+
+D13 (Port A Pin 17) = Red LED
+D9 (Port A Pin 7) = AIN 7 : Battery Voltage / 2
+
+If you have manufactured and populated the PCB yourself, you will need to install the Adafruit bootloader:
+Get yourself a Segger J-Link programmer and connect it according to Atmel_SAMD21_Programming_Cable.pdf
+Ignore the RST connection
+Connect the 5V-Supply output from the J-Link to VBAT / BAT+ to power the board while you configure it
+See https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/restoring-bootloader for more details
+
+
