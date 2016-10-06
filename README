@@ -2,6 +2,9 @@
 # Iridium 9603 Beacon #
 #######################
 
+A lightweight (70g including the batteries) Iridium + GPS Beacon (Tracker)
+Suitable for High Altitude Ballooning
+
 With grateful thanks to Mikal Hart:
 Based on Mikal's IridiumSBD Beacon example: https://github.com/mikalhart/IridiumSBD
 Requires Mikal's TinyGPS library: https://github.com/mikalhart/TinyGPS
