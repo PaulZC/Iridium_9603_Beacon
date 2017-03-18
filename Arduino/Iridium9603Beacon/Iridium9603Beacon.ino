@@ -1,6 +1,6 @@
-// ####################################
-// # Paul Clark's Iridium 9603 Beacon #
-// ####################################
+// #######################
+// # Iridium 9603 Beacon #
+// #######################
 
 // With grateful thanks to Mikal Hart:
 // Based on Mikal's IridiumSBD Beacon example: https://github.com/mikalhart/IridiumSBD
@@ -85,7 +85,7 @@ long iterationCounter = 0;
 static const int networkAvailable = 17; // 9602 Network Available on pin D17
 static const int LTC3225shutdown = 5; // LTC3225 ~Shutdown on pin D5
 static const int LTC3225PGOOD = 15; // LTC3225 PGOOD on pin A1 / D15
-static const int GPS_EN = 11; // Ultimate GPS Enable on pin D11
+static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define GPS_ON LOW
 #define GPS_OFF HIGH
 
@@ -251,7 +251,7 @@ void loop()
   if (iterationCounter > 12) BEACON_INTERVAL = 60; // Send every 10 mins for the first two hours then drop to once per hour
   if (iterationCounter > 250) BEACON_INTERVAL = 360; // After ten days, drop to once every six hours
   
-  if (isbd.begin() == ISBD_SUCCESS)
+  if (isbd.begin() == ISBD_SUCCESS) // isbd.begin() powers on the 9603
   {
     char outBuffer[80]; // Always try to keep message short
 
@@ -275,11 +275,24 @@ void loop()
       str.print(tempC, 1);
       str.print(",");
       str.print(vbat, 2);
+      str.print(",");
+      str.print(iterationCounter, 0);
     }
 
     else
     {
-      sprintf(outBuffer, "%d: No GPS fix found!", iterationCounter);
+      // No GPS fix found!
+      //sprintf(outBuffer, "%d: No GPS fix found!", iterationCounter);
+      sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,");
+      int len = strlen(outBuffer);
+      PString str(outBuffer + len, sizeof(outBuffer) - len);
+      str.print(pascals, 0);
+      str.print(",");
+      str.print(tempC, 1);
+      str.print(",");
+      str.print(vbat, 2);
+      str.print(",");
+      str.print(iterationCounter, 0);
     }
 
     Serial.print("Transmitting message '");
