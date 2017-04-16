@@ -1,11 +1,18 @@
 #######################
-# Iridium 9603 Beacon #
+# Iridium 9603N Beacon #
 #######################
 
-*** Updated on March 18th 2017 to include details of the UBSEDS22I test flight ***
-
-A lightweight (72.6g including the batteries) Iridium + GPS Beacon (Tracker)
+A lightweight Iridium 9603N + GPS Beacon (Tracker)
 Suitable for High Altitude Ballooning
+
+*** Version 3 now includes u-blox SAM-M8Q GNSS and the option of solar power ***
+You can find the latest (untested) files in:
+https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/V3
+Details for the tested breadboard prototype can be found in:
+https://github.com/PaulZC/Iridium_9603N_Solar_Beacon
+
+
+The current tested release is Version 2:
 
 See Iridium_9603_Beacon.pdf for a description of the project:
 https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon.pdf
