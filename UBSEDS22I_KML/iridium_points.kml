@@ -499,5 +499,89 @@
                 <coordinates>83.15379,33.84892,0.0</coordinates>
             </Point>
         </Placemark>
+        <Placemark id="feat_73">
+            <name>830</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_70">
+                <coordinates>84.17803,33.47044,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_74">
+            <name>831</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_71">
+                <coordinates>85.41413,32.99175,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_75">
+            <name>833</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_72">
+                <coordinates>98.93059,32.44033,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_76">
+            <name>834</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_73">
+                <coordinates>99.55346,32.64457,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_77">
+            <name>835</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_74">
+                <coordinates>100.45408,32.91263,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_78">
+            <name>836</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_75">
+                <coordinates>101.35214,33.43683,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_79">
+            <name>837</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_76">
+                <coordinates>102.67406,33.77159,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_80">
+            <name>838</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_77">
+                <coordinates>103.44678,34.16435,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_81">
+            <name>840</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_78">
+                <coordinates>105.69807,35.13578,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_82">
+            <name>841</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_79">
+                <coordinates>107.37507,35.454,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_83">
+            <name>842</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_80">
+                <coordinates>108.2952,35.65839,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="feat_84">
+            <name>843</name>
+            <styleUrl>#stylesel_0</styleUrl>
+            <Point id="geom_81">
+                <coordinates>109.52857,35.9224,0.0</coordinates>
+            </Point>
+        </Placemark>
     </Document>
 </kml>

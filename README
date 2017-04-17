@@ -1,6 +1,6 @@
-#######################
+########################
 # Iridium 9603N Beacon #
-#######################
+########################
 
 A lightweight Iridium 9603N + GPS Beacon (Tracker)
 Suitable for High Altitude Ballooning
@@ -12,7 +12,7 @@ Details for the tested breadboard prototype can be found in:
 https://github.com/PaulZC/Iridium_9603N_Solar_Beacon
 
 
-The current tested release is Version 2:
+The current stable release is Version 2:
 
 See Iridium_9603_Beacon.pdf for a description of the project:
 https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon.pdf
