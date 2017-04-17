@@ -276,7 +276,7 @@ void loop()
       str.print(",");
       str.print(vbat, 2);
       str.print(",");
-      str.print(iterationCounter, 0);
+      str.print(float(iterationCounter), 0);
     }
 
     else
@@ -292,7 +292,7 @@ void loop()
       str.print(",");
       str.print(vbat, 2);
       str.print(",");
-      str.print(iterationCounter, 0);
+      str.print(float(iterationCounter), 0);
     }
 
     Serial.print("Transmitting message '");
