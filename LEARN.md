@@ -12,13 +12,13 @@ Version 3 now includes u-blox SAM-M8Q GNSS and the option of solar power.
 
 Following on from the [original work I did on the Iridium_9603_Beacon](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V2/Iridium_9603_Beacon.pdf)
 which got some nice coverage on [Hackaday](http://hackaday.com/2016/12/19/a-beacon-suitable-for-tracking-santas-sleigh/)
-and which flew on UBSEDS22 and sent updates all the way from the UK to China before the batteries gave up:
+and which flew on [UBSEDS22](http://www.bristol-seds.co.uk/hab/flight/2017/03/13/ubseds22.html) and sent updates all the way from the UK to China before the batteries gave up:
 
 ![UBSEDS22_KML](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/UBSEDS22_KML.JPG)
 - https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/UBSEDS22I_KML
 
 I decided to set myself the challenge of modifying the design of the beacon to make it solar-powered, making the lithium batteries optional and allowing the beacon to send updates during daylight hours for as long as the balloon continues to float.
-The design I’ve ended up with is based largely on V2 of the Iridium 9603 Beacon but can be powered by a pair of PowerFilm Solar MPT3.6-150 solar panels:
+The design I’ve ended up with is based extensively on V2 of the Iridium 9603 Beacon but can be powered by a pair of PowerFilm Solar MPT3.6-150 solar panels:
 - http://www.powerfilmsolar.com/products/?mpt36150&show=product&productID=271537&productCategoryIDs=6573
 
 These amazing little panels weigh only 3.1g each but can deliver a really useful amount of power: 100mA at 3.6V at Air Mass 1.5. This is enough to power the beacon’s SAMD21G18 processor and the GNSS receiver or the LTC3225EDDB super capacitor charger which delivers power to the Iridium 9603N.
@@ -35,10 +35,12 @@ layout and Bill Of Materials.
 The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Eagle) directory contains the schematic and pcb design files.
 
 Here's how the completed PCB looks when configured for solar power (using 10F super capacitors):
+
 ![V3_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Top.JPG)
 ![V3_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Bottom.JPG)
 
 And here's how it looks from the side once the 9603N and antenna PCB have been mounted:
+
 ![V3_Beacon_Side.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Side.JPG)
 
 The key components of V3 of the Iridium 9603N Beacon are:
@@ -54,7 +56,7 @@ Available (in the UK) from e.g.:
 Other UK and International distributors can be found at:
 - https://iridium.com/products/details/Iridium-9603?section=wtb 
 
-Make sure you purchase the 9603N and not the older 9603 (the 9603N will run from 5V ± 0.5V which is important as the super capacitor charger is set to produce 5.3V; the older 9603 is only rated to 5V ± 0.2V)
+Make sure you purchase the 9603N and not the older 9603. The 9603N will run from 5V ± 0.5V which is important as the super capacitor charger is set to produce 5.3V; the older 9603 is only rated to 5V ± 0.2V.
 
 ### Taoglas IP.1621.25.4.A.021 Iridium Patch Antenna
 ![V3_Beacon_Antenna.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Antenna.JPG)
@@ -90,6 +92,7 @@ Available as a bare chip from e.g. Farnell / Element14 (2009084)
 Available as a bare chip from e.g. Farnell / Element14 (1715231)
 
 Charges two e.g. Bussmann HV1030-2R7106-R 10F 2.7V capacitors (Farnell / Element14 2148486)
+
 ![V3_Beacon_SuperCap_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_SuperCap_Bottom.JPG)
 
 ### u-blox SAM-M8Q GNSS
@@ -111,11 +114,11 @@ Available (in the UK) from e.g.:
 
 The SAMD21G18 has a built-in power-on reset and brown-out detector circuit, but it doesn't work properly if the supply voltage rises very slowly.
 The SAMD21G18 datasheet isn’t much help here. Section 8.2.4.1 specifies:
-- Minimum Rise Rate
+- _Minimum Rise Rate_
 
-   The integrated power-on reset (POR) circuitry monitoring the VDDANA power supply requires a minimum rise rate.
+   _The integrated power-on reset (POR) circuitry monitoring the VDDANA power supply requires a minimum rise rate._
 
-But then the supply characteristics section (37.4) specifies a _maximum_ supply rise rate of 0.1V/µs, but no minimum.
+But then the supply characteristics section (37.4) specifies a _maximum_ supply rise rate of 0.1V/µs, not a minimum.
 
 Tests I've carried out show that the processor will reset correctly if the power supply ramps up at 0.3 V/s or more, but fails to reset correctly at 0.2 V/s or less.
 As the solar panel voltage will ramp up very slowly at sunrise, I've included a separate reset supervisor.
@@ -189,6 +192,7 @@ The BOM lists the different parts you'll need for the two configurations. Here a
 
 ![V1_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Top.JPG)
 ![V1_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Bottom.JPG)
+
 ![V1_Beacon_Side.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Side.JPG)
  
 ### Why do you need the Super Capacitors?
@@ -202,8 +206,11 @@ We need to charge the capacitors at a higher current than this, but keep the tot
 ### Can I leave the USB connected during testing?
 Yes. Leaving the USB connected is useful as you can monitor the Serial messages produced by the code in the Arduino IDE Serial Monitor.
 If you use a standard USB cable then the beacon will draw power from USB. To test the beacon running on solar power, you will need to break the USB 5V power connection.
-You can do this with a home-made power-break cable. Take a short male to female USB extension cable; carefully strip the outer sheath from cable somewhere near the middle;
+You can do this with a home-made power-break cable.
+
+Take a short male to female USB extension cable; carefully strip the outer sheath from cable somewhere near the middle;
 prise apart the screen connection to reveal the four USB wires (red (5V); black (GND); green and white (data)); cut and insulate the ends of the red 5V wire leaving the black, green and white wires and the screen connection intact:
+
 ![USB_Power_Break.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/USB_Power_Break.JPG)
 
 ## Do you recommend coating the board once it is populated?
@@ -226,11 +233,11 @@ The Arduino code included in this repository will send the following (separated 
 - Battery / solar voltage (V)
 - Iteration count
 
-E.g.:
+- E.g.:
 
    _20170729144631,55.866573,-2.428458,103,0.1,0,3.0,5,99098,25.3,4.98,0_
 
-You can opt receive the data as an email attachment from the Iridium system. The email itself contains extra useful information:
+You can opt to receive the data as an email attachment from the Iridium system. The email itself contains extra useful information:
 - Message sequence numbers (so you can identify if any messages have been missed)
 - The time and date the message session was processed by the Iridium system
 - The status of the message session (was it successful or was the data corrupt)
@@ -238,13 +245,13 @@ You can opt receive the data as an email attachment from the Iridium system. The
 - The approximate latitude and longitude the message was sent from
 - The approximate error radius of the transmitter’s location
 
-E.g.:
+- E.g.:
 
    _From:	sbdservice@sbd.iridium.com_  
    _Sent:	20 August 2016 16:25_  
    _To:_  
-   _Subject:	SBD Msg From Unit: 30043406174****_  
-   _Attachments:	30043406174****_000029.sbd_  
+   _Subject:	SBD Msg From Unit: 30043406174_  
+   _Attachments:	30043406174-000029.sbd_  
 
    _MOMSN: 29_  
    _MTMSN: 0_  
@@ -258,7 +265,7 @@ You can opt to receive the data via HTTP instead of email. Your service provider
 
 ## Acknowledgements
 
-I’m very grateful to Richard Meadows and his fellow students at UBSEDS (University of Bristol Students for the Exploration and Development of Space).
+I’m very grateful to Richard Meadows and his fellow students at UBSEDS (University of Bristol Students for the Exploration and Development of Space) who flew the V1 beacon on [UBSEDS22](http://www.bristol-seds.co.uk/hab/flight/2017/03/13/ubseds22.html).
 - http://www.bristol-seds.co.uk/
 
 I’m also very grateful to the UKHAS (UK High Altitude Society) team who provide the habhub flight tracker:
@@ -272,6 +279,7 @@ This project wouldn’t have been possible without the open source designs and cod
    The design for the Feather M0 Adalogger
    For more details, check out the product page at:
    - https://www.adafruit.com/product/2772  
+
    Adafruit invests time and resources providing this open source design, please support Adafruit and open-source hardware by purchasing products from Adafruit!  
    Designed by Adafruit Industries.  
    Creative Commons Attribution, Share-Alike license
