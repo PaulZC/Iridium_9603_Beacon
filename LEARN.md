@@ -142,7 +142,8 @@ It is possible to connect both the solar panels and the batteries, the beacon wi
 
 If you are going to use solar power, use the 10F super capacitors described above.
 
-If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice.
+If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice if you increase the super capacitor charge current to 150mA.
+Do this by replacing R2 with a 12K resistor instead of 30K. Remember that a draw of 150mA would be too much for the solar panels.
 
 The BOM lists the different parts you'll need for the two configurations. Here are images of V1 of the beacon configured for batteries plus 1F capacitors:
 
@@ -182,7 +183,7 @@ Please see the [V2 documentation](https://github.com/PaulZC/Iridium_9603_Beacon/
 You can use this pin to provide power for a peripheral which you want to be able to disable to save power.
 
 **SDA** and **SCL** are the I2C bus data and clock signals.
-You can use these to connect another I2C sensor but it will share the bus with the MPL3115A2.
+You can use these to connect another I2C sensor but be aware that it will share the bus with the MPL3115A2.
 
 **3V3** is the 3.3V power rail from the SPX3819-3.3 voltage regulator.
 Any peripherals connected to this will be continuously powered when power is available from the solar panels, batteries or USB.
@@ -256,7 +257,8 @@ The Arduino code included in this repository will send the following (separated 
 - Temperature (C)
 - Battery / solar voltage (V)
 - Iteration count
-   
+  
+
 - E.g.:
 
    _20170729144631,55.866573,-2.428458,103,0.1,0,3.0,5,99098,25.3,4.98,0_
@@ -268,7 +270,8 @@ You can opt to receive the data as an email attachment from the Iridium system. 
 - The size of the message in bytes
 - The approximate latitude and longitude the message was sent from
 - The approximate error radius of the transmitter’s location
-   
+  
+
 - E.g.:
 
    _From:	sbdservice@sbd.iridium.com_  
@@ -344,7 +347,7 @@ This project wouldn’t have been possible without the open source designs and cod
 
 This project is distributed under a Creative Commons Share-alike 4.0 licence.
 Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
-
+  
 
 Enjoy!
 
