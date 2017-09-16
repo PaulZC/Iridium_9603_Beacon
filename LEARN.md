@@ -112,6 +112,8 @@ Available (in the UK) from e.g.:
 You will want to angle the solar panels at +/- 45 degrees with respect to the circuit board so that at least one panel will collect sunlight while the sun is low in the sky.
 When the sun is overhead, both panels will collect sunlight.
 
+![Iridium_9603_Beacon_V3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603_Beacon_V3.JPG)
+
 ### MCP111T-240 Reset Supervisor
 ![V3_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_ResetSupervisor.JPG)
 
@@ -257,9 +259,8 @@ The Arduino code included in this repository will send the following (separated 
 - Temperature (C)
 - Battery / solar voltage (V)
 - Iteration count
-  
 
-- E.g.:
+E.g.:
 
    _20170729144631,55.866573,-2.428458,103,0.1,0,3.0,5,99098,25.3,4.98,0_
 
@@ -270,20 +271,19 @@ You can opt to receive the data as an email attachment from the Iridium system. 
 - The size of the message in bytes
 - The approximate latitude and longitude the message was sent from
 - The approximate error radius of the transmitter’s location
-  
 
-- E.g.:
+E.g.:
 
    _From:	sbdservice@sbd.iridium.com_  
    _Sent:	20 August 2016 16:25_  
    _To:_  
    _Subject:	SBD Msg From Unit: 30043406174_  
    _Attachments:	30043406174-000029.sbd_  
-
+  
    _MOMSN: 29_  
    _MTMSN: 0_  
    _Time of Session (UTC): Sat Aug 20 15:24:57 2016 Session Status: 00 - Transfer OK Message Size (bytes): 61_  
-
+  
    _Unit Location: Lat = 55.87465 Long = -2.37135 CEPradius = 4_
 
 You can adapt the code to send whatever data you like, up to a maximum of 340 bytes. The message is sent as plain text, but you could encrypt it if required.
