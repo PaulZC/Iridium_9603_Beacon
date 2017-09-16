@@ -6,7 +6,7 @@ Suitable for High Altitude Ballooning and many other remote monitoring applicati
 
 Version 3 now includes u-blox SAM-M8Q GNSS and the option of solar power.
 
-![Iridium_9603N_Beacon_V3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V3.JPG)
+![Iridium_9603_Beacon_V3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603_Beacon_V3.JPG)
 
 **See [LEARN.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md) for more details.**
 
