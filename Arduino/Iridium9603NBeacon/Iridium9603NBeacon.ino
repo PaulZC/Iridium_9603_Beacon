@@ -5,8 +5,6 @@
 // A version of the Iridium 9603N Beacon which can be powered by two PowerFilm MPT3.6-150 solar panels
 // GPS data is provided by u-blox SAM-M8Q
 
-// ***!!! STILL TO DO: Check all of the low voltage limits ("if (vbat < 3.0)") !!!***
-
 // With grateful thanks to Mikal Hart:
 // Based on Mikal's IridiumSBD Beacon example: https://github.com/mikalhart/IridiumSBD
 // Requires Mikal's TinyGPS library: https://github.com/mikalhart/TinyGPS
@@ -62,6 +60,13 @@
 
 // D13 (Port A Pin 17) = Red LED
 // D9 (Port A Pin 7) = AIN 7 : Bus Voltage / 2
+
+// As the solar panel or battery voltage drops, reported VBAT drops to ~3.38V and then flatlines
+// So, M0 cannot detect supply voltages lower than about 3.3V
+// Therefore, check that reported VBAT is >= 3.5V (~3.7V actual) before doing anything useful
+// Even if most of the chipset works at voltages lower than this!
+// SAM-M8Q seems to need at least 2.4V
+// LTC3225 seems to need at least 3.08V
 
 #include <IridiumSBD.h>
 #include <TinyGPS.h> // NMEA parsing: http://arduiniana.org
@@ -171,7 +176,7 @@ bool ISBDCallback()
    average_reading = total / numReadings; // Seems to work OK with integer maths - but total does need to be long int
    vbat = float(average_reading) * (2.0 * 3.3 / 1023.0);
   
-  if (vbat < 3.0) {
+  if (vbat < 3.50) {
     Serial.print("***!!! LOW VOLTAGE (ISBDCallback) ");
     Serial.print(vbat,2);
     Serial.println("V !!!***");
@@ -265,7 +270,7 @@ void loop()
       // Check solar panel voltage
       // If panel voltage is low, go to sleep
       get_vbat();
-      if (vbat < 3.0) {
+      if (vbat < 3.50) {
         Serial.print("***!!! LOW VOLTAGE (init) ");
         Serial.print(vbat,2);
         Serial.println(" !!!***");
@@ -287,7 +292,7 @@ void loop()
       // Check solar panel voltage now we are drawing current for the GPS
       // If panel voltage is low, go to sleep
       get_vbat();
-      if (vbat < 3.0) {
+      if (vbat < 3.50) {
         Serial.print("***!!! LOW VOLTAGE (start_GPS) ");
         Serial.print(vbat,2);
         Serial.println("V !!!***");
@@ -344,7 +349,7 @@ void loop()
           {
             tinygps.f_get_position(&latitude, &longitude, &locationFix);
             tinygps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &dateFix);
-            altitude = tinygps.altitude();
+            altitude = tinygps.altitude(); // Altitude in cm (long)
             fixFound = locationFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        dateFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        altitude != TinyGPS::GPS_INVALID_ALTITUDE &&
@@ -360,14 +365,17 @@ void loop()
         // Check solar panel voltage now we are drawing current for the GPS
         // If panel voltage is low, stop looking for GPS and go to sleep
         get_vbat();
-        if (vbat < 3.0) {
+        if (vbat < 3.50) {
           break;
         }        
       }
 
       Serial.println(charsSeen ? fixFound ? F("A GPS fix was found!") : F("No GPS fix was found.") : F("Wiring error: No GPS data seen."));
+      Serial.print("Latitude (degrees): "); Serial.println(latitude, 6);
+      Serial.print("Longitude (degrees): "); Serial.println(longitude, 6);
+      Serial.print("Altitude (m): "); Serial.println(altitude / 100); // Convert altitude from cm to m
 
-      if (vbat < 3.0) {
+      if (vbat < 3.50) {
         Serial.print("***!!! LOW VOLTAGE (read_GPS) ");
         Serial.print(vbat,2);
         Serial.println("V !!!***");
@@ -396,6 +404,9 @@ void loop()
         tempC = 0.0;
       }
 
+      Serial.print("Pressure (Pascals): "); Serial.println(pascals,0);
+      Serial.print("Temperature (C): "); Serial.println(tempC,1);
+
        // Power down the GPS and MPL3115A2
       Serial.println("Powering down the GPS and MPL3115A2...");
       digitalWrite(GPS_EN, GPS_OFF); // Disable the GPS and MPL3115A2
@@ -417,7 +428,7 @@ void loop()
         // Check solar panel voltage now we are drawing current for the LTC3225
         // If panel voltage is low, stop LTC3225 and go to sleep
         get_vbat();
-        if (vbat < 3.0) {
+        if (vbat < 3.50) {
           break;
         }
 
@@ -428,7 +439,7 @@ void loop()
       }
 
       // If voltage is low or supercapacitors did not charge then go to sleep
-      if (vbat < 3.0) {
+      if (vbat < 3.50) {
         Serial.print("***!!! LOW VOLTAGE (start_LTC3225) ");
         Serial.print(vbat,2);
         Serial.println("V !!!***");
@@ -456,7 +467,7 @@ void loop()
         // Check solar panel voltage now we are drawing current for the LTC3225
         // If panel voltage is low, stop LTC3225 and go to sleep
         get_vbat();
-        if (vbat < 3.0) {
+        if (vbat < 3.50) {
           break;
         }
 
@@ -467,7 +478,7 @@ void loop()
       }
 
       // If voltage is low or supercapacitors did not charge then go to sleep
-      if (vbat < 3.0) {
+      if (vbat < 3.50) {
         Serial.print("***!!! LOW VOLTAGE (wait_LTC3225) ");
         Serial.print(vbat,2);
         Serial.println("V !!!***");
@@ -493,7 +504,7 @@ void loop()
 
       if (isbd.begin() == ISBD_SUCCESS) // isbd.begin powers up the 9603
       {
-        char outBuffer[80]; // Always try to keep message short
+        char outBuffer[90]; // Always try to keep message short (maximum should be ~82 chars)
     
         if (fixFound)
         {
@@ -504,11 +515,15 @@ void loop()
           str.print(",");
           str.print(longitude, 6);
           str.print(",");
-          str.print(altitude / 100);
+          str.print(altitude / 100); // Convert altitude from cm to m
           str.print(",");
-          str.print(tinygps.f_speed_knots(), 1);
+          str.print(tinygps.f_speed_mps(), 1); // Speed in metres per second
           str.print(",");
-          str.print(tinygps.course() / 100);
+          str.print(tinygps.course() / 100); // Convert from 1/100 degree to degrees
+          str.print(",");
+          str.print((((float)tinygps.hdop()) / 100),1); // Convert from 1/100 m to m
+          str.print(",");
+          str.print(tinygps.satellites());
           str.print(",");
           str.print(pascals, 0);
           str.print(",");
@@ -522,7 +537,7 @@ void loop()
         else
         {
           // No GPS fix found!
-          sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,");
+          sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,0.0,0,");
           int len = strlen(outBuffer);
           PString str(outBuffer + len, sizeof(outBuffer) - len);
           str.print(pascals, 0);
