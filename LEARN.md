@@ -18,7 +18,7 @@ and which flew on [UBSEDS22](http://www.bristol-seds.co.uk/hab/flight/2017/03/13
 - https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/UBSEDS22I_KML
 
 I decided to set myself the challenge of modifying the design of the beacon to make it solar-powered, making the lithium batteries optional and allowing the beacon to send updates during daylight hours for as long as the balloon continues to float.
-The design I’ve ended up with is based extensively on V2 of the Iridium 9603 Beacon but can be powered by a pair of PowerFilm Solar MPT3.6-150 solar panels:
+The design I’ve ended up with is based extensively on V2 of the Iridium 9603 Beacon but can now be powered by a pair of PowerFilm Solar MPT3.6-150 solar panels:
 - http://www.powerfilmsolar.com/products/?mpt36150&show=product&productID=271537&productCategoryIDs=6573
 
 These amazing little panels weigh only 3.1g each but can deliver a really useful amount of power: 100mA at 3.6V at Air Mass 1.5. This is enough to power the beacon’s SAMD21G18 processor and the GNSS receiver or the LTC3225EDDB super capacitor charger which delivers power to the Iridium 9603N.
@@ -66,7 +66,7 @@ Available from e.g. Mouser (Part# 960-IP1621254A02)
 This is mounted on a small PCB above the 9603N:
 - https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Eagle/Iridium_9603_Antenna.brd
 
-and connected to the 9603N with a short Molex uFL cable (part number 73412-0508, available from Farnell / Element14 (1340201))
+and is connected to the 9603N with a short Molex uFL cable (part number 73412-0508, available from Farnell / Element14 (1340201))
 
 ### Atmel ATSAMD21G18 Processor
 ![V3_Beacon_SAMD.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_SAMD.JPG)
@@ -131,7 +131,61 @@ The SPX3819-3.3 Voltage Regulator regulates the output from the two solar panels
 
 The LTC3225EDDB SuperCapacitor Charger draws its power directly from the solar panels, batteries or USB without going through the regulator.
 
-MBR120 diodes protect the solar panels and the batteries when the PCB is connected to USB.
+MBR120 diodes protect the solar panels and the batteries from each other, and when the PCB is connected to USB.
+
+## Power Options 
+V3 of the Iridium 9603N Beacon can draw power from: either or both of the solar panels; three AAA batteries; or USB.
+It is possible to connect both the solar panels and the batteries, the beacon will simply draw power from whichever is providing the higher voltage.
+
+If you are going to use solar power, use the 10F super capacitors described above.
+
+If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice.
+
+The BOM lists the different parts you'll need for the two configurations. Here are images of V1 of the beacon configured for batteries plus 1F capacitors:
+
+![V1_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Top.JPG)
+![V1_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Bottom.JPG)
+
+![V1_Beacon_Side.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Side.JPG)
+ 
+### Why do you need the Super Capacitors?
+The Iridium 9603 module draws an average current of 145mA and a peak current of 1.3A when transmitting its short data bursts. That’s too much for the solar panel to provide.
+The LTC3225 super capacitor charger draws 60mA from the panel to charge two 10F 2.7V capacitors, connected in series, to 5.3V. The capacitors then deliver the 1.3A to the module when it sends the data burst.
+
+### Why is the Super Capacitor Charger charge current set to 60mA?
+The datasheet for the 9603N quotes: an average idle current of 34mA; and an average receive current of 39mA.
+We need to charge the capacitors at a higher current than this, but keep the total current draw within what the solar panel can deliver.
+
+### Can I leave the USB connected during testing?
+Yes. Leaving the USB connected is useful as you can monitor the Serial messages produced by the code in the Arduino IDE Serial Monitor.
+If you use a standard USB cable then the beacon will draw power from USB. To test the beacon running on solar power, you will need to break the USB 5V power connection.
+You can do this with a home-made power-break cable.
+
+Take a short male to female USB extension cable; carefully strip the outer sheath from cable somewhere near the middle;
+prise apart the screen connection to reveal the four USB wires (red (5V); black (GND); green and white (data)); cut and insulate the ends of the red 5V wire leaving the black, green and white wires and the screen connection intact:
+
+![USB_Power_Break.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/USB_Power_Break.JPG)
+
+## IO Pins
+![V3_Beacon_IO.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_IO.JPG)
+
+**SWCLK** and **SWDIO** are used during [programming of the SAMD bootloader](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md#how-do-i-install-the-atsamd21g18-bootloader)
+
+**3V3SW** is the 3.3V power rail switched by Q1 and which provides power for the SAM-M8Q GNSS and MPL3115A2 altitude sensor.
+You can use this pin to provide power for a peripheral which you want to be able to disable to save power.
+
+**SDA** and **SCL** are the I2C bus data and clock signals.
+You can use these to connect another I2C sensor but it will share the bus with the MPL3115A2.
+
+**3V3** is the 3.3V power rail from the SPX3819-3.3 voltage regulator.
+Any peripherals connected to this will be continuously powered when power is available from the solar panels, batteries or USB.
+
+**MISO**, **SCK**, **MOSI** and **SD_CS** are the SPI bus data, clock and enable connections.
+You could use these to connect SD storage or another SPI peripheral.
+
+## Do you recommend coating the board once it is populated?
+As a minimum, I’d recommend applying a coat of acrylic protective lacquer to the processor and surrounding components (especially the crystal).
+If you’re using an aerosol, be careful to mask off the connectors, switch and the pressure sensor first.
 
 ## Arduino Code
 The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory contains the Arduino code.
@@ -180,43 +234,6 @@ Connect the 5V-Supply output from the J-Link to one of the SOLAR+ connections to
 Follow Lady Ada’s excellent instructions:
 - https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/restoring-bootloader
 
-## Power Options 
-V3 of the Iridium 9603N Beacon can draw power from: either or both of the solar panels; three AAA batteries; or USB.
-It is possible to connect both the solar panels and the batteries, the beacon will simply draw power from whichever is providing the higher voltage.
-
-If you are going to use solar power, use the 10F super capacitors described above.
-
-If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice.
-
-The BOM lists the different parts you'll need for the two configurations. Here are images of V1 of the beacon configured for batteries plus 1F capacitors:
-
-![V1_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Top.JPG)
-![V1_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Bottom.JPG)
-
-![V1_Beacon_Side.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Side.JPG)
- 
-### Why do you need the Super Capacitors?
-The Iridium 9603 module draws an average current of 145mA and a peak current of 1.3A when transmitting its short data bursts. That’s too much for the solar panel to provide.
-The LTC3225 super capacitor charger draws 60mA from the panel to charge two 10F 2.7V capacitors, connected in series, to 5.3V. The capacitors then deliver the 1.3A to the module when it sends the data burst.
-
-### Why is the Super Capacitor Charger charge current set to 60mA?
-The datasheet for the 9603N quotes: an average idle current of 34mA; and an average receive current of 39mA.
-We need to charge the capacitors at a higher current than this, but keep the total current draw within what the solar panel can deliver.
-
-### Can I leave the USB connected during testing?
-Yes. Leaving the USB connected is useful as you can monitor the Serial messages produced by the code in the Arduino IDE Serial Monitor.
-If you use a standard USB cable then the beacon will draw power from USB. To test the beacon running on solar power, you will need to break the USB 5V power connection.
-You can do this with a home-made power-break cable.
-
-Take a short male to female USB extension cable; carefully strip the outer sheath from cable somewhere near the middle;
-prise apart the screen connection to reveal the four USB wires (red (5V); black (GND); green and white (data)); cut and insulate the ends of the red 5V wire leaving the black, green and white wires and the screen connection intact:
-
-![USB_Power_Break.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/USB_Power_Break.JPG)
-
-## Do you recommend coating the board once it is populated?
-As a minimum, I’d recommend applying a coat of acrylic protective lacquer to the processor and surrounding components (especially the crystal).
-If you’re using an aerosol, be careful to mask off the connectors, switch and the pressure sensor first.
-
 ## What data will I get back from the beacon?
 
 The Arduino code included in this repository will send the following (separated by commas):
@@ -232,7 +249,7 @@ The Arduino code included in this repository will send the following (separated 
 - Temperature (C)
 - Battery / solar voltage (V)
 - Iteration count
-
+   
 - E.g.:
 
    _20170729144631,55.866573,-2.428458,103,0.1,0,3.0,5,99098,25.3,4.98,0_
@@ -244,7 +261,7 @@ You can opt to receive the data as an email attachment from the Iridium system. 
 - The size of the message in bytes
 - The approximate latitude and longitude the message was sent from
 - The approximate error radius of the transmitter’s location
-
+   
 - E.g.:
 
    _From:	sbdservice@sbd.iridium.com_  
@@ -275,8 +292,8 @@ I’m also very grateful to the UKHAS (UK High Altitude Society) team who provide 
 This project wouldn’t have been possible without the open source designs and code kindly provided by:
 - Adafruit:
 
-   The Adafruit SAMD Board library
-   The design for the Feather M0 Adalogger
+   The Adafruit SAMD Board library  
+   The design for the Feather M0 Adalogger  
    For more details, check out the product page at:
    - https://www.adafruit.com/product/2772  
 
@@ -286,7 +303,7 @@ This project wouldn’t have been possible without the open source designs and cod
 
    The MPL3115A2 library
 
-   Sercom examples
+   Sercom examples:
    - https://learn.adafruit.com/using-atsamd21-sercom-to-add-more-spi-i2c-serial-ports/creating-a-new-serial
 
 - Mikal Hart:
@@ -297,7 +314,7 @@ This project wouldn’t have been possible without the open source designs and cod
 
 - Sparkfun:
 
-   The MPL3115A2 Breakout
+   The MPL3115A2 Breakout:
    - https://www.sparkfun.com/products/11084
 
 - Arduino:
@@ -308,12 +325,12 @@ This project wouldn’t have been possible without the open source designs and cod
 
 - Cave Moa:
 
-   The SimpleSleepUSB example
+   The SimpleSleepUSB example:
    - https://github.com/cavemoa/Feather-M0-Adalogger/tree/master/SimpleSleepUSB
 
 - MartinL:
 
-   sercom examples
+   Sercom examples:
    - https://forum.arduino.cc/index.php?topic=341054.msg2443086#msg2443086
 
 ## Licence
