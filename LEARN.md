@@ -109,6 +109,9 @@ Charges two e.g. Bussmann HV1030-2R7106-R 10F 2.7V capacitors (Farnell / Element
 Available (in the UK) from e.g.:
 - http://www.selectsolar.co.uk/prod/264/powerfilm-mpt36150-100ma-36v-mini-solar-panel
 
+You will want to angle the solar panels at +/- 45 degrees with respect to the circuit board so that at least one panel will collect sunlight while the sun is low in the sky.
+When the sun is overhead, both panels will collect sunlight.
+
 ### MCP111T-240 Reset Supervisor
 ![V3_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_ResetSupervisor.JPG)
 
@@ -165,6 +168,10 @@ Take a short male to female USB extension cable; carefully strip the outer sheat
 prise apart the screen connection to reveal the four USB wires (red (5V); black (GND); green and white (data)); cut and insulate the ends of the red 5V wire leaving the black, green and white wires and the screen connection intact:
 
 ![USB_Power_Break.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/USB_Power_Break.JPG)
+
+### Which AAA batteries should I use?
+Energiser® Ultimate Lithium batteries. These are rated down to -40°C but tests I’ve done (using dry ice) show that they continue to work much colder than that.
+Please see the [V2 documentation](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V2/Iridium_9603_Beacon.pdf) for further details.
 
 ## IO Pins
 ![V3_Beacon_IO.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_IO.JPG)
