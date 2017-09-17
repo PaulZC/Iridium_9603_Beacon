@@ -102,6 +102,7 @@ Charges two e.g. Bussmann HV1030-2R7106-R 10F 2.7V capacitors (Farnell / Element
 
 ### Two PowerFilm Solar MPT3.6-150 solar panels
 ![Iridium_9603N_Beacon_Solar.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_Solar.JPG)
+
 ![V3_Beacon_Solar.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Solar.JPG)
 
 - http://www.powerfilmsolar.com/products/?mpt36150&show=product&productID=271537&productCategoryIDs=6573
@@ -113,6 +114,8 @@ You will want to angle the solar panels at +/- 45 degrees with respect to the ci
 When the sun is overhead, both panels will collect sunlight.
 
 ![Iridium_9603_Beacon_V3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603_Beacon_V3.JPG)
+
+![Iridium_9603N_Beacon_Solar_2.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_Solar_2.JPG)
 
 ### MCP111T-240 Reset Supervisor
 ![V3_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_ResetSupervisor.JPG)
