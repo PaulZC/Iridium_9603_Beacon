@@ -186,6 +186,9 @@ bool ISBDCallback()
     return true;
   }
 }
+// IridiumSBD V2 console and diagnostic callbacks (replacing attachConsole and attachDiags)
+void ISBDConsoleCallback(IridiumSBD *device, char c) { Serial.write(c); }
+void ISBDDiagsCallback(IridiumSBD *device, char c) { Serial.write(c); }
 
 // Interrupt handler for SERCOM1 (essential for Serial2 comms)
 void SERCOM1_Handler()
@@ -262,10 +265,10 @@ void loop()
       Serial.println("Iridium 9603N Solar Beacon");
       
       // Setup the IridiumSBD
-      isbd.attachConsole(Serial);
-      isbd.attachDiags(Serial);
-      isbd.setPowerProfile(1);
-      isbd.useMSSTMWorkaround(false);
+      // isbd.attachConsole(Serial); // Deprecated in V2 of IridiumSBD
+      // isbd.attachDiags(Serial); // Deprecated in V2 of IridiumSBD
+      isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Change power profile to "low current" (was isbd.setPowerProfile(1);)
+      isbd.useMSSTMWorkaround(false); // Redundant?
 
       // Check solar panel voltage
       // If panel voltage is low, go to sleep
