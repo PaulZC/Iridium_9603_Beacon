@@ -142,13 +142,13 @@ The LTC3225EDDB SuperCapacitor Charger draws its power directly from the solar p
 MBR120 diodes protect the solar panels and the batteries from each other, and when the PCB is connected to USB.
 
 ## Power Options 
-V3 of the Iridium 9603N Beacon can draw power from: either or both of the solar panels; three AAA batteries; or USB.
+V3 of the Iridium 9603N Beacon can draw power from: the solar panels; three AAA batteries; or USB.
 It is possible to connect both the solar panels and the batteries, the beacon will simply draw power from whichever is providing the higher voltage.
 
 If you are going to use solar power, use the 10F super capacitors described above.
 
 If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice if you increase the super capacitor charge current to 150mA.
-Do this by replacing R2 with a 12K resistor instead of 30K. Remember that a draw of 150mA would be too much for the solar panels.
+Do this by replacing R2 with a 12K resistor instead of 30K. Remember that this would be too much for the solar panels. (The LTC3225 draws approximately _twice_ the chosen charge current.)
 
 The BOM lists the different parts you'll need for the two configurations. Here are images of V1 of the beacon configured for batteries plus 1F capacitors:
 
@@ -158,12 +158,13 @@ The BOM lists the different parts you'll need for the two configurations. Here a
 ![V1_Beacon_Side.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V1_Beacon_Side.JPG)
  
 ### Why do you need the Super Capacitors?
-The Iridium 9603 module draws an average current of 145mA and a peak current of 1.3A when transmitting its short data bursts. That’s too much for the solar panel to provide.
-The LTC3225 super capacitor charger draws 60mA from the panel to charge two 10F 2.7V capacitors, connected in series, to 5.3V. The capacitors then deliver the 1.3A to the module when it sends the data burst.
+The Iridium 9603 module draws an average current of 145mA and a peak current of 1.3A when transmitting its short data bursts. That’s too much for the solar panels to provide.
+The LTC3225 super capacitor charger draws a lower current from the panels to slowly charge two 10F 2.7V capacitors, connected in series, to 5.3V. The capacitors then deliver the 1.3A to the module when it sends the data burst.
 
 ### Why is the Super Capacitor Charger charge current set to 60mA?
 The datasheet for the 9603N quotes: an average idle current of 34mA; and an average receive current of 39mA.
-We need to charge the capacitors at a higher current than this, but keep the total current draw within what the solar panel can deliver.
+We need to charge the capacitors at a higher current than this, but keep the total current draw within what the solar panels can deliver.
+(Remember that the LTC3225 draws approximately _twice_ the chosen charge current.)
 
 ### Can I leave the USB connected during testing?
 Yes. Leaving the USB connected is useful as you can monitor the Serial messages produced by the code in the Arduino IDE Serial Monitor.
@@ -227,7 +228,7 @@ You can follow Lady Ada’s excellent instructions:
 - https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather-m0-adalogger.pdf
 
 ### What other libraries do I need?
-The main one is Mikal Hart’s Iridium SBD library. It was written for the Rock7 RockBLOCK, which uses the Iridium 9602 module, but it works just fine on the 9603:
+The main one is Mikal Hart’s Iridium SBD library (V2.0) written for the Rock7 RockBLOCK:
 - http://arduiniana.org/libraries/iridiumsbd/
 - https://github.com/mikalhart/IridiumSBD
 
