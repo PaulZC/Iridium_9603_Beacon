@@ -397,6 +397,7 @@ void loop()
     case read_pressure:
       // Start the MPL3115A2 (does Wire.begin())
       if (baro.begin()) {
+        pascals = baro.getPressure(); // Read pressure twice to avoid first erroneous read
         pascals = baro.getPressure();
         if (pascals > 110000) pascals = 0.0; // Correct wrap-around if pressure drops too low
         tempC = baro.getTemperature();
