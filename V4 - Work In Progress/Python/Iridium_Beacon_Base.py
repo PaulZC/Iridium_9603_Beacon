@@ -12,6 +12,7 @@
 ## https://developers.google.com/maps/documentation/static-maps/intro
 ## You will need a Key to access the API. You can create one by following this link:
 ## https://developers.google.com/maps/documentation/static-maps/get-api-key
+## Copy and paste it into a file called Google_Static_Maps_API_Key.txt
 
 ## The beacon sends data packets to the base via Iridium, forwarded by Rock7's RockBLOCK network.
 ## The serial number of the destination base is set in Iridium9603NBeacon_V4.ino
@@ -24,22 +25,22 @@
 ## 'Update' will return to its default setting once MTQ is zero again.
 
 ## The GUI and base provide access to the RockBLOCK FLUSH_MT function, so an excess of
-## unread Mobile Terminated messages can be discarded (note that you are still charged from these messages!)
+## unread Mobile Terminated messages can be discarded (note that you are still charged from these messages!).
 
-## The software logs all received packets to a csv log file
+## The software logs all received packets to a csv log file.
 
-## The software makes extensive use of the Google Static Map API
+## The software makes extensive use of the Google Static Map API.
 ## The displayed map is automatically centered on the beacon position, but the center position can be
 ## changed by clicking in the image.
 ## The zoom level is set automatically to ensure both beacon and base positions are shown.
 ## The zoom can be changed using the buttons (but is automatically reset at the next update).
 
 ## The beacon's path is displayed as a red line on the map.
-## The oldest waypoints may not be shown as the map fetch URL is limited to 8192 characters.
+## The oldest waypoints may not be shown as the map URL is limited to 8192 characters.
 
 ## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a premium plan with Google.
 
-## The code can currently only handle data from a single beacon. A future upgrade will add support for multiple beacons.
+## This code can currently only handle data from a single beacon. A future upgrade will add support for multiple beacons.
 
 import Tkinter as tk
 import tkMessageBox
@@ -58,6 +59,78 @@ class BeaconBase(object):
       ''' Init BeaconBase: read API key; open the serial port; set up the Tkinter window '''
       print 'Iridium 9603N Beacon Base'
       print
+
+      # Default values
+      self.zoom = '0' # Default Google Maps zoom (text)
+      self.default_interval = 120 # Default update interval (secs)
+      self.last_update_at = time.time() # Last time an update was requested
+      self.next_update_at = self.last_update_at + 1 # Do first update after this many seconds
+      self.beacon_timeout = 65 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
+      self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V4_Base)
+      self.log_file = '' # Log file name
+      self.path = '' # Beacon path for Static Map
+      self.console_height = 2 # Serial console window height in lines
+      self.sep_width = 304 # Separator width in pixels
+      self.map_lat = 0.0 # Map latitude (degrees)
+      self.map_lon = 0.0 # Map longitude (degrees)
+      self.frame_height = 480
+      self.frame_width = 640
+      self.base_choice = '1\r' # Send this choice to the beacon base to request the base GNSS position etc.
+      self.beacon_choice = '3\r' # Send this choice to the beacon base to request the beacon data via Iridium
+      self.flush_mt_choice = '4\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
+
+      # Numpy array to hold useful map radii vs Google Static Map zoom level
+      # These values are valid at the equator
+      # They need to be decreased with increasing latitude due to the Mercator projection
+      # They are used to select the most appropriate map zoom for a given delta (angle) between base and beacon
+      self.zooms = np.array([
+      [1,90.0],         # Zoom 1: 90 degrees
+      [2,65.535],       # Zoom 2: 65.535 degrees
+      [3,32.768],       # Zoom 3: 32.768 degrees
+      [4,16.384],       # Zoom 4: 16.384 degrees
+      [5,8.192],        # Zoom 5: 8.192 degrees
+      [6,4.096],        # Zoom 6: 4.096 degrees
+      [7,2.048],        # Zoom 7: 2.048 degrees
+      [8,1.024],        # Zoom 8: 1.024 degrees
+      [9,0.512],        # Zoom 9: 0.512 degrees
+      [10,0.256],       # Zoom 10: 0.256 degrees
+      [11,0.128],       # Zoom 11: 0.128 degrees
+      [12,0.064],       # Zoom 12: 0.064 degrees
+      [13,0.032],       # Zoom 13: 0.032 degrees
+      [14,0.016],       # Zoom 14: 0.016 degrees
+      [15,0.008],       # Zoom 15: 0.008 degrees
+      [16,0.004],       # Zoom 16: 0.004 degrees
+      [17,0.002],       # Zoom 17: 0.002 degrees
+      [18,0.001],       # Zoom 18: 0.001 degrees
+      [19,0.0005],      # Zoom 19: 0.0005 degrees
+      [20,0.00025],     # Zoom 20: 0.00025 degrees
+      [21,0.000125]])   # Zoom 21: 0.000125 degrees
+
+      # Google static map API pixel scales to help with map moves
+      # https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
+      self.scales = np.array([
+         [21,564.24861],
+         [20,1128.497220],
+         [19,2256.994440],
+         [18,4513.988880],
+         [17,9027.977761],
+         [16,18055.955520],
+         [15,36111.911040],
+         [14,72223.822090],
+         [13,144447.644200],
+         [12,288895.288400],
+         [11,577790.576700],
+         [10,1155581.153000],
+         [9,2311162.307000],
+         [8,4622324.614000],
+         [7,9244649.227000],
+         [6,18489298.450000],
+         [5,36978596.910000],
+         [4,73957193.820000],
+         [3,147914387.600000],
+         [2,295828775.300000],
+         [1,591657550.500000]])
+      self.scale_multiplier = 1.18358396586e-09 # Correction factor - found by iteration
 
       # Read the Google Static Maps API key
       # Create one using: https://developers.google.com/maps/documentation/static-maps/get-api-key
@@ -80,10 +153,11 @@ class BeaconBase(object):
          defcom = '/dev/tty.usbmodem'
       elif platform.startswith('win'):
          # Windows...
-         defcom = 'COM4'
+         defcom = 'COM1'
       else:
          defcom = 'COM1'
-      
+
+      # Ask the user to confirm the serial port name
       com_port = raw_input('Which serial port do you want to use (default '+defcom+')? ')
       if com_port == '': com_port = defcom
       print
@@ -94,25 +168,6 @@ class BeaconBase(object):
       except:
          raise NameError('COULD NOT OPEN SERIAL PORT!')
       self.ser.flushInput() # Flush RX buffer
-
-      # Defaults
-      self.zoom = '0' # Default Google Maps zoom (text)
-      self.default_interval = 120 # Default update interval (secs)
-      self.last_update_at = time.time() # Last time an update was requested
-      self.next_update_at = self.last_update_at + 1 # Do first update after this many seconds
-      self.beacon_timeout = 65 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
-      self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V4_Base)
-      self.log_file = '' # Log file name
-      self.path = '' # Beacon path for Static Map
-      self.console_height = 2 # Serial console window height in lines
-      self.sep_width = 304 # Separator width in pixels
-      self.map_lat = 0.0 # Map latitude (degrees)
-      self.map_lon = 0.0 # Map longitude (degrees)
-      self.frame_height = 480
-      self.frame_width = 640
-      self.base_choice = '1\r' # Send this choice to the beacon base to request the base GNSS position etc.
-      self.beacon_choice = '3\r' # Send this choice to the beacon base to request the beacon data via Iridium
-      self.flush_mt_choice = '4\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
 
       # Ask the user to confirm the update interval
       new_interval = 0
@@ -143,57 +198,7 @@ class BeaconBase(object):
       self.label = tk.Label(self.imageFrame,image=photo)
       self.label.pack(fill=tk.BOTH) # Make the image fill the frame
       self.image = photo # Store the image to avoid garbage collection
-      self.label.bind("<Button 1>",self.image_click) # Mouseclick event
-
-      # Numpy array to hold useful radii vs Google Static Map zoom level
-      self.zooms = np.array([   # Useful radius (at 55 degrees north) is approximately:
-      [1,60],              # Zoom 1: 60 degrees
-      [2,30],              # Zoom 2: 30 degrees
-      [3,15],              # Zoom 3: 15 degrees
-      [4,9.0],             # Zoom 4: 9.0 degrees
-      [5,4.8],             # Zoom 5: 4.8 degrees
-      [6,2.4],             # Zoom 6: 2.4 degrees
-      [7,1.2],             # Zoom 7: 1.2 degrees
-      [8,0.6],             # Zoom 8: 0.6 degrees
-      [9,0.3],             # Zoom 9: 0.3 degrees
-      [10,0.15],           # Zoom 10: 0.15 degrees
-      [11,0.075],          # Zoom 11: 0.075 degrees
-      [12,0.04],           # Zoom 12: 0.04 degrees
-      [13,0.02],           # Zoom 13: 0.02 degrees
-      [14,0.01],           # Zoom 14: 0.01 degrees
-      [15,0.005],          # Zoom 15: 0.005 degrees
-      [16,0.0025],         # Zoom 16: 0.0025 degrees
-      [17,0.00125],        # Zoom 17: 0.00125 degrees
-      [18,0.000625],       # Zoom 18: 0.000625 degrees
-      [19,0.000312],       # Zoom 19: 0.000312 degrees
-      [20,0.00015],        # Zoom 20: 0.00015 degrees
-      [21,0.000075]])      # Zoom 21: 0.000075 degrees
-
-      # Pixel scales to help with map moves
-      # https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
-      self.scales = np.array([
-         [21,564.24861],
-         [20,1128.497220],
-         [19,2256.994440],
-         [18,4513.988880],
-         [17,9027.977761],
-         [16,18055.955520],
-         [15,36111.911040],
-         [14,72223.822090],
-         [13,144447.644200],
-         [12,288895.288400],
-         [11,577790.576700],
-         [10,1155581.153000],
-         [9,2311162.307000],
-         [8,4622324.614000],
-         [7,9244649.227000],
-         [6,18489298.450000],
-         [5,36978596.910000],
-         [4,73957193.820000],
-         [3,147914387.600000],
-         [2,295828775.300000],
-         [1,591657550.500000]])
-      self.scale_multiplier = 1.18358396586e-09 # By trial
+      self.label.bind("<Button-1>",self.image_click) # Left mouse button click event
 
       row = 0
 
@@ -236,7 +241,7 @@ class BeaconBase(object):
       self.base_location = tk.Entry(self.toolFrame)
       self.base_location.grid(row=row, column=1)
       self.base_location.delete(0, tk.END)
-      self.base_location.insert(0, '0.0,0.0')
+      self.base_location.insert(0, '0.000000,0.000000')
       self.base_location.config(justify=tk.CENTER,width=22,state='readonly')
       self.base_location_txt = tk.Label(self.toolFrame, text = 'Base location',width=20)
       self.base_location_txt.grid(row=row, column=0)
@@ -272,7 +277,7 @@ class BeaconBase(object):
       self.beacon_location = tk.Entry(self.toolFrame)
       self.beacon_location.grid(row=row, column=1)
       self.beacon_location.delete(0, tk.END)
-      center = str(self.map_lat) + ',' + str(self.map_lon)
+      center = ("%.6f"%self.map_lat) + ',' + ("%.6f"%self.map_lon)
       self.beacon_location.insert(0, center)
       self.beacon_location.config(justify=tk.CENTER,width=22,state='readonly')
       self.beacon_location_txt = tk.Label(self.toolFrame, text = 'Beacon location',width=20)
@@ -375,14 +380,14 @@ class BeaconBase(object):
       self.distance_to_beacon_txt.grid(row=row, column=0)
       row += 1
 
-      # Heading to beacon
-      self.heading_to_beacon = tk.Entry(self.toolFrame)
-      self.heading_to_beacon.grid(row=row, column=1)
-      self.heading_to_beacon.delete(0, tk.END)
-      self.heading_to_beacon.insert(0, '0')
-      self.heading_to_beacon.config(justify=tk.CENTER,width=22,state='readonly')
-      self.heading_to_beacon_txt = tk.Label(self.toolFrame, text = ("Heading to Beacon ("+u"\u00b0"+")"),width=20)
-      self.heading_to_beacon_txt.grid(row=row, column=0)
+      # Course to beacon
+      self.course_to_beacon = tk.Entry(self.toolFrame)
+      self.course_to_beacon.grid(row=row, column=1)
+      self.course_to_beacon.delete(0, tk.END)
+      self.course_to_beacon.insert(0, '0')
+      self.course_to_beacon.config(justify=tk.CENTER,width=22,state='readonly')
+      self.course_to_beacon_txt = tk.Label(self.toolFrame, text = ("Course to Beacon ("+u"\u00b0"+")"),width=20)
+      self.course_to_beacon_txt.grid(row=row, column=0)
       row += 1
 
       # Serial console - used to display base_location serial data from Beacon
@@ -440,8 +445,8 @@ class BeaconBase(object):
       if do_update: # If it is time to do an update
          self.get_base_location() # Read 'base_location' from Beacon Base GNSS
          self.get_beacon_data() # Contact Iridium and download a new message (if available)
-         self.distance_to() # Update distance
-         self.heading_to() # Update heading
+         self.distance_between() # Update distance
+         self.course_to() # Update heading
          self.update_zoom() # Update zoom
          self.update_map() # Update the Google Static Maps image
          # Enable zoom buttons now that map has been displayed
@@ -450,8 +455,9 @@ class BeaconBase(object):
       
       self.window.after(250, self.timer) # Schedule another timer event in 0.25s
 
-   def distance_to(self):
+   def distance_between(self):
       ''' Calculate distance. Gratefully plagiarised from Mikal Hart's TinyGPS. '''
+      # https://github.com/mikalhart/TinyGPS/blob/master/TinyGPS.cpp
       # Calculate the great circle distance between 'base_location' and 'beacon_location'
       # See https://en.wikipedia.org/wiki/Great-circle_distance#Computational_formulas
       try: # Read base_location from entry box
@@ -485,8 +491,9 @@ class BeaconBase(object):
       self.distance_to_beacon.insert(0,str(int(delta * 6372795.))) # Set distance
       self.distance_to_beacon.configure(state='readonly') # Lock entry box
 
-   def heading_to(self):
+   def course_to(self):
       ''' Calculate heading. Gratefully plagiarised from Mikal Hart's TinyGPS. '''
+      # https://github.com/mikalhart/TinyGPS/blob/master/TinyGPS.cpp
       try: # Read base_location from entry box
          lat1,long1 = self.base_location.get().split(',')
          lat1 = math.radians(float(lat1))
@@ -505,26 +512,37 @@ class BeaconBase(object):
       a2 = math.cos(lat1) * math.sin(lat2) - a2
       a2 = math.atan2(a1, a2)
       if (a2 < 0.): a2 += math.pi + math.pi
-      self.heading_to_beacon.configure(state='normal') # Unlock entry box
-      self.heading_to_beacon.delete(0, tk.END) # Delete old heading
-      self.heading_to_beacon.insert(0, str(int(math.degrees(a2)))) # Set heading
-      self.heading_to_beacon.configure(state='readonly') # Lock entry box
+      self.course_to_beacon.configure(state='normal') # Unlock entry box
+      self.course_to_beacon.delete(0, tk.END) # Delete old heading
+      self.course_to_beacon.insert(0, str(int(math.degrees(a2)))) # Set heading
+      self.course_to_beacon.configure(state='readonly') # Lock entry box
 
    def update_zoom(self):
       ''' Update Google StaticMap zoom based on angular separation of base_location and beacon_location '''
-      # ** Run after distance_to() : requires updated self.delta **
+      # ** Run after distance_between() : requires updated self.delta **
       # Delta is the angular separation of base_location and beacon_location
 
-      if (self.delta > self.zooms[0][1]): # Is delta greater than the useful radius for zoom 1?
+      adjusted_zooms = np.array(self.zooms) # Make a copy of the zoom vs delta look-up table
+      # Calculate latitude scale multiplier based on current latitude to correct for Mercator projection
+      if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
+         scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
+      else:
+         scale_multiplier_lat = 1.0
+      # Adjust the delta values in the zoom look up table to compensate for latitude
+      for entry in adjusted_zooms:
+         entry[1] = entry[1] * scale_multiplier_lat
+
+      # Now set map zoom based on angle (delta) between base and beacon
+      if (self.delta > adjusted_zooms[0][1]): # Is delta greater than the useful radius for zoom 1?
          self.zoom = str('0') # If it is: set zoom 0
       else: # Else: set zoom to the lowest zoom level which will display this delta
-         self.zoom = str(int(self.zooms[np.where(self.delta<=self.zooms[:,1])][-1][0]))
+         self.zoom = str(int(adjusted_zooms[np.where(self.delta<=adjusted_zooms[:,1])][-1][0]))
 
    def update_map(self):
       ''' Show base_location, beacon_location and the beacon route using Google Maps API StaticMap '''
       
       # Assemble map center
-      center = str(self.map_lat) + ',' + str(self.map_lon)
+      center = ("%.6f"%self.map_lat) + ',' + ("%.6f"%self.map_lon)
 
       # Get marker locations
       try:
@@ -616,7 +634,10 @@ class BeaconBase(object):
          scale = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
          scale_x = scale * self.scale_multiplier # Calculate x scale
          # Compensate y scale (Mercator projection) using current latitude
-         scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
+         if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
+            scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
+         else:
+            scale_multiplier_lat = 1.0
          scale_y = scale * self.scale_multiplier * scale_multiplier_lat # Calculate y scale
          self.map_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
          self.map_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
@@ -657,6 +678,8 @@ class BeaconBase(object):
 
    def get_base_location(self):
       ''' Talk to Beacon Base using serial; get current location (base_location) '''
+      # Base data format will be:
+      # YYYYMMDDHHMMSS,lat,lon,alt,speed,heading,hdop,satellites
       resp = self.writeWait(self.base_choice, self.gnss_timeout) # Send menu choice '1'; wait for response for gnss_timeout seconds
       if resp != '': # Did we get a response?
          try:
@@ -694,8 +717,12 @@ class BeaconBase(object):
       ''' Talk to Beacon Base using serial; start Iridium session and download new data '''
       # Base will respond with:
       # beacon data followed by ',' and the MT queue length;
-      # (only) the MT queue length (if there was no data waiting to be downloaded);
-      # an error message starting with "ERROR".
+      # or (only) the MT queue length (if there was no data waiting to be downloaded);
+      # or an error message starting with "ERROR".
+      # Beacon data format will be:
+      # YYYYMMDDHHMMSS,lat,lon,alt,speed,heading,hdop,satellites,pressure,temperature,vbat,count,rockblock_serial_no,mtq
+      # provided the RockBLOCK option has been selected in the beacon Arduino code.
+      # If the RockBLOCK option wasn't selected, the serial number will be missing and the parse will fail.
       resp = self.writeWait(self.beacon_choice, self.beacon_timeout) # Send menu choice '3'; wait for response for beacon_timeout secs
       if resp != '': # Did we get a response?
          try:
@@ -782,7 +809,7 @@ class BeaconBase(object):
                      if self.log_file == '':
                         # Create and clear the log file
                         # Construct the filename from the beacon GNSS datetime and the beacon serial number
-                        self.log_file = 'Beacon_Log_' + parse[0][0:8] + '_' + parse[0][8:] + '_' + parse[12] + '.csv'
+                        self.log_file = 'Beacon_Log_' + parse[0] + '_' + parse[12] + '.csv'
                         self.fp = open(self.log_file, 'wb') # Create / clear the file
                         self.fp.close()
                      # Now that the log file exists, append the new beacon data
