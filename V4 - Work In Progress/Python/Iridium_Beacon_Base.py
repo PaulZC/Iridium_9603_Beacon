@@ -31,7 +31,8 @@
 
 ## The software makes extensive use of the Google Static Map API.
 ## The displayed map is automatically centered on the beacon position, but the center position can be
-## changed by clicking in the image.
+## changed by left-clicking in the image.
+## A right-click will copy that location (lat,lon) to the clipboard.
 ## The zoom level is set automatically to ensure both beacon and base positions are shown.
 ## The zoom can be changed using the buttons (but is automatically reset at the next update).
 
@@ -73,11 +74,12 @@ class BeaconBase(object):
       self.sep_width = 304 # Separator width in pixels
       self.map_lat = 0.0 # Map latitude (degrees)
       self.map_lon = 0.0 # Map longitude (degrees)
-      self.frame_height = 480
-      self.frame_width = 640
+      self.frame_height = 480 # Google Static Map window width
+      self.frame_width = 640 # Google Static Map window height
       self.base_choice = '1\r' # Send this choice to the beacon base to request the base GNSS position etc.
       self.beacon_choice = '3\r' # Send this choice to the beacon base to request the beacon data via Iridium
       self.flush_mt_choice = '4\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
+      self.enable_clicks = False # Are mouse clicks enabled? False until first map has been loaded      
 
       # Numpy array to hold useful map radii vs Google Static Map zoom level
       # These values are valid at the equator
@@ -198,7 +200,8 @@ class BeaconBase(object):
       self.label = tk.Label(self.imageFrame,image=photo)
       self.label.pack(fill=tk.BOTH) # Make the image fill the frame
       self.image = photo # Store the image to avoid garbage collection
-      self.label.bind("<Button-1>",self.image_click) # Left mouse button click event
+      self.label.bind("<Button-1>",self.left_click) # Left mouse button click event
+      self.label.bind("<Button-3>",self.right_click) # Right mouse button click event
 
       row = 0
 
@@ -449,9 +452,6 @@ class BeaconBase(object):
          self.course_to() # Update heading
          self.update_zoom() # Update zoom
          self.update_map() # Update the Google Static Maps image
-         # Enable zoom buttons now that map has been displayed
-         self.zoom_in_button.config(state='normal')
-         self.zoom_out_button.config(state='normal')
       
       self.window.after(250, self.timer) # Schedule another timer event in 0.25s
 
@@ -592,9 +592,8 @@ class BeaconBase(object):
       self.map_url += red
 
       # Copy the Google Maps URL to the clipboard so it can be pasted into a browser
-      self.window.clipboard_clear()
-      self.window.clipboard_append(self.map_url)
-      self.window.update()
+      #self.window.clipboard_clear()
+      #self.window.clipboard_append(self.map_url)
 
       # Download the API map image from Google
       filename = "map_image.png" # Download map to this file
@@ -608,6 +607,12 @@ class BeaconBase(object):
       photo = ImageTk.PhotoImage(image)
       self.label.configure(image=photo)
       self.image = photo
+      
+      # Enable zoom buttons and mouse clicks if a map image was displayed
+      if filename == "map_image.png":
+         self.zoom_in_button.config(state='normal') # Enable zoom+
+         self.zoom_out_button.config(state='normal') # Enable zoom-
+         self.enable_clicks = True # Enabled mouse clicks
 
       # Update window
       self.window.update()
@@ -626,9 +631,17 @@ class BeaconBase(object):
          self.zoom = str(int(self.zoom) - 1)
          self.update_map()
 
-   def image_click(self, event):
-      ''' Move map based on where image was clicked '''
-      if (int(self.zoom) > 0) and (int(self.zoom) <= 21): # Is zoom 1-21?
+   def left_click(self, event):
+      ''' Left mouse click - move map based on click position '''
+      self.image_click(event, 'left')
+
+   def right_click(self, event):
+      ''' Right mouse click - copy map location to clipboard '''
+      self.image_click(event, 'right')
+
+   def image_click(self, event, button):
+      ''' Handle mouse click event '''
+      if (self.enable_clicks) and (int(self.zoom) > 0) and (int(self.zoom) <= 21): # Are clicks enabled and is zoom 1-21?
          x_move = event.x - (self.frame_width / 2) # Required x move in pixels
          y_move = event.y - (self.frame_height / 2) # Required y move in pixels
          scale = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
@@ -639,9 +652,18 @@ class BeaconBase(object):
          else:
             scale_multiplier_lat = 1.0
          scale_y = scale * self.scale_multiplier * scale_multiplier_lat # Calculate y scale
-         self.map_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
-         self.map_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
-         self.update_map() # Update map
+         new_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
+         new_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
+         if button == 'left':
+            self.map_lat = new_lat # Update lat
+            self.map_lon = new_lon # Update lon
+            self.update_map() # Update map
+         else:
+            # Copy the location to the clipboard so it can be pasted into (e.g.) a browser
+            self.window.clipboard_clear() # Clear clipboard
+            loc = ("%.6f"%new_lat) + ',' + ("%.6f"%new_lon) # Construct location
+            self.window.clipboard_append(loc) # Copy location to clipboard
+            self.window.update() # Update window
 
    def flush_mt(self):
       ''' Talk to Beacon Base using serial; send flush_mt command; process response '''
@@ -674,7 +696,6 @@ class BeaconBase(object):
                   self.interval.insert(0, str(self.default_interval))
                   self.next_update_at = self.last_update_at + self.default_interval
                self.interval.config(state='readonly')
-         
 
    def get_base_location(self):
       ''' Talk to Beacon Base using serial; get current location (base_location) '''
