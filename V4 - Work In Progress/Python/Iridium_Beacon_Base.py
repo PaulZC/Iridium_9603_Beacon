@@ -41,7 +41,7 @@
 
 ## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a premium plan with Google.
 
-## This code can currently only handle data from a single beacon. A future upgrade will add support for multiple beacons.
+## This code can currently only handle data from a single beacon. A future upgrade will be to add support for multiple beacons.
 
 import Tkinter as tk
 import tkMessageBox
@@ -80,59 +80,50 @@ class BeaconBase(object):
       self.beacon_choice = '3\r' # Send this choice to the beacon base to request the beacon data via Iridium
       self.flush_mt_choice = '4\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
       self.enable_clicks = False # Are mouse clicks enabled? False until first map has been loaded      
-
-      # Numpy array to hold useful map radii vs Google Static Map zoom level
-      # These values are valid at the equator
-      # They need to be decreased with increasing latitude due to the Mercator projection
-      # They are used to select the most appropriate map zoom for a given delta (angle) between base and beacon
-      self.zooms = np.array([
-      [1,90.0],         # Zoom 1: 90 degrees
-      [2,65.535],       # Zoom 2: 65.535 degrees
-      [3,32.768],       # Zoom 3: 32.768 degrees
-      [4,16.384],       # Zoom 4: 16.384 degrees
-      [5,8.192],        # Zoom 5: 8.192 degrees
-      [6,4.096],        # Zoom 6: 4.096 degrees
-      [7,2.048],        # Zoom 7: 2.048 degrees
-      [8,1.024],        # Zoom 8: 1.024 degrees
-      [9,0.512],        # Zoom 9: 0.512 degrees
-      [10,0.256],       # Zoom 10: 0.256 degrees
-      [11,0.128],       # Zoom 11: 0.128 degrees
-      [12,0.064],       # Zoom 12: 0.064 degrees
-      [13,0.032],       # Zoom 13: 0.032 degrees
-      [14,0.016],       # Zoom 14: 0.016 degrees
-      [15,0.008],       # Zoom 15: 0.008 degrees
-      [16,0.004],       # Zoom 16: 0.004 degrees
-      [17,0.002],       # Zoom 17: 0.002 degrees
-      [18,0.001],       # Zoom 18: 0.001 degrees
-      [19,0.0005],      # Zoom 19: 0.0005 degrees
-      [20,0.00025],     # Zoom 20: 0.00025 degrees
-      [21,0.000125]])   # Zoom 21: 0.000125 degrees
+      self.delta_limit_pixels = 200 # If base to beacon angle (delta) exceeds this many pixels, decrease the zoom level accordingly
 
       # Google static map API pixel scales to help with map moves
       # https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
+      # ---
+      # Radius of the Earth at the Equator = 6378137m
+      # Circumference at the Equator = 2*pi*r = 40075017m
+      # Zoom level 24 uses 2^32 (4294967296) pixels at circumference
+      # Pixel scale at zoom level 24 is 0.009330692m/pixel
+      # Pixel scale doubles with each zoom level
+      # Pixel scale at zoom level 21 is 0.074645535m/pixel
+      # Pixel scale at zoom level 1 is 78271.5170m/pixel
+      # ---
+      # Zoom level 24 uses 2^32 (4294967296) pixels at circumference
+      # Each pixel represents an angle of 2*pi/2^32 radians = 1.46291808e-9 radians
+      # Angle doubles with each zoom level
+      # Zoom level 21 is 1.17033446e-8 radians per pixel
+      # In degrees:
+      # Zoom level 21 is 6.70552254e-7 degrees per pixel
+      # Zoom level 1 is 0.703125 degrees per pixel
+      # ---
+      # These values need to be adjusted with increasing latitude due to the Mercator projection
       self.scales = np.array([
-         [21,564.24861],
-         [20,1128.497220],
-         [19,2256.994440],
-         [18,4513.988880],
-         [17,9027.977761],
-         [16,18055.955520],
-         [15,36111.911040],
-         [14,72223.822090],
-         [13,144447.644200],
-         [12,288895.288400],
-         [11,577790.576700],
-         [10,1155581.153000],
-         [9,2311162.307000],
-         [8,4622324.614000],
-         [7,9244649.227000],
-         [6,18489298.450000],
-         [5,36978596.910000],
-         [4,73957193.820000],
-         [3,147914387.600000],
-         [2,295828775.300000],
-         [1,591657550.500000]])
-      self.scale_multiplier = 1.18358396586e-09 # Correction factor - found by iteration
+         [1,7.03125000E-01], # Zoom level 1 is 0.703125 degrees per pixel at the Equator
+         [2,3.51562500E-01],
+         [3,1.75781250E-01],
+         [4,8.78906250E-02],
+         [5,4.39453125E-02],
+         [6,2.19726562E-02],
+         [7,1.09863281E-02],
+         [8,5.49316406E-03],
+         [9,2.74658203E-03],
+         [10,1.37329102E-03],
+         [11,6.86645508E-04],
+         [12,3.43322754E-04],
+         [13,1.71661377E-04],
+         [14,8.58306885E-05],
+         [15,4.29153442E-05],
+         [16,2.14576721E-05],
+         [17,1.07288361E-05],
+         [18,5.36441803E-06],
+         [19,2.68220901E-06],
+         [20,1.34110451E-06],
+         [21,6.70552254E-07]]) # Zoom level 21 is 6.70552254e-7 degrees per pixel at the Equator
 
       # Read the Google Static Maps API key
       # Create one using: https://developers.google.com/maps/documentation/static-maps/get-api-key
@@ -149,7 +140,7 @@ class BeaconBase(object):
       # Get the serial port name
       if platform.startswith('linux'):
          # linux
-         defcom = '/dev/ttyAMA0'
+         defcom = '/dev/ttyACM0'
       elif platform.startswith('darwin'):
          # OS X
          defcom = '/dev/tty.usbmodem'
@@ -393,6 +384,11 @@ class BeaconBase(object):
       self.course_to_beacon_txt.grid(row=row, column=0)
       row += 1
 
+      # Separator
+      self.sep_4 = tk.Frame(self.toolFrame,height=1,bg='#808080',width=self.sep_width)
+      self.sep_4.grid(row=row, columnspan=2)
+      row += 1
+
       # Serial console - used to display base_location serial data from Beacon
       self.console_1 = tk.Text(self.toolFrame)
       self.console_1.grid(row=row,columnspan=2)
@@ -403,6 +399,11 @@ class BeaconBase(object):
       self.console_2 = tk.Text(self.toolFrame)
       self.console_2.grid(row=row,columnspan=2)
       self.console_2.config(width=42,height=self.console_height,wrap='none',state='disabled')
+      row += 1
+
+      # Separator
+      self.sep_5 = tk.Frame(self.toolFrame,height=1,bg='#808080',width=self.sep_width)
+      self.sep_5.grid(row=row, columnspan=2)
       row += 1
 
       # Buttons
@@ -488,7 +489,7 @@ class BeaconBase(object):
       self.delta = math.degrees(delta)
       self.distance_to_beacon.configure(state='normal') # Unlock entry box
       self.distance_to_beacon.delete(0,tk.END) # Delete old distance
-      self.distance_to_beacon.insert(0,str(int(delta * 6372795.))) # Set distance
+      self.distance_to_beacon.insert(0,str(int(delta * 6378137.))) # Set distance
       self.distance_to_beacon.configure(state='readonly') # Lock entry box
 
    def course_to(self):
@@ -520,23 +521,24 @@ class BeaconBase(object):
    def update_zoom(self):
       ''' Update Google StaticMap zoom based on angular separation of base_location and beacon_location '''
       # ** Run after distance_between() : requires updated self.delta **
-      # Delta is the angular separation of base_location and beacon_location
+      # delta is the angular separation of base_location and beacon_location
 
-      adjusted_zooms = np.array(self.zooms) # Make a copy of the zoom vs delta look-up table
+      adjusted_scales = np.array(self.scales) # Make a copy of the zoom vs pixel scale angle look-up table
       # Calculate latitude scale multiplier based on current latitude to correct for Mercator projection
       if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
          scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
       else:
          scale_multiplier_lat = 1.0
-      # Adjust the delta values in the zoom look up table to compensate for latitude
-      for entry in adjusted_zooms:
-         entry[1] = entry[1] * scale_multiplier_lat
+      # Adjust the pixel scale angles in the zoom look up table to compensate for latitude
+      # And convert them into angular limits for delta by also multiplying by delta_limit_pixels
+      for entry in adjusted_scales:
+         entry[1] = entry[1] * scale_multiplier_lat * self.delta_limit_pixels
 
-      # Now set map zoom based on angle (delta) between base and beacon
-      if (self.delta > adjusted_zooms[0][1]): # Is delta greater than the useful radius for zoom 1?
+      # Now set map zoom based on delta between base and beacon
+      if (self.delta > adjusted_scales[0][1]): # Is delta greater than the useful radius for zoom 1?
          self.zoom = str('0') # If it is: set zoom 0
       else: # Else: set zoom to the lowest zoom level which will display this delta
-         self.zoom = str(int(adjusted_zooms[np.where(self.delta<=adjusted_zooms[:,1])][-1][0]))
+         self.zoom = str(int(adjusted_scales[np.where(self.delta<=adjusted_scales[:,1])][-1][0]))
 
    def update_map(self):
       ''' Show base_location, beacon_location and the beacon route using Google Maps API StaticMap '''
@@ -644,14 +646,13 @@ class BeaconBase(object):
       if (self.enable_clicks) and (int(self.zoom) > 0) and (int(self.zoom) <= 21): # Are clicks enabled and is zoom 1-21?
          x_move = event.x - (self.frame_width / 2) # Required x move in pixels
          y_move = event.y - (self.frame_height / 2) # Required y move in pixels
-         scale = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
-         scale_x = scale * self.scale_multiplier # Calculate x scale
+         scale_x = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
          # Compensate y scale (Mercator projection) using current latitude
          if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
             scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
          else:
             scale_multiplier_lat = 1.0
-         scale_y = scale * self.scale_multiplier * scale_multiplier_lat # Calculate y scale
+         scale_y = scale_x * scale_multiplier_lat # Calculate y scale
          new_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
          new_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
          if button == 'left':
@@ -699,8 +700,9 @@ class BeaconBase(object):
 
    def get_base_location(self):
       ''' Talk to Beacon Base using serial; get current location (base_location) '''
-      # Base data format will be:
+      # Base will respond with:
       # YYYYMMDDHHMMSS,lat,lon,alt,speed,heading,hdop,satellites
+      # or an error message starting with "ERROR".
       resp = self.writeWait(self.base_choice, self.gnss_timeout) # Send menu choice '1'; wait for response for gnss_timeout seconds
       if resp != '': # Did we get a response?
          try:
