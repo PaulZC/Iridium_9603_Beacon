@@ -525,15 +525,11 @@ class BeaconBase(object):
 
       adjusted_scales = np.array(self.scales) # Make a copy of the zoom vs pixel scale angle look-up table
       # Calculate latitude scale multiplier based on current latitude to correct for Mercator projection
-      if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
-         scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
-      else:
-         scale_multiplier_lat = 1.0
+      scale_multiplier_lat = math.cos(math.radians(self.map_lat))
       # Adjust the pixel scale angles in the zoom look up table to compensate for latitude
       # And convert them into angular limits for delta by also multiplying by delta_limit_pixels
       for entry in adjusted_scales:
          entry[1] = entry[1] * scale_multiplier_lat * self.delta_limit_pixels
-
       # Now set map zoom based on delta between base and beacon
       if (self.delta > adjusted_scales[0][1]): # Is delta greater than the useful radius for zoom 1?
          self.zoom = str('0') # If it is: set zoom 0
@@ -648,10 +644,7 @@ class BeaconBase(object):
          y_move = event.y - (self.frame_height / 2) # Required y move in pixels
          scale_x = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
          # Compensate y scale (Mercator projection) using current latitude
-         if abs(self.map_lat) > 1.: # Check for non-zero lat to avoid divide by zero error
-            scale_multiplier_lat = math.sin(abs(math.radians(self.map_lat))) / math.tan(abs(math.radians(self.map_lat)))
-         else:
-            scale_multiplier_lat = 1.0
+         scale_multiplier_lat = math.cos(math.radians(self.map_lat))
          scale_y = scale_x * scale_multiplier_lat # Calculate y scale
          new_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
          new_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
