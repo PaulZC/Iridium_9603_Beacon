@@ -402,6 +402,12 @@ class BeaconBase(object):
       self.quit_button = tk.Button(self.toolFrame, text="Quit", font=self.boldFont, width=20, command=self.QUIT)
       self.quit_button.grid(row=row,column=1)
 
+      # Menu to list current beacon locations
+      self.menubar = tk.Menu(self.window)
+      self.beacon_menu = tk.Menu(self.menubar, tearoff=0)
+      self.menubar.add_cascade(label="Beacon Locations", menu=self.beacon_menu)
+      self.window.config(menu=self.menubar)
+
       # Set up next update
       self.last_update_at = time.time() # Last time an update was requested
       self.next_update_at = self.last_update_at #+ self.default_interval # Do first update after this many seconds
@@ -554,6 +560,10 @@ class BeaconBase(object):
                            self.do_zoom = True
                            console_message = 'New beacon found (' + parse[12] + ')'
                            self.writeToConsole(self.console_1, console_message) # Update message console
+                           # Add it to the Beacon Location menu
+                           # https://stackoverflow.com/q/7542164
+                           ser_no = parse[12]
+                           self.beacon_menu.add_command(label=ser_no,command=lambda ser_no=ser_no: self.copy_location(ser_no))
                         else:
                            # Return now - maximum has been reached - don't process data from this beacon
                            self.writeToConsole(self.console_1, 'Beacon limit reached!') # Update message console
@@ -616,6 +626,9 @@ class BeaconBase(object):
                      self.beacon_serial_no.delete(0, tk.END)
                      self.beacon_serial_no.insert(0, parse[12])
                      self.beacon_serial_no.config(state='readonly')
+                     # Update Beacon Location menu
+                     label_str = parse[12] + ' : ' + beacon_location
+                     self.beacon_menu.entryconfig(self.beacon_serials[parse[12]], label=label_str, background=self.beacon_colours[self.beacon_serials[parse[12]]])
                      # Check if the log file is empty (file name is NULL)
                      if self.beacon_log_files[self.beacon_serials[parse[12]]] == '':
                         # Create and clear the log file
@@ -846,6 +859,13 @@ class BeaconBase(object):
             loc = ("%.6f"%new_lat) + ',' + ("%.6f"%new_lon) # Construct location
             self.window.clipboard_append(loc) # Copy location to clipboard
             self.window.update() # Update window
+
+   def copy_location(self, ser_no):
+      ''' Copy the location of the beacon with this serial number to the clipboard '''
+      self.window.clipboard_clear() # Clear clipboard
+      loc = self.beacon_locations[self.beacon_serials[ser_no]] # Get location
+      self.window.clipboard_append(loc) # Copy location to clipboard
+      self.window.update() # Update window
 
    def flush_mt(self):
       ''' Talk to Beacon Base using serial; send flush_mt command; process response '''
