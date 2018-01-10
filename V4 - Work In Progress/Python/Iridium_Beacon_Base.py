@@ -38,7 +38,14 @@
 ## Each beacon's path is displayed as a coloured line on the map.
 ## The oldest waypoints may be deleted as the map URL is limited to 8192 characters.
 
-## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a premium plan with Google.
+## A pull-down menu lists the locations of all the beacons being tracked.
+## Clicking on a menu entry will center the map on that location and will copy the location
+## to the clipboard.
+## A second pull-down menu shows the location of the base. Clicking it will center the map on that
+## location and will copy that location to the clipboard.
+
+## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a
+## premium plan with Google.
 
 import Tkinter as tk
 import tkMessageBox
@@ -408,6 +415,11 @@ class BeaconBase(object):
       self.menubar.add_cascade(label="Beacon Locations", menu=self.beacon_menu)
       self.window.config(menu=self.menubar)
 
+      # Menu to list base location
+      self.base_menu = tk.Menu(self.menubar, tearoff=0)
+      self.menubar.add_cascade(label="Base Location", menu=self.base_menu)
+      self.window.config(menu=self.menubar)
+
       # Set up next update
       self.last_update_at = time.time() # Last time an update was requested
       self.next_update_at = self.last_update_at #+ self.default_interval # Do first update after this many seconds
@@ -487,12 +499,14 @@ class BeaconBase(object):
                      self.base_time.delete(0, tk.END) # Delete old value
                      self.base_time.insert(0, time_str) # Insert new time
                      self.base_time.config(state='readonly') # Lock base_time
+                     # Construct 'base_location' in lat,lon (float) format
+                     base_location = parse[1] + ',' + parse[2]
                      if self.first_base: # Is this the first time we have seen the base location?
                         self.map_lat = float(parse[1]) # Center map on base location (could be overridden by beacon location if there is one)
                         self.map_lon = float(parse[2])
+                        # Add it to the Base Location menu
+                        self.base_menu.add_command(label=base_location,command=self.goto_base,background=self.base_colour)
                         self.first_base = False
-                     # Construct 'base_location' in lat,lon (float) format
-                     base_location = parse[1] + ',' + parse[2]
                      self.base_location.config(state='normal') # Unlock base_location
                      self.base_location.delete(0, tk.END) # Delete old value
                      self.base_location.insert(0, base_location) # Insert new location
@@ -501,6 +515,7 @@ class BeaconBase(object):
                      self.base_altitude.delete(0, tk.END) # Delete old value
                      self.base_altitude.insert(0, parse[3]) # Insert new altitude
                      self.base_altitude.config(state='readonly') # Lock base_altitude
+                     self.base_menu.entryconfig(0, label=base_location) # Update base location menu
                      self.do_map_update = True # Update map with new beacon location
                      self.writeToConsole(self.console_1, 'Base location received') # Update message console
                except: # If parse failed, do nothing
@@ -755,7 +770,7 @@ class BeaconBase(object):
             self.zoom = str(min_zoom)
 
    def update_map(self):
-      ''' Show base location, beacon locations and the beacon routes using Google Maps API StaticMap '''
+      ''' Show base location, beacon locations and the beacon routes using Google Static Maps API '''
 
       self.writeToConsole(self.console_1, 'Updating map') # Update message console      
 
@@ -862,10 +877,33 @@ class BeaconBase(object):
 
    def copy_location(self, ser_no):
       ''' Copy the location of the beacon with this serial number to the clipboard '''
+      self.writeToConsole(self.console_1, 'Copying beacon location to clipboard') # Update message console      
       self.window.clipboard_clear() # Clear clipboard
       loc = self.beacon_locations[self.beacon_serials[ser_no]] # Get location
       self.window.clipboard_append(loc) # Copy location to clipboard
       self.window.update() # Update window
+      try:
+         lat,lon = loc.split(',')
+         self.map_lat = float(lat)
+         self.map_lon = float(lon)
+         self.update_map()
+      except:
+         pass
+
+   def goto_base(self):
+      ''' Copy the location of the base to the clipboard and center the map on its location '''
+      self.writeToConsole(self.console_1, 'Copying base location to clipboard') # Update message console      
+      try:
+         self.window.clipboard_clear() # Clear clipboard
+         loc = self.base_location.get() # Get location
+         self.window.clipboard_append(loc) # Copy location to clipboard
+         self.window.update() # Update window
+         lat,lon = loc.split(',')
+         self.map_lat = float(lat)
+         self.map_lon = float(lon)
+         self.update_map()
+      except:
+         pass
 
    def flush_mt(self):
       ''' Talk to Beacon Base using serial; send flush_mt command; process response '''

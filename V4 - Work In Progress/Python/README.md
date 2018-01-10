@@ -1,6 +1,6 @@
 # Iridium Beacon Base
 
-A Tkinter GUI which talks to Iridium9603NBeacon_V4_Base via serial and displays the beacon position and path using the Google Static Maps API.
+A Tkinter GUI which talks to Iridium9603NBeacon_V4_Base via serial and displays up to 8 beacon positions and paths using the Google Static Maps API.
 
 ## Linux Python 2.7 Libraries
 
