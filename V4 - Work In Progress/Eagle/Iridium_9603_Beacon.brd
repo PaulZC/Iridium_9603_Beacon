@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.5.0">
+<eagle version="8.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -1763,8 +1763,6 @@ Your Multi-CB Team
 <contactref element="U2" pad="3"/>
 <wire x1="15.8115" y1="25.4" x2="15.8115" y2="27.27325" width="0.6096" layer="1"/>
 <wire x1="16.4799" y1="23.21175" x2="14.57075" y2="23.21175" width="0.4064" layer="1"/>
-<wire x1="31.5595" y1="16.1925" x2="35.52825" y2="20.16125" width="0.8128" layer="16"/>
-<wire x1="31.5595" y1="16.1925" x2="31.5595" y2="14.732" width="0.8128" layer="16"/>
 <wire x1="38.5445" y1="43.96105" x2="38.5445" y2="44.35475" width="0.2032" layer="1"/>
 <wire x1="38.5445" y1="44.35475" x2="37.7825" y2="45.11675" width="0.2032" layer="1"/>
 <via x="37.7825" y="45.11675" extent="1-16" drill="0.254" diameter="0.6096"/>
@@ -1781,8 +1779,6 @@ Your Multi-CB Team
 <wire x1="22.83675" y1="53.11775" x2="25.24125" y2="53.11775" width="0.8128" layer="1"/>
 <wire x1="25.24125" y1="53.11775" x2="25.4" y2="52.959" width="0.8128" layer="1"/>
 <wire x1="20.54225" y1="25.527" x2="20.54225" y2="16.28775" width="0.8128" layer="16"/>
-<wire x1="20.54225" y1="16.28775" x2="22.098" y2="14.732" width="0.8128" layer="16"/>
-<wire x1="22.098" y1="14.732" x2="31.5595" y2="14.732" width="0.8128" layer="16"/>
 <wire x1="37.7825" y1="52.7685" x2="37.81425" y2="52.80025" width="0.8128" layer="16"/>
 <wire x1="37.81425" y1="52.80025" x2="37.6555" y2="52.959" width="0.8128" layer="16"/>
 <wire x1="37.6555" y1="52.959" x2="35.71875" y2="52.959" width="0.8128" layer="16"/>
@@ -1808,9 +1804,6 @@ Your Multi-CB Team
 <wire x1="34.5195" y1="13.716" x2="35.1155" y2="14.312" width="0.4064" layer="1"/>
 <wire x1="35.1155" y1="14.312" x2="35.1155" y2="15.14475" width="0.4064" layer="1"/>
 <via x="35.1155" y="15.14475" extent="1-16" drill="0.254" diameter="0.8128"/>
-<wire x1="35.1155" y1="15.14475" x2="31.97225" y2="15.14475" width="0.6096" layer="16"/>
-<wire x1="31.97225" y1="15.14475" x2="31.90875" y2="15.08125" width="0.4064" layer="16"/>
-<wire x1="31.90875" y1="15.08125" x2="31.5595" y2="14.732" width="0.4064" layer="16"/>
 <wire x1="12.98325" y1="23.39975" x2="14.38275" y2="23.39975" width="0.6096" layer="1"/>
 <wire x1="14.38275" y1="23.39975" x2="14.50975" y2="23.27275" width="0.6096" layer="1"/>
 <wire x1="21.55825" y1="55.3" x2="25.4" y2="55.3" width="0.8128" layer="1"/>
@@ -1827,8 +1820,15 @@ Your Multi-CB Team
 <contactref element="D4" pad="C"/>
 <wire x1="31.496" y1="11.0575" x2="31.496" y2="12.319" width="0.4064" layer="1"/>
 <via x="31.496" y="12.319" extent="1-16" drill="0.254" diameter="0.6096"/>
-<wire x1="31.496" y1="12.319" x2="31.90875" y2="12.73175" width="0.4064" layer="16"/>
-<wire x1="31.90875" y1="12.73175" x2="31.90875" y2="15.08125" width="0.4064" layer="16"/>
+<wire x1="20.54225" y1="16.28775" x2="21.68525" y2="15.14475" width="0.8128" layer="16"/>
+<wire x1="21.68525" y1="15.14475" x2="31.75" y2="15.14475" width="0.8128" layer="16"/>
+<wire x1="31.75" y1="15.14475" x2="35.1155" y2="15.14475" width="0.8128" layer="16"/>
+<wire x1="31.9512" y1="13.64961875" x2="31.75" y2="13.85081875" width="0.8128" layer="16"/>
+<wire x1="31.75" y1="13.85081875" x2="31.75" y2="15.14475" width="0.8128" layer="16"/>
+<wire x1="31.496" y1="12.319" x2="31.9512" y2="12.7742" width="0.8128" layer="16"/>
+<wire x1="31.9512" y1="12.7742" x2="31.9512" y2="13.64961875" width="0.8128" layer="16"/>
+<wire x1="35.52825" y1="20.16393125" x2="35.1155" y2="19.75118125" width="0.8128" layer="16"/>
+<wire x1="35.1155" y1="19.75118125" x2="35.1155" y2="15.14475" width="0.8128" layer="16"/>
 </signal>
 <signal name="GND">
 <contactref element="U2" pad="2"/>
@@ -3098,40 +3098,40 @@ Your Multi-CB Team
 </signal>
 </signals>
 <errors>
-<approved hash="4,1,9fdd5023333370ce"/>
-<approved hash="4,1,98cf6af1d78c2db2"/>
-<approved hash="4,1,be3b71c692ded120"/>
-<approved hash="4,1,8ed27fecc8e323dd"/>
-<approved hash="4,1,831e84e187f1c40f"/>
-<approved hash="4,1,63bc5842255666a8"/>
-<approved hash="4,1,9fdd5023333370ce"/>
-<approved hash="4,1,8ed27fecc8e323dd"/>
-<approved hash="4,1,831e84e187f1c40f"/>
-<approved hash="4,1,63bc5842255666a8"/>
-<approved hash="4,1,98cf6af1d78c2db2"/>
-<approved hash="4,1,be3b71c692ded120"/>
 <approved hash="19,1,5c1bb1bd14cde33f"/>
 <approved hash="19,1,b9e00b7d48f3fb06"/>
-<approved hash="4,16,be3b71c692ded120"/>
+<approved hash="4,1,be3b71c692ded120"/>
+<approved hash="4,1,9fdd5023333370ce"/>
+<approved hash="4,1,98cf6af1d78c2db2"/>
+<approved hash="4,1,63bc5842255666a8"/>
+<approved hash="4,1,8ed27fecc8e323dd"/>
+<approved hash="4,1,831e84e187f1c40f"/>
+<approved hash="4,1,be3b71c692ded120"/>
+<approved hash="4,1,9fdd5023333370ce"/>
+<approved hash="4,1,98cf6af1d78c2db2"/>
+<approved hash="4,1,63bc5842255666a8"/>
+<approved hash="4,1,8ed27fecc8e323dd"/>
+<approved hash="4,1,831e84e187f1c40f"/>
 <approved hash="4,16,9fdd5023333370ce"/>
+<approved hash="4,16,be3b71c692ded120"/>
 <approved hash="4,16,63bc5842255666a8"/>
 <approved hash="4,16,831e84e187f1c40f"/>
-<approved hash="6,16,a329b5eb35d72315"/>
+<approved hash="6,16,e13bf9a7fd0fe0f3"/>
 <approved hash="6,16,93d39910191413d7"/>
+<approved hash="6,16,090f2ed1d9279831"/>
 <approved hash="6,16,21473c5538292117"/>
-<approved hash="6,16,1fd758252b7188b3"/>
-<approved hash="6,16,df493a553e01df7d"/>
+<approved hash="6,16,b8a6bfeb3fef38a2"/>
 <approved hash="6,16,f51b34933492f51a"/>
 <approved hash="6,16,e4c9f9dbfd8be4b5"/>
+<approved hash="4,16,9fdd5023333370ce"/>
 <approved hash="4,16,be3b71c692ded120"/>
+<approved hash="6,16,86769f301f0c064a"/>
+<approved hash="6,16,a329b5eb35d72315"/>
+<approved hash="6,16,1fd758252b7188b3"/>
+<approved hash="6,16,df493a553e01df7d"/>
+<approved hash="6,16,e2c907d503e1e29d"/>
 <approved hash="4,16,63bc5842255666a8"/>
 <approved hash="4,16,831e84e187f1c40f"/>
-<approved hash="4,16,9fdd5023333370ce"/>
-<approved hash="6,16,86769f301f0c064a"/>
-<approved hash="6,16,090f2ed1d9279831"/>
-<approved hash="6,16,b8a6bfeb3fef38a2"/>
-<approved hash="6,16,e2c907d503e1e29d"/>
-<approved hash="6,16,e13bf9a7fd0fe0f3"/>
 </errors>
 </board>
 </drawing>
