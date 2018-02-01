@@ -138,6 +138,10 @@ byte month, day, hour, minute, second, hundredths;
 unsigned long dateFix, locationFix;
 float latitude, longitude;
 long altitude;
+float speed;
+short satellites;
+long course;
+long hdop;
 bool fixFound = false;
 bool charsSeen = false;
 int loop_step = init;
@@ -340,6 +344,8 @@ void loop()
         
       // Reset TinyGPS and begin listening to the GPS
       Serial.println("Beginning to listen for GPS traffic...");
+      fixFound = false; // Reset fixFound
+      charsSeen = false; // Reset charsSeen
       tinygps = TinyGPS();
       
       // Look for GPS signal for up to 5 minutes
@@ -352,10 +358,18 @@ void loop()
           {
             tinygps.f_get_position(&latitude, &longitude, &locationFix);
             tinygps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &dateFix);
-            altitude = tinygps.altitude(); // Altitude in cm (long)
+            altitude = tinygps.altitude(); // Altitude in cm (long) - checks that we have received a GGA message
+            speed = tinygps.f_speed_mps(); // Get speed - checks that we have received an RMC message
+            satellites = tinygps.satellites(); // Get number of satellites
+            course = tinygps.course(); // Get course over ground
+            hdop = tinygps.hdop(); // Get horizontal dilution of precision
             fixFound = locationFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        dateFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        altitude != TinyGPS::GPS_INVALID_ALTITUDE &&
+                       speed != TinyGPS::GPS_INVALID_F_SPEED &&
+                       satellites != TinyGPS::GPS_INVALID_SATELLITES &&
+                       course != TinyGPS::GPS_INVALID_ANGLE &&
+                       hdop != TinyGPS::GPS_INVALID_HDOP &&
                        year != 2000;
           }
         }
@@ -521,13 +535,13 @@ void loop()
           str.print(",");
           str.print(altitude / 100); // Convert altitude from cm to m
           str.print(",");
-          str.print(tinygps.f_speed_mps(), 1); // Speed in metres per second
+          str.print(speed, 1); // Speed in metres per second
           str.print(",");
-          str.print(tinygps.course() / 100); // Convert from 1/100 degree to degrees
+          str.print(course / 100); // Convert from 1/100 degree to degrees
           str.print(",");
-          str.print((((float)tinygps.hdop()) / 100),1); // Convert from 1/100 m to m
+          str.print((((float)hdop) / 100),1); // Convert from 1/100 m to m
           str.print(",");
-          str.print(tinygps.satellites());
+          str.print(satellites);
           str.print(",");
           str.print(pascals, 0);
           str.print(",");
