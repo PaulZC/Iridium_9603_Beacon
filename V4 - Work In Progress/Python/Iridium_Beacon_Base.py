@@ -2,7 +2,7 @@
 
 ## Multi Iridium Beacon Base
 
-## Written by Paul Clark: Dec 2017 - Jan 2018.
+## Written by Paul Clark: Dec 2017 - Feb 2018.
 
 ## This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 ## Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
@@ -47,16 +47,21 @@
 ## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a
 ## premium plan with Google.
 
+## Offline maps can be collected using Google_Static_Map_Tiler.py
+## Base and beacon locations will be shown on the offline maps but not path information
+
 import Tkinter as tk
 import tkMessageBox
 import tkFont
 import serial
 import time
 import urllib
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import math
 import numpy as np
 from sys import platform
+from shutil import copyfile
+import os
 
 class BeaconBase(object):
 
@@ -94,6 +99,7 @@ class BeaconBase(object):
       self.first_base = True # Is this the first time we have received a base location?
       self.do_zoom = False # Should we set the map zoom? (When a new beacon is detected)
       self.do_map_update = False # Should we update the map? (When new data is detected)
+      self.offline_marker_radius = 5 # Radius of the offline marker circle (int)
       # Limit path lengths to this many characters depending on how many beacons are being tracked
       # (Google allows combined URLs of up to 8192 characters)
       # The first entry is redundant (i.e. would be used when tracking zero beacons)
@@ -179,6 +185,28 @@ class BeaconBase(object):
       except:
          raise NameError('COULD NOT OPEN SERIAL PORT!')
       self.ser.flushInput() # Flush RX buffer
+
+      # Check for offline map tiles
+      self.tile_num = 0 # tile number
+      self.tile_filenames = [] # tile long filenames
+      self.tile_lats = [] # tile latitudes
+      self.tile_lons = [] # tile longitudes
+      self.tile_zooms = [] # tile zooms
+      for root, dirs, files in os.walk("."):
+         if len(files) > 0:
+            #if root != ".": # Ignore files in this directory - only process subdirectories
+            #if root == ".": # Ignore subdirectories - only process this directory
+               for filename in files:
+                  if (filename[:13] == 'StaticMapTile') and (filename[-4:] == '.png'): # check for tile file
+                     fields = filename.split("_") # split the filename into fields
+                     longfilename = os.path.join(root, filename)
+                     self.tile_filenames.append(longfilename) # add the filename to the dictionary
+                     self.tile_zooms.append(fields[2])
+                     self.tile_lats.append(float(fields[4]))
+                     self.tile_lons.append(float(fields[6]))
+                     self.tile_num += 1 # increment the tile number
+      print 'Found',self.tile_num,'offline map tiles'
+      print
 
       # Set up Tkinter GUI
       self.window = tk.Tk() # Create main window
@@ -700,6 +728,16 @@ class BeaconBase(object):
       except:
          return # beacon location must be empty so return now
          #raise ValueError('Invalid Beacon_Location!')
+
+      delta = self.calculate_delta(lat1,long1,lat2,long2) # Calculate delta
+      self.distance_to_beacon.configure(state='normal') # Unlock entry box
+      self.distance_to_beacon.delete(0,tk.END) # Delete old distance
+      self.distance_to_beacon.insert(0,str(int(delta * 6378137.))) # Set distance
+      self.distance_to_beacon.configure(state='readonly') # Lock entry box
+      self.delta = math.degrees(delta) # Store the delta in degrees so update_zoom can use it
+
+   def calculate_delta(self,lat1,long1,lat2,long2):
+      ''' Calculate delta (angle) between lat1,long1 and lat2,long2. All values are in radians. '''
       delta = long1-long2
       sdlong = math.sin(delta)
       cdlong = math.cos(delta)
@@ -713,12 +751,8 @@ class BeaconBase(object):
       delta = delta**0.5
       denom = (slat1 * slat2) + (clat1 * clat2 * cdlong)
       delta = math.atan2(delta, denom)
-      self.delta = math.degrees(delta)
-      self.distance_to_beacon.configure(state='normal') # Unlock entry box
-      self.distance_to_beacon.delete(0,tk.END) # Delete old distance
-      self.distance_to_beacon.insert(0,str(int(delta * 6378137.))) # Set distance
-      self.distance_to_beacon.configure(state='readonly') # Lock entry box
-
+      return delta
+      
    def course_to(self):
       ''' Calculate heading. Gratefully plagiarised from Mikal Hart's TinyGPS. '''
       # https://github.com/mikalhart/TinyGPS/blob/master/TinyGPS.cpp
@@ -804,9 +838,81 @@ class BeaconBase(object):
       filename = "map_image.png" # Download map to this file
       try:
          urllib.urlretrieve(self.path_url, filename) # Attempt map image download
+         # Enable zoom buttons and mouse clicks since valid map was downloaded
+         self.zoom_in_button.config(state='normal') # Enable zoom+
+         self.zoom_out_button.config(state='normal') # Enable zoom-
+         self.enable_clicks = True # Enable mouse clicks
       except:
-         self.writeToConsole(self.console_1, 'Map image download failed!') # Update message console      
-         filename = "map_image_blank.png" # If download failed, default to blank image
+         self.writeToConsole(self.console_1, 'Map image download failed!') # Update message console
+         # Check if we have any offline files
+         if (self.tile_num > 0):
+            # we have offline tiles so choose the one closest to the map center
+            distances = []
+            for tile in range(self.tile_num):
+               distances.append(self.calculate_delta(math.radians(self.map_lat),math.radians(self.map_lon),math.radians(self.tile_lats[tile]),math.radians(self.tile_lons[tile])) * 6378137.)
+            distances = np.array(distances) # convert to numpy array for argmin
+            tile = distances.argmin()
+            # copy chosen tile into map_image.png
+            copyfile(self.tile_filenames[tile], 'map_image.png')
+            # update map lat, lon and zoom
+            self.map_lat = self.tile_lats[tile]
+            self.map_lon = self.tile_lons[tile]
+            self.zoom = self.tile_zooms[tile]
+            # add markers to image
+            # https://infohost.nmt.edu/tcc/help/pubs/pil/image-draw.html
+            # open the image
+            im = Image.open("map_image.png").convert("RGBA")
+            draw = ImageDraw.Draw(im) # instantiate the Draw object
+            if self.base_location.get() != '': # check if base location is known
+               base_lat,base_lon = self.base_location.get().split(',') # get base lat and lon
+               base_lat = float(base_lat) # convert lat to float
+               base_lon = float(base_lon) # convert lon to float
+               pixel_scale = self.scales[np.where(self.scales[:,0]==float(self.zoom))][0][1]
+               x_dist = base_lon - self.map_lon # calculate x offset from tile centre in degrees
+               x_dist = x_dist / pixel_scale # convert x offset into pixels
+               pixel_scale = pixel_scale * math.cos(math.radians(self.map_lat)) # Adjust the pixel scale to compensate for latitude
+               y_dist = base_lat - self.map_lat # calculate y offset from tile centre in degrees
+               y_dist = y_dist / pixel_scale # convert y offset into pixels
+               # check if the base can be shown on this tile
+               if (abs(y_dist) < ((self.frame_height / 2) - (2 * self.offline_marker_radius))) and (abs(x_dist) < ((self.frame_width / 2) - (2 * self.offline_marker_radius))):
+                  # calculate the bounding box top left
+                  bby = int((self.frame_height / 2) - (y_dist + self.offline_marker_radius))
+                  bbx = int((self.frame_width / 2) + x_dist - self.offline_marker_radius)
+                  # add the marker (circle)
+                  draw.ellipse([(bbx,bby),((bbx + (2 * self.offline_marker_radius)),(bby + (2 * self.offline_marker_radius)))],fill=self.base_colour,outline="black")
+            if self.beacons > 0: # Do we have any valid beacons?
+               for beacon in range(self.beacons):
+                  beacon_lat,beacon_lon = self.beacon_locations[beacon].split(',') # get beacon lat and lon
+                  beacon_lat = float(beacon_lat) # convert lat to float
+                  beacon_lon = float(beacon_lon) # convert lon to float
+                  pixel_scale = self.scales[np.where(self.scales[:,0]==float(self.zoom))][0][1]
+                  x_dist = beacon_lon - self.map_lon # calculate x offset from tile centre in degrees
+                  x_dist = x_dist / pixel_scale # convert x offset into pixels
+                  pixel_scale = pixel_scale * math.cos(math.radians(self.map_lat)) # Adjust the pixel scale to compensate for latitude
+                  y_dist = beacon_lat - self.map_lat # calculate y offset from tile centre in degrees
+                  y_dist = y_dist / pixel_scale # convert y offset into pixels
+                  # check if the beacon can be shown on this tile
+                  if (abs(y_dist) < ((self.frame_height / 2) - (2 * self.offline_marker_radius))) and (abs(x_dist) < ((self.frame_width / 2) - (2 * self.offline_marker_radius))):
+                     # calculate the bounding box top left
+                     bby = int((self.frame_height / 2) - (y_dist + self.offline_marker_radius))
+                     bbx = int((self.frame_width / 2) + x_dist - self.offline_marker_radius)
+                     # add the marker (circle)
+                     draw.ellipse([(bbx,bby),((bbx + (2 * self.offline_marker_radius)),(bby + (2 * self.offline_marker_radius)))],fill=self.beacon_colours[beacon],outline="black")
+            del draw
+            # save the image
+            im.save("map_image.png")
+            # Disable zoom buttons only as we are using offline maps
+            self.zoom_in_button.config(state='disabled') # Disable zoom+
+            self.zoom_out_button.config(state='disabled') # Disable zoom-
+            self.enable_clicks = True # Enable mouse clicks
+            self.writeToConsole(self.console_1, 'Using offline map tile') # Update message console
+         else:
+            # No offline files available so default to blank image
+            filename = "map_image_blank.png"
+            # Disable zoom buttons and mouse clicks as there is no map image to display
+            self.zoom_in_button.config(state='disabled') # Disable zoom+
+            self.zoom_out_button.config(state='disabled') # Disable zoom-
+            self.enable_clicks = False # Disable mouse clicks
 
       # Update label using image
       image = Image.open(filename)
@@ -814,16 +920,6 @@ class BeaconBase(object):
       self.label.configure(image=photo)
       self.image = photo
       
-      # Enable zoom buttons and mouse clicks if a map image was displayed
-      if filename == "map_image.png":
-         self.zoom_in_button.config(state='normal') # Enable zoom+
-         self.zoom_out_button.config(state='normal') # Enable zoom-
-         self.enable_clicks = True # Enable mouse clicks
-      else: # Else disable them again
-         self.zoom_in_button.config(state='disabled') # Disable zoom+
-         self.zoom_out_button.config(state='disabled') # Disable zoom-
-         self.enable_clicks = False # Disable mouse clicks
-
       # Update window
       self.window.update()
 
