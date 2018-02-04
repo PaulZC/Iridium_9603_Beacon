@@ -169,7 +169,7 @@
 <text x="4.66725" y="1.397" size="1.016" layer="1" font="vector" ratio="16">TOP</text>
 <text x="8.66775" y="1.397" size="1.016" layer="16" font="vector" ratio="16" rot="MR0">BOTTOM</text>
 <text x="27.84475" y="59.182" size="1.4224" layer="22" ratio="18" rot="MR0" align="bottom-center">Please return to:</text>
-<text x="28.448" y="14.605" size="1.4224" layer="21" font="vector" ratio="18" align="bottom-center">Iridium 9603N
+<text x="48.768" y="1.905" size="1.4224" layer="21" font="vector" ratio="18" align="bottom-center">Iridium 9603N
 Beacon V4</text>
 <text x="28.86075" y="14.605" size="1.4224" layer="22" font="vector" ratio="18" rot="MR0" align="bottom-center">Iridium 9603N
 Beacon V4</text>
@@ -182,13 +182,20 @@ Beacon V4</text>
 <rectangle x1="36.8427" y1="19.58975" x2="47.0027" y2="50.83175" layer="52"/>
 <circle x="3.4925" y="48.92675" radius="0.3175" width="0.635" layer="21"/>
 <text x="1.74625" y="50.038" size="1.016" layer="21" font="vector" ratio="16">U6</text>
-<text x="34.82975" y="62.83325" size="1.4224" layer="21" ratio="18" align="bottom-center">-</text>
-<text x="23.01875" y="62.8015" size="1.4224" layer="21" ratio="18" align="bottom-center">+</text>
+<text x="34.82975" y="62.83325" size="1.778" layer="21" ratio="18" align="bottom-center">-</text>
+<text x="23.01875" y="62.8015" size="1.778" layer="21" ratio="18" align="bottom-center">+</text>
 <circle x="5.08" y="5.08" radius="0.50038125" width="0" layer="31"/>
 <circle x="52.4764" y="60.96" radius="0.50038125" width="0" layer="31"/>
-<text x="22.733" y="62.8015" size="1.4224" layer="22" ratio="18" rot="MR0" align="bottom-center">+</text>
-<text x="34.544" y="62.8015" size="1.4224" layer="22" ratio="18" rot="MR0" align="bottom-center">-</text>
+<text x="22.733" y="62.8015" size="1.778" layer="22" ratio="18" rot="MR0" align="bottom-center">+</text>
+<text x="34.544" y="62.8015" size="1.778" layer="22" ratio="18" rot="MR0" align="bottom-center">-</text>
 <rectangle x1="5.08" y1="53.34" x2="52.4764" y2="58.42" layer="22"/>
+<text x="28.92425" y="60.0075" size="1.016" layer="21" ratio="18" align="bottom-center">5.5V Max</text>
+<text x="48.86325" y="55.0545" size="1.016" layer="21" ratio="18" align="bottom-center">5.3V</text>
+<text x="53.213" y="55.08625" size="1.016" layer="21" ratio="18" align="bottom-center">4.8V</text>
+<text x="48.48225" y="48.0695" size="1.016" layer="21" ratio="18" align="bottom-center">150mA</text>
+<text x="53.56225" y="48.0695" size="1.016" layer="21" ratio="18" align="bottom-center">60mA</text>
+<text x="43.52925" y="48.5775" size="1.778" layer="22" ratio="18" rot="MR0" align="bottom-center">-</text>
+<text x="33.36925" y="48.60925" size="1.778" layer="22" ratio="18" rot="MR0" align="bottom-center">-</text>
 </plain>
 <libraries>
 <library name="microbuilder">
@@ -1488,8 +1495,8 @@ Your Multi-CB Team
 </pass>
 </autorouter>
 <elements>
-<element name="C6" library="microbuilder" package="0805-NO" value="10µF" x="12.03325" y="23.39975" smashed="yes" rot="R180">
-<attribute name="NAME" x="10.00125" y="23.52675" size="0.8128" layer="25" ratio="18" rot="R180"/>
+<element name="C6" library="microbuilder" package="0805-NO" value="10µF" x="8.22325" y="23.39975" smashed="yes" rot="R180">
+<attribute name="NAME" x="6.19125" y="23.52675" size="0.8128" layer="25" ratio="18" rot="R180"/>
 </element>
 <element name="C7" library="microbuilder" package="0603-NO" value="1uF" x="23.8125" y="24.16175" smashed="yes" rot="R270">
 <attribute name="NAME" x="24.66975" y="22.44725" size="0.8128" layer="25" font="vector" ratio="18" rot="R180"/>
@@ -1531,19 +1538,19 @@ Your Multi-CB Team
 <attribute name="NAME" x="34.417" y="38.25875" size="0.8128" layer="25" ratio="18" rot="R180"/>
 </element>
 <element name="C9" library="microbuilder" package="0805-NO" value="0.1uF" x="15.24" y="38.13175" smashed="yes">
-<attribute name="NAME" x="14.605" y="39.14775" size="0.8128" layer="25" ratio="18"/>
+<attribute name="NAME" x="11.84275" y="37.68725" size="0.8128" layer="25" ratio="18"/>
 </element>
 <element name="C10" library="microbuilder" package="0805-NO" value="10uF" x="19.05" y="44.48175" smashed="yes">
 <attribute name="NAME" x="18.0975" y="45.43425" size="0.8128" layer="25" ratio="18"/>
 </element>
-<element name="Q1" library="microbuilder" package="SOT23-WIDE" value="DMG3415U-7 " x="15.24" y="41.94175" smashed="yes" rot="R90">
-<attribute name="NAME" x="16.51" y="43.84675" size="0.8128" layer="25" ratio="18" rot="R90"/>
+<element name="Q1" library="microbuilder" package="SOT23-WIDE" value="DMG3415U-7 " x="15.5575" y="41.05275" smashed="yes" rot="R90">
+<attribute name="NAME" x="16.8275" y="42.95775" size="0.8128" layer="25" ratio="18" rot="R90"/>
 </element>
 <element name="R1" library="microbuilder" package="0805-NO" value="100K" x="19.939" y="39.02075" smashed="yes" rot="R90">
 <attribute name="NAME" x="21.9075" y="38.25875" size="0.8128" layer="25" ratio="18" rot="R90"/>
 </element>
 <element name="U4" library="SparkFun-Sensors" package="LGA8" value="MPL3115A2LGA8" x="12.03325" y="33.68675" smashed="yes" rot="R180">
-<attribute name="NAME" x="15.5575" y="31.52775" size="0.8128" layer="25" font="vector" ratio="15" rot="R180"/>
+<attribute name="NAME" x="12.85875" y="37.24275" size="0.8128" layer="25" font="vector" ratio="15" rot="R180"/>
 <attribute name="PROD_ID" value="IC-10869" x="12.03325" y="33.68675" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="J1" library="SS4-10-3.50-X-D" package="SS4-10-3.50-X-D" value="SS4-10-3.50-X-D" x="26.27121875" y="42.10176875" smashed="yes">
@@ -1616,8 +1623,8 @@ Your Multi-CB Team
 <element name="C15" library="microbuilder" package="0603-NO" value="1uF" x="37.592" y="40.10025" smashed="yes">
 <attribute name="NAME" x="33.782" y="39.65575" size="0.8128" layer="25" font="vector" ratio="18"/>
 </element>
-<element name="R2" library="microbuilder" package="0805-NO" value="30K" x="42.76725" y="44.41825" smashed="yes" rot="R90">
-<attribute name="NAME" x="45.43425" y="44.79925" size="0.8128" layer="25" ratio="18" rot="R180"/>
+<element name="R2" library="microbuilder" package="0805-NO" value="12K" x="48.3235" y="46.863" smashed="yes">
+<attribute name="NAME" x="49.11725" y="45.7835" size="0.8128" layer="25" ratio="18" rot="R180"/>
 </element>
 <element name="C16" library="microbuilder" package="0603-NO" value="0.22uF" x="36.7665" y="46.70425" smashed="yes">
 <attribute name="NAME" x="35.71875" y="47.625" size="0.8128" layer="25" font="vector" ratio="18"/>
@@ -1648,9 +1655,7 @@ Your Multi-CB Team
 <element name="C13" library="microbuilder" package="0603-NO" value="0.1uF" x="16.9545" y="32.03575" smashed="yes">
 <attribute name="NAME" x="18.70075" y="31.65475" size="0.8128" layer="25" font="vector" ratio="18"/>
 </element>
-<element name="JP1" library="SparkFun-Passives" package="PAD-JUMPER-3-2OF3_NC_BY_TRACE_YES_SILK_LARGE" value="" x="50.8635" y="48.35525" smashed="yes" rot="R180">
-<attribute name="NAME" x="52.7685" y="47.1805" size="1.27" layer="25" ratio="10" rot="R180"/>
-</element>
+<element name="JP1" library="SparkFun-Passives" package="PAD-JUMPER-3-2OF3_NC_BY_TRACE_YES_SILK_LARGE" value="" x="50.8635" y="53.721" smashed="yes" rot="R180"/>
 <element name="SOLAR1-" library="adafruit" package="1X01" value="" x="32.1564" y="63.5" smashed="yes">
 <attribute name="NAME" x="30.27045" y="61.2648" size="0.6096" layer="25" ratio="15"/>
 <attribute name="VALUE" x="30.8864" y="60.325" size="1.27" layer="27"/>
@@ -1690,7 +1695,7 @@ Your Multi-CB Team
 </element>
 <element name="U6" library="ubloxLib" package="MAX-M8" value="MAX-M8" x="9.4615" y="52.832" rot="R270"/>
 <element name="R9" library="microbuilder" package="0805-NO" value="10 ohm" x="8.001" y="59.97575" smashed="yes" rot="R180">
-<attribute name="NAME" x="6.31825" y="60.35675" size="0.8128" layer="25" ratio="18" rot="R180"/>
+<attribute name="NAME" x="5.3975" y="60.7695" size="0.8128" layer="25" ratio="18" rot="R270"/>
 </element>
 <element name="L1" library="microbuilder" package="0805-NO" value="33nH" x="11.77925" y="59.97575" smashed="yes">
 <attribute name="NAME" x="13.68425" y="59.6265" size="0.8128" layer="25" ratio="18"/>
@@ -1743,6 +1748,12 @@ Your Multi-CB Team
 <element name="D4" library="microbuilder" package="SOD-123" value="MBR120" x="31.496" y="9.2075" smashed="yes" rot="R270">
 <attribute name="NAME" x="33.274" y="8.5725" size="0.8128" layer="25" ratio="18" rot="R90"/>
 </element>
+<element name="JP2" library="SparkFun-Passives" package="PAD-JUMPER-3-2OF3_NC_BY_TRACE_YES_SILK_LARGE" value="" x="50.8635" y="50.38725" smashed="yes" rot="R180">
+<attribute name="VALUE" x="50.9636" y="50.38725" size="0.02" layer="27" rot="R180"/>
+</element>
+<element name="R11" library="microbuilder" package="0805-NO" value="30K" x="53.4035" y="46.863" smashed="yes" rot="R180">
+<attribute name="NAME" x="56.4515" y="45.7835" size="0.8128" layer="25" ratio="18" rot="R180"/>
+</element>
 </elements>
 <signals>
 <signal name="VBUS">
@@ -1772,7 +1783,6 @@ Your Multi-CB Team
 <wire x1="35.71875" y1="54.8615" x2="35.91175" y2="55.0545" width="0.8128" layer="1"/>
 <wire x1="15.8115" y1="25.4" x2="14.50975" y2="24.09825" width="0.6096" layer="1"/>
 <wire x1="14.50975" y1="23.27275" x2="14.50975" y2="24.09825" width="0.6096" layer="1"/>
-<wire x1="12.98325" y1="23.39975" x2="13.04675" y2="23.2385" width="0.6096" layer="1"/>
 <wire x1="14.57075" y1="23.21175" x2="14.50975" y2="23.27275" width="0.4064" layer="1"/>
 <wire x1="25.43175" y1="55.33175" x2="25.4" y2="52.959" width="0.8128" layer="1"/>
 <via x="25.4" y="52.959" extent="1-16" drill="0.254" diameter="0.8128"/>
@@ -1804,8 +1814,6 @@ Your Multi-CB Team
 <wire x1="34.5195" y1="13.716" x2="35.1155" y2="14.312" width="0.4064" layer="1"/>
 <wire x1="35.1155" y1="14.312" x2="35.1155" y2="15.14475" width="0.4064" layer="1"/>
 <via x="35.1155" y="15.14475" extent="1-16" drill="0.254" diameter="0.8128"/>
-<wire x1="12.98325" y1="23.39975" x2="14.38275" y2="23.39975" width="0.6096" layer="1"/>
-<wire x1="14.38275" y1="23.39975" x2="14.50975" y2="23.27275" width="0.6096" layer="1"/>
 <wire x1="21.55825" y1="55.3" x2="25.4" y2="55.3" width="0.8128" layer="1"/>
 <wire x1="25.4" y1="55.3" x2="25.43175" y2="55.33175" width="0.8128" layer="1"/>
 <contactref element="VBUS" pad="1"/>
@@ -1815,8 +1823,6 @@ Your Multi-CB Team
 <wire x1="35.1155" y1="15.14475" x2="37.5758125" y2="15.14475" width="0.6096" layer="16"/>
 <wire x1="37.5758125" y1="15.14475" x2="39.91315625" y2="12.80740625" width="0.6096" layer="16"/>
 <via x="41.94175" y="47.244" extent="1-16" drill="0.254" diameter="0.6096"/>
-<wire x1="49.3395" y1="48.35525" x2="43.053" y2="48.35525" width="0.4064" layer="1"/>
-<wire x1="43.053" y1="48.35525" x2="41.94175" y2="47.244" width="0.4064" layer="1"/>
 <contactref element="D4" pad="C"/>
 <wire x1="31.496" y1="11.0575" x2="31.496" y2="12.319" width="0.4064" layer="1"/>
 <via x="31.496" y="12.319" extent="1-16" drill="0.254" diameter="0.6096"/>
@@ -1829,6 +1835,14 @@ Your Multi-CB Team
 <wire x1="31.9512" y1="12.7742" x2="31.9512" y2="13.64961875" width="0.8128" layer="16"/>
 <wire x1="35.52825" y1="20.16393125" x2="35.1155" y2="19.75118125" width="0.8128" layer="16"/>
 <wire x1="35.1155" y1="19.75118125" x2="35.1155" y2="15.14475" width="0.8128" layer="16"/>
+<wire x1="14.50975" y1="23.27275" x2="9.30025" y2="23.27275" width="0.6096" layer="1"/>
+<wire x1="9.30025" y1="23.27275" x2="9.17325" y2="23.39975" width="0.6096" layer="1"/>
+<wire x1="41.94175" y1="47.244" x2="43.6245" y2="48.92675" width="0.4064" layer="1"/>
+<wire x1="43.6245" y1="48.92675" x2="44.45" y2="48.92675" width="0.4064" layer="1"/>
+<wire x1="44.45" y1="48.92675" x2="46.00575" y2="50.4825" width="0.4064" layer="1"/>
+<wire x1="46.00575" y1="50.4825" x2="46.00575" y2="52.7685" width="0.4064" layer="1"/>
+<wire x1="46.95825" y1="53.721" x2="46.00575" y2="52.7685" width="0.4064" layer="1"/>
+<wire x1="49.3395" y1="53.721" x2="46.95825" y2="53.721" width="0.4064" layer="1"/>
 </signal>
 <signal name="GND">
 <contactref element="U2" pad="2"/>
@@ -1860,7 +1874,10 @@ Your Multi-CB Team
 <contactref element="J1" pad="14"/>
 <contactref element="J1" pad="18"/>
 <wire x1="49.22815" y1="64.80175" x2="56.769" y2="64.80175" width="0.4064" layer="1"/>
-<wire x1="56.769" y1="64.80175" x2="56.769" y2="50.8" width="0.4064" layer="1"/>
+<wire x1="56.769" y1="64.80175" x2="56.769" y2="58.9915" width="0.4064" layer="1"/>
+<wire x1="56.769" y1="58.9915" x2="56.769" y2="53.721" width="0.4064" layer="1"/>
+<wire x1="56.769" y1="53.721" x2="56.769" y2="46.99" width="0.4064" layer="1"/>
+<wire x1="56.769" y1="46.99" x2="56.769" y2="41.17975" width="0.4064" layer="1"/>
 <wire x1="42.8625" y1="0.635" x2="42.352190625" y2="0.630275" width="0.4064" layer="1"/>
 <wire x1="42.352190625" y1="0.630275" x2="39.4335" y2="0.60325" width="0.4064" layer="1"/>
 <wire x1="0.73025" y1="48.8315" x2="0.7287375" y2="48.261434375" width="0.4064" layer="1"/>
@@ -1943,11 +1960,7 @@ Your Multi-CB Team
 <wire x1="39.0525" y1="46.70425" x2="37.6165" y2="46.70425" width="0.8128" layer="1"/>
 <wire x1="39.0525" y1="43.02125" x2="40.894" y2="43.02125" width="0.2032" layer="1"/>
 <wire x1="40.894" y1="43.02125" x2="41.4655" y2="43.02125" width="0.4064" layer="1"/>
-<wire x1="41.4655" y1="43.02125" x2="42.479" y2="43.02125" width="0.4064" layer="1"/>
-<wire x1="42.479" y1="43.02125" x2="42.76725" y2="43.46825" width="0.4064" layer="1"/>
-<wire x1="43.660059375" y1="50.83175" x2="45.085" y2="50.83175" width="0.8128" layer="1"/>
-<wire x1="45.085" y1="50.83175" x2="45.085" y2="50.8" width="0.8128" layer="1"/>
-<wire x1="42.926" y1="43.46575" x2="42.76725" y2="43.46825" width="0.8128" layer="1"/>
+<wire x1="42.479" y1="43.02125" x2="41.4655" y2="43.02125" width="0.4064" layer="1"/>
 <wire x1="39.0525" y1="43.02125" x2="37.1475" y2="43.02125" width="0.2032" layer="1"/>
 <wire x1="37.1475" y1="43.02125" x2="37.1475" y2="42.95775" width="0.127" layer="1"/>
 <wire x1="37.1475" y1="42.95775" x2="36.3855" y2="42.95775" width="0.4064" layer="1"/>
@@ -2080,17 +2093,8 @@ Your Multi-CB Team
 <contactref element="BAT3" pad="GND@1"/>
 <contactref element="BAT3" pad="GND@2"/>
 <wire x1="54.95925" y1="28.86075" x2="56.769" y2="28.829" width="0.4064" layer="1"/>
-<wire x1="45.085" y1="50.8" x2="46.99" y2="50.8" width="0.8128" layer="1"/>
-<wire x1="46.99" y1="50.8" x2="47.65675" y2="50.8" width="0.8128" layer="1"/>
 <wire x1="43.660059375" y1="50.83175" x2="39.532559375" y2="46.70425" width="0.8128" layer="1"/>
 <wire x1="39.532559375" y1="46.70425" x2="39.0525" y2="46.70425" width="0.8128" layer="1"/>
-<wire x1="42.76725" y1="43.46825" x2="43.18" y2="43.0555" width="0.8128" layer="1"/>
-<wire x1="43.18" y1="43.0555" x2="43.18" y2="41.91" width="0.8128" layer="1"/>
-<wire x1="43.18" y1="41.91" x2="43.561" y2="41.529" width="0.8128" layer="1"/>
-<wire x1="44.3865" y1="41.529" x2="44.7675" y2="41.148" width="0.8128" layer="1"/>
-<wire x1="44.7675" y1="41.148" x2="46.83125" y2="41.148" width="0.8128" layer="1"/>
-<wire x1="47.6885" y1="50.76825" x2="47.65675" y2="50.8" width="0.8128" layer="1"/>
-<wire x1="43.561" y1="41.529" x2="44.3865" y2="41.529" width="0.8128" layer="1"/>
 <contactref element="C18" pad="2"/>
 <contactref element="U6" pad="10_GND"/>
 <contactref element="U6" pad="12_GND"/>
@@ -2171,9 +2175,6 @@ Your Multi-CB Team
 <wire x1="38.608" y1="6.9215" x2="37.83225" y2="7.69725" width="0.4064" layer="1"/>
 <wire x1="42.3164" y1="7.8994" x2="42.3164" y2="0.666065625" width="0.4064" layer="1"/>
 <wire x1="42.3164" y1="0.666065625" x2="42.352190625" y2="0.630275" width="0.4064" layer="1"/>
-<wire x1="11.08325" y1="23.39975" x2="11.08325" y2="22.54" width="0.4064" layer="1"/>
-<wire x1="12.0015" y1="21.62175" x2="16.271240625" y2="21.62175" width="0.4064" layer="1"/>
-<wire x1="11.08325" y1="22.54" x2="12.0015" y2="21.62175" width="0.4064" layer="1"/>
 <wire x1="41.3618" y1="63.9246" x2="37.661" y2="63.9246" width="0.4064" layer="1"/>
 <wire x1="37.661" y1="63.9246" x2="37.2364" y2="63.5" width="0.4064" layer="1"/>
 <wire x1="37.2364" y1="63.5" x2="32.1564" y2="63.5" width="0.4064" layer="1"/>
@@ -2207,7 +2208,6 @@ Your Multi-CB Team
 </polygon>
 <via x="40.64" y="58.42" extent="1-16" drill="0.254" diameter="0.8128"/>
 <via x="49.53" y="58.42" extent="1-16" drill="0.254" diameter="0.8128"/>
-<wire x1="46.99" y1="50.8" x2="56.769" y2="50.8" width="0.4064" layer="1"/>
 <contactref element="C3" pad="2"/>
 <contactref element="C13" pad="2"/>
 <wire x1="17.8045" y1="32.03575" x2="17.8045" y2="34.31175" width="0.4064" layer="1"/>
@@ -2235,8 +2235,6 @@ Your Multi-CB Team
 <wire x1="48.10125" y1="58.42" x2="47.3075" y2="59.21375" width="0.4064" layer="1"/>
 <wire x1="56.769" y1="28.829" x2="56.769" y2="36.068" width="0.4064" layer="1"/>
 <wire x1="56.769" y1="36.068" x2="56.769" y2="41.17975" width="0.4064" layer="1"/>
-<wire x1="56.769" y1="41.17975" x2="56.769" y2="48.26" width="0.4064" layer="1"/>
-<wire x1="56.769" y1="48.26" x2="56.769" y2="50.8" width="0.4064" layer="1"/>
 <wire x1="41.91" y1="21.59" x2="41.91" y2="23.583" width="0.4064" layer="1"/>
 <wire x1="41.91" y1="23.583" x2="41.83925" y2="23.65375" width="0.4064" layer="1"/>
 <wire x1="41.83925" y1="23.65375" x2="41.83925" y2="26.416" width="0.4064" layer="1"/>
@@ -2251,10 +2249,8 @@ Your Multi-CB Team
 <via x="19.939" y="28.73375" extent="1-16" drill="0.254" diameter="0.6096"/>
 <wire x1="17.74825" y1="28.73375" x2="19.939" y2="28.73375" width="0.4064" layer="1"/>
 <wire x1="19.939" y1="28.73375" x2="19.939" y2="34.31175" width="0.4064" layer="1"/>
-<wire x1="46.83125" y1="41.148" x2="56.73725" y2="41.148" width="0.4064" layer="1"/>
+<wire x1="44.35225" y1="41.148" x2="56.73725" y2="41.148" width="0.4064" layer="1"/>
 <wire x1="56.73725" y1="41.148" x2="56.769" y2="41.17975" width="0.4064" layer="1"/>
-<wire x1="52.3875" y1="48.35525" x2="52.48275" y2="48.26" width="0.4064" layer="1"/>
-<wire x1="52.48275" y1="48.26" x2="56.769" y2="48.26" width="0.4064" layer="1"/>
 <contactref element="LED2" pad="C"/>
 <wire x1="29.591" y1="7.967" x2="28.36825" y2="7.967" width="0.4064" layer="1"/>
 <wire x1="28.36825" y1="7.967" x2="27.62775" y2="7.2265" width="0.4064" layer="1"/>
@@ -2264,6 +2260,26 @@ Your Multi-CB Team
 <wire x1="33.43275" y1="12.6365" x2="33.7185" y2="12.35075" width="0.4064" layer="1"/>
 <wire x1="33.7185" y1="12.35075" x2="33.7185" y2="6.477" width="0.4064" layer="1"/>
 <wire x1="33.7185" y1="6.477" x2="34.163" y2="6.0325" width="0.4064" layer="1"/>
+<contactref element="R11" pad="1"/>
+<wire x1="16.271240625" y1="21.62175" x2="8.22325" y2="21.62175" width="0.4064" layer="1"/>
+<wire x1="7.27325" y1="22.57175" x2="7.27325" y2="23.39975" width="0.4064" layer="1"/>
+<wire x1="8.22325" y1="21.62175" x2="7.27325" y2="22.57175" width="0.4064" layer="1"/>
+<wire x1="43.660059375" y1="50.83175" x2="43.660059375" y2="54.550309375" width="0.6096" layer="1"/>
+<wire x1="43.660059375" y1="54.550309375" x2="44.704" y2="55.59425" width="0.6096" layer="1"/>
+<wire x1="44.704" y1="55.59425" x2="46.1645" y2="55.59425" width="0.6096" layer="1"/>
+<wire x1="46.1645" y1="55.59425" x2="47.625" y2="57.05475" width="0.6096" layer="1"/>
+<wire x1="47.625" y1="57.05475" x2="50.64125" y2="57.05475" width="0.6096" layer="1"/>
+<wire x1="52.578" y1="58.9915" x2="56.769" y2="58.9915" width="0.6096" layer="1"/>
+<wire x1="50.64125" y1="57.05475" x2="52.578" y2="58.9915" width="0.6096" layer="1"/>
+<wire x1="44.35225" y1="41.148" x2="42.479" y2="43.02125" width="0.4064" layer="1"/>
+<wire x1="54.3535" y1="46.863" x2="54.4805" y2="46.99" width="0.4064" layer="1"/>
+<wire x1="54.4805" y1="46.99" x2="56.769" y2="46.99" width="0.4064" layer="1"/>
+<wire x1="52.3875" y1="53.721" x2="56.769" y2="53.721" width="0.4064" layer="1"/>
+<wire x1="47.3735" y1="46.863" x2="47.3735" y2="46.2255" width="0.4064" layer="1"/>
+<wire x1="47.3735" y1="46.2255" x2="48.03775" y2="45.56125" width="0.4064" layer="1"/>
+<wire x1="48.03775" y1="45.56125" x2="53.81625" y2="45.56125" width="0.4064" layer="1"/>
+<wire x1="54.3535" y1="46.0985" x2="54.3535" y2="46.863" width="0.4064" layer="1"/>
+<wire x1="53.81625" y1="45.56125" x2="54.3535" y2="46.0985" width="0.4064" layer="1"/>
 </signal>
 <signal name="VBAT">
 <contactref element="D1" pad="A"/>
@@ -2370,7 +2386,6 @@ Your Multi-CB Team
 <signal name="D11">
 <contactref element="U5" pad="25"/>
 <contactref element="Q1" pad="1"/>
-<wire x1="16.24" y1="40.99175" x2="19.939" y2="40.99175" width="0.4064" layer="1"/>
 <wire x1="27.005" y1="33.00775" x2="26.7775" y2="33.00775" width="0.127" layer="1"/>
 <wire x1="26.7775" y1="33.00775" x2="26.4795" y2="33.30575" width="0.2032" layer="1"/>
 <wire x1="26.4795" y1="33.30575" x2="26.4795" y2="36.54425" width="0.2032" layer="1"/>
@@ -2380,10 +2395,10 @@ Your Multi-CB Team
 <wire x1="21.2725" y1="37.17925" x2="21.2725" y2="39.97325" width="0.2032" layer="16"/>
 <via x="21.2725" y="39.97325" extent="1-16" drill="0.254" diameter="0.6096"/>
 <contactref element="R1" pad="2"/>
-<wire x1="19.9415" y1="39.97325" x2="19.9415" y2="40.98925" width="0.4064" layer="1"/>
-<wire x1="19.9415" y1="40.98925" x2="19.939" y2="40.99175" width="0.4064" layer="1"/>
 <wire x1="19.9415" y1="39.97325" x2="21.2725" y2="39.97325" width="0.4064" layer="1"/>
 <wire x1="19.9415" y1="39.97325" x2="19.939" y2="39.97075" width="0.4064" layer="1"/>
+<wire x1="19.939" y1="39.97075" x2="19.807" y2="40.10275" width="0.4064" layer="1"/>
+<wire x1="19.807" y1="40.10275" x2="16.5575" y2="40.10275" width="0.4064" layer="1"/>
 </signal>
 <signal name="D12">
 <contactref element="U5" pad="28"/>
@@ -2450,8 +2465,6 @@ Your Multi-CB Team
 <via x="31.4325" y="34.76625" extent="1-16" drill="0.2032" diameter="0.4572"/>
 <wire x1="31.242" y1="32.48025" x2="32.7025" y2="32.48025" width="0.127" layer="16"/>
 <wire x1="32.7025" y1="32.48025" x2="32.7025" y2="30.00375" width="0.127" layer="16"/>
-<wire x1="16.24" y1="42.89175" x2="18.1" y2="42.89175" width="0.8128" layer="1"/>
-<wire x1="18.1" y1="42.89175" x2="18.1" y2="44.48175" width="0.8128" layer="1"/>
 <contactref element="R4" pad="2"/>
 <wire x1="42.86" y1="39.97325" x2="48.26" y2="39.97325" width="0.4064" layer="1"/>
 <wire x1="42.86" y1="39.97325" x2="42.86" y2="38.89125" width="0.4064" layer="1"/>
@@ -2473,7 +2486,6 @@ Your Multi-CB Team
 <wire x1="21.59" y1="34.76625" x2="22.733" y2="35.90925" width="0.8128" layer="1"/>
 <via x="22.733" y="35.90925" extent="1-16" drill="0.254" diameter="0.6096"/>
 <wire x1="22.733" y1="35.90925" x2="22.733" y2="41.30675" width="0.8128" layer="16"/>
-<wire x1="18.1" y1="42.89175" x2="18.034" y2="42.95775" width="0.8128" layer="1"/>
 <via x="18.034" y="42.95775" extent="1-16" drill="0.254" diameter="0.6096"/>
 <wire x1="18.034" y1="42.95775" x2="21.082" y2="42.95775" width="0.8128" layer="16"/>
 <wire x1="21.082" y1="42.95775" x2="21.1455" y2="42.89425" width="0.8128" layer="16"/>
@@ -2528,6 +2540,10 @@ Your Multi-CB Team
 <wire x1="24.35225" y1="12.92475" x2="24.09575" y2="12.66825" width="0.4064" layer="1"/>
 <wire x1="24.09575" y1="12.66825" x2="24.09575" y2="12.0485" width="0.4064" layer="1"/>
 <wire x1="24.09575" y1="12.0485" x2="22.47375" y2="10.4265" width="0.4064" layer="1"/>
+<wire x1="18.034" y1="42.95775" x2="17.079" y2="42.00275" width="0.8128" layer="1"/>
+<wire x1="17.079" y1="42.00275" x2="16.5575" y2="42.00275" width="0.8128" layer="1"/>
+<wire x1="18.1" y1="44.48175" x2="18.034" y2="44.41575" width="0.8128" layer="1"/>
+<wire x1="18.034" y1="44.41575" x2="18.034" y2="42.95775" width="0.8128" layer="1"/>
 </signal>
 <signal name="D13">
 <contactref element="U5" pad="26"/>
@@ -2810,19 +2826,22 @@ Your Multi-CB Team
 <via x="31.75" y="25.30475" extent="1-16" drill="0.2032" diameter="0.4572"/>
 <wire x1="31.75" y1="25.30475" x2="31.75" y2="26.76275" width="0.2032" layer="1"/>
 <wire x1="31.75" y1="26.76275" x2="31.73" y2="26.78275" width="0.127" layer="1"/>
-<wire x1="42.5421375" y1="19.57251875" x2="43.06465625" y2="19.05" width="0.3048" layer="16"/>
-<wire x1="42.5421375" y1="19.57251875" x2="37.57748125" y2="19.57251875" width="0.3048" layer="16"/>
-<wire x1="36.2585" y1="20.8915" x2="35.179" y2="20.8915" width="0.3048" layer="16"/>
-<wire x1="35.179" y1="20.8915" x2="33.49625" y2="22.57425" width="0.3048" layer="16"/>
-<wire x1="37.57748125" y1="19.57251875" x2="36.2585" y2="20.8915" width="0.3048" layer="16"/>
-<wire x1="33.49625" y1="22.57425" x2="33.49625" y2="23.90775" width="0.3048" layer="16"/>
+<wire x1="33.49625" y1="23.90775" x2="33.49625" y2="22.86" width="0.3048" layer="16"/>
 <wire x1="33.49625" y1="23.90775" x2="32.67075" y2="24.73325" width="0.3048" layer="16"/>
 <wire x1="32.67075" y1="24.73325" x2="32.22625" y2="24.73325" width="0.3048" layer="16"/>
 <wire x1="32.22625" y1="24.73325" x2="32.03575" y2="24.92375" width="0.3048" layer="16"/>
 <wire x1="32.03575" y1="24.92375" x2="32.03575" y2="25.019" width="0.3048" layer="16"/>
 <wire x1="32.03575" y1="25.019" x2="31.75" y2="25.30475" width="0.3048" layer="16"/>
-<wire x1="51.72075" y1="19.05" x2="52.07" y2="18.70075" width="0.3048" layer="16"/>
-<wire x1="43.06465625" y1="19.05" x2="51.72075" y2="19.05" width="0.3048" layer="16"/>
+<wire x1="36.4224875" y1="20.8915" x2="36.9169375" y2="20.409109375" width="0.3048" layer="16"/>
+<wire x1="36.9169375" y1="20.409109375" x2="37.32163125" y2="20.0142875" width="0.3048" layer="16"/>
+<wire x1="43.70046875" y1="19.1917" x2="51.57905" y2="19.1917" width="0.3048" layer="16"/>
+<wire x1="43.004134375" y1="19.888034375" x2="43.70046875" y2="19.1917" width="0.3048" layer="16"/>
+<wire x1="37.32163125" y1="20.0142875" x2="37.447884375" y2="19.888034375" width="0.3048" layer="16"/>
+<wire x1="37.447884375" y1="19.888034375" x2="43.004134375" y2="19.888034375" width="0.3048" layer="16"/>
+<wire x1="51.57905" y1="19.1917" x2="52.07" y2="18.70075" width="0.3048" layer="16"/>
+<wire x1="33.49625" y1="22.86" x2="35.19605" y2="21.1602" width="0.3048" layer="16"/>
+<wire x1="36.147071875" y1="21.1602" x2="36.4224875" y2="20.8915" width="0.3048" layer="16"/>
+<wire x1="35.19605" y1="21.1602" x2="36.147071875" y2="21.1602" width="0.3048" layer="16"/>
 </signal>
 <signal name="SWDIO">
 <contactref element="U5" pad="46"/>
@@ -2903,11 +2922,8 @@ Your Multi-CB Team
 <contactref element="U6" pad="8_VCC"/>
 <wire x1="6.35" y1="36.068" x2="8.41375" y2="38.13175" width="0.8128" layer="1"/>
 <wire x1="8.41375" y1="38.13175" x2="14.29" y2="38.13175" width="0.8128" layer="1"/>
-<wire x1="14.24" y1="41.94175" x2="14.24" y2="38.18175" width="0.8128" layer="1"/>
 <wire x1="14.24" y1="38.18175" x2="14.29" y2="38.13175" width="0.8128" layer="1"/>
 <wire x1="11.6115" y1="47.882" x2="12.7115" y2="47.882" width="0.3048" layer="1"/>
-<wire x1="14.24" y1="41.94175" x2="14.24" y2="44.56125" width="0.4064" layer="1"/>
-<wire x1="14.24" y1="44.56125" x2="14.57325" y2="44.8945" width="0.4064" layer="1"/>
 <via x="14.57325" y="44.8945" extent="1-16" drill="0.254" diameter="0.8128"/>
 <wire x1="14.57325" y1="44.8945" x2="15.14475" y2="45.466" width="0.4064" layer="16"/>
 <wire x1="15.14475" y1="45.466" x2="15.14475" y2="47.5615" width="0.4064" layer="16"/>
@@ -2917,6 +2933,10 @@ Your Multi-CB Team
 <wire x1="14.7955" y1="49.403" x2="13.30325" y2="49.403" width="0.4064" layer="1"/>
 <wire x1="12.7115" y1="48.81125" x2="12.7115" y2="47.882" width="0.4064" layer="1"/>
 <wire x1="13.30325" y1="49.403" x2="12.7115" y2="48.81125" width="0.4064" layer="1"/>
+<wire x1="14.5575" y1="41.05275" x2="14.29" y2="40.78525" width="0.8128" layer="1"/>
+<wire x1="14.29" y1="40.78525" x2="14.29" y2="38.13175" width="0.8128" layer="1"/>
+<wire x1="14.57325" y1="44.8945" x2="14.57325" y2="41.0685" width="0.4064" layer="1"/>
+<wire x1="14.57325" y1="41.0685" x2="14.5575" y2="41.05275" width="0.4064" layer="1"/>
 </signal>
 <signal name="LTC3225_VOUT">
 <contactref element="J1" pad="2"/>
@@ -2970,15 +2990,6 @@ Your Multi-CB Team
 <wire x1="38.0619" y1="42.08145" x2="38.0619" y2="41.29315" width="0.2032" layer="1"/>
 <wire x1="38.0619" y1="41.29315" x2="36.742" y2="40.10025" width="0.2032" layer="1"/>
 </signal>
-<signal name="N$11">
-<contactref element="U3" pad="7"/>
-<contactref element="R2" pad="2"/>
-<wire x1="39.5605" y1="43.96105" x2="39.5605" y2="44.54525" width="0.2032" layer="1"/>
-<wire x1="39.5605" y1="44.54525" x2="40.386" y2="45.37075" width="0.2032" layer="1"/>
-<wire x1="40.386" y1="45.37075" x2="41.91" y2="45.37075" width="0.4064" layer="1"/>
-<wire x1="41.91" y1="45.37075" x2="42.9235" y2="45.37075" width="0.4064" layer="1"/>
-<wire x1="42.9235" y1="45.37075" x2="42.76725" y2="45.36825" width="0.4064" layer="1"/>
-</signal>
 <signal name="N$6">
 <contactref element="C11" pad="-"/>
 <contactref element="C12" pad="+"/>
@@ -3004,15 +3015,17 @@ Your Multi-CB Team
 <wire x1="40.0431" y1="43.96105" x2="40.8178" y2="43.96105" width="0.3048" layer="1"/>
 <wire x1="40.8178" y1="43.96105" x2="41.37025" y2="44.5135" width="0.3048" layer="1"/>
 <via x="41.37025" y="44.5135" extent="1-16" drill="0.254" diameter="0.6096"/>
-<wire x1="50.8635" y1="47.0535" x2="50.8635" y2="48.35525" width="0.4064" layer="1"/>
-<wire x1="50.2285" y1="46.4185" x2="50.8635" y2="47.0535" width="0.4064" layer="1"/>
 <wire x1="41.37025" y1="44.5135" x2="41.37025" y2="45.30725" width="0.4064" layer="16"/>
-<wire x1="48.8315" y1="46.4185" x2="50.2285" y2="46.4185" width="0.4064" layer="1"/>
-<wire x1="47.8155" y1="47.4345" x2="48.8315" y2="46.4185" width="0.4064" layer="1"/>
 <wire x1="41.37025" y1="45.30725" x2="42.83075" y2="46.76775" width="0.4064" layer="16"/>
 <via x="42.83075" y="46.76775" extent="1-16" drill="0.254" diameter="0.6096"/>
-<wire x1="42.83075" y1="46.76775" x2="43.4975" y2="47.4345" width="0.4064" layer="1"/>
-<wire x1="43.4975" y1="47.4345" x2="47.8155" y2="47.4345" width="0.4064" layer="1"/>
+<wire x1="42.83075" y1="46.76775" x2="44.22775" y2="48.16475" width="0.4064" layer="1"/>
+<wire x1="50.8635" y1="52.67325" x2="50.8635" y2="53.721" width="0.4064" layer="1"/>
+<wire x1="50.45075" y1="52.2605" x2="50.8635" y2="52.67325" width="0.4064" layer="1"/>
+<wire x1="46.70425" y1="50.165" x2="46.70425" y2="51.40325" width="0.4064" layer="1"/>
+<wire x1="46.70425" y1="51.40325" x2="47.5615" y2="52.2605" width="0.4064" layer="1"/>
+<wire x1="44.22775" y1="48.16475" x2="44.704" y2="48.16475" width="0.4064" layer="1"/>
+<wire x1="44.704" y1="48.16475" x2="46.70425" y2="50.165" width="0.4064" layer="1"/>
+<wire x1="47.5615" y1="52.2605" x2="50.45075" y2="52.2605" width="0.4064" layer="1"/>
 </signal>
 <signal name="N$14">
 <contactref element="SOLAR2+" pad="1"/>
@@ -3096,42 +3109,70 @@ Your Multi-CB Team
 <wire x1="31.5295" y1="4.525" x2="31.5295" y2="7.324" width="0.4064" layer="1"/>
 <wire x1="31.5295" y1="7.324" x2="31.496" y2="7.3575" width="0.4064" layer="1"/>
 </signal>
+<signal name="N$11">
+<contactref element="U3" pad="7"/>
+<contactref element="JP2" pad="2"/>
+<wire x1="39.5605" y1="43.96105" x2="39.5605" y2="44.577" width="0.2032" layer="1"/>
+<wire x1="39.5605" y1="44.577" x2="40.005" y2="45.0215" width="0.2032" layer="1"/>
+<wire x1="40.005" y1="45.0215" x2="40.79875" y2="45.81525" width="0.4064" layer="1"/>
+<wire x1="48.10125" y1="51.689" x2="50.38725" y2="51.689" width="0.4064" layer="1"/>
+<wire x1="50.38725" y1="51.689" x2="50.8635" y2="51.21275" width="0.4064" layer="1"/>
+<wire x1="50.8635" y1="51.21275" x2="50.8635" y2="50.38725" width="0.4064" layer="1"/>
+<wire x1="40.79875" y1="45.81525" x2="43.59275" y2="45.81525" width="0.4064" layer="1"/>
+<wire x1="43.59275" y1="45.81525" x2="47.625" y2="49.8475" width="0.4064" layer="1"/>
+<wire x1="47.625" y1="49.8475" x2="47.625" y2="51.21275" width="0.4064" layer="1"/>
+<wire x1="47.625" y1="51.21275" x2="48.10125" y2="51.689" width="0.4064" layer="1"/>
+</signal>
+<signal name="N$17">
+<contactref element="JP2" pad="3"/>
+<contactref element="R2" pad="2"/>
+<wire x1="49.3395" y1="50.38725" x2="49.3395" y2="46.929" width="0.4064" layer="1"/>
+<wire x1="49.3395" y1="46.929" x2="49.2735" y2="46.863" width="0.4064" layer="1"/>
+</signal>
+<signal name="N$18">
+<contactref element="JP2" pad="1"/>
+<contactref element="R11" pad="2"/>
+<wire x1="52.4535" y1="46.863" x2="52.3875" y2="46.929" width="0.4064" layer="1"/>
+<wire x1="52.3875" y1="46.929" x2="52.3875" y2="50.38725" width="0.4064" layer="1"/>
+</signal>
 </signals>
 <errors>
-<approved hash="19,1,5c1bb1bd14cde33f"/>
-<approved hash="19,1,b9e00b7d48f3fb06"/>
-<approved hash="4,1,be3b71c692ded120"/>
-<approved hash="4,1,9fdd5023333370ce"/>
 <approved hash="4,1,98cf6af1d78c2db2"/>
+<approved hash="4,1,be3b71c692ded120"/>
+<approved hash="4,1,831e84e187f1c40f"/>
+<approved hash="4,1,63bc5842255666a8"/>
+<approved hash="4,1,9fdd5023333370ce"/>
+<approved hash="4,1,8ed27fecc8e323dd"/>
+<approved hash="19,1,3dfd3aac89bdf237"/>
+<approved hash="19,1,1d86675fb41cce12"/>
+<approved hash="4,1,98cf6af1d78c2db2"/>
+<approved hash="4,1,be3b71c692ded120"/>
+<approved hash="19,1,127387cd4b30413e"/>
+<approved hash="19,1,5c63ab890ab1e337"/>
+<approved hash="4,1,831e84e187f1c40f"/>
 <approved hash="4,1,63bc5842255666a8"/>
 <approved hash="4,1,8ed27fecc8e323dd"/>
-<approved hash="4,1,831e84e187f1c40f"/>
-<approved hash="4,1,be3b71c692ded120"/>
 <approved hash="4,1,9fdd5023333370ce"/>
-<approved hash="4,1,98cf6af1d78c2db2"/>
-<approved hash="4,1,63bc5842255666a8"/>
-<approved hash="4,1,8ed27fecc8e323dd"/>
-<approved hash="4,1,831e84e187f1c40f"/>
+<approved hash="6,16,e4c9f9dbfd8be4b5"/>
+<approved hash="4,16,831e84e187f1c40f"/>
+<approved hash="4,16,63bc5842255666a8"/>
 <approved hash="4,16,9fdd5023333370ce"/>
 <approved hash="4,16,be3b71c692ded120"/>
-<approved hash="4,16,63bc5842255666a8"/>
-<approved hash="4,16,831e84e187f1c40f"/>
-<approved hash="6,16,e13bf9a7fd0fe0f3"/>
+<approved hash="6,16,e2c907d503e1e29d"/>
+<approved hash="6,16,86769f301f0c064a"/>
 <approved hash="6,16,93d39910191413d7"/>
+<approved hash="4,16,831e84e187f1c40f"/>
+<approved hash="6,16,df493a553e01df7d"/>
+<approved hash="6,16,1fd758252b7188b3"/>
+<approved hash="6,16,a329b5eb35d72315"/>
+<approved hash="6,16,b8a6bfeb3fef38a2"/>
+<approved hash="4,16,63bc5842255666a8"/>
+<approved hash="6,16,f51b34933492f51a"/>
 <approved hash="6,16,090f2ed1d9279831"/>
 <approved hash="6,16,21473c5538292117"/>
-<approved hash="6,16,b8a6bfeb3fef38a2"/>
-<approved hash="6,16,f51b34933492f51a"/>
-<approved hash="6,16,e4c9f9dbfd8be4b5"/>
+<approved hash="6,16,e13bf9a7fd0fe0f3"/>
 <approved hash="4,16,9fdd5023333370ce"/>
 <approved hash="4,16,be3b71c692ded120"/>
-<approved hash="6,16,86769f301f0c064a"/>
-<approved hash="6,16,a329b5eb35d72315"/>
-<approved hash="6,16,1fd758252b7188b3"/>
-<approved hash="6,16,df493a553e01df7d"/>
-<approved hash="6,16,e2c907d503e1e29d"/>
-<approved hash="4,16,63bc5842255666a8"/>
-<approved hash="4,16,831e84e187f1c40f"/>
 </errors>
 </board>
 </drawing>

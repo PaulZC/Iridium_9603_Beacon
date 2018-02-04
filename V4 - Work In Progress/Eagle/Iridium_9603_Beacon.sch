@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="8.5.0">
+<eagle version="8.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -10077,7 +10077,7 @@ DIN A4, landscape with location and doc. field</description>
 <part name="SD_CS" library="adafruit" deviceset="PINHD-1X1" device=""/>
 <part name="U3" library="LTC_By_element14_Batch_1" deviceset="LTC3225EDDB-TRMPBF" device="DFN300X200-10L" value="LTC3225EDDB#TRMPBF"/>
 <part name="C15" library="microbuilder" deviceset="CAP_CERAMIC" device="0603_NO" value="1uF"/>
-<part name="R2" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="30K"/>
+<part name="R2" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="12K"/>
 <part name="U$20" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$22" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$23" library="microbuilder" deviceset="GND" device=""/>
@@ -10153,6 +10153,9 @@ DIN A4, landscape with location and doc. field</description>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
 <part name="U$45" library="microbuilder" deviceset="VBUS" device=""/>
 <part name="D4" library="microbuilder" deviceset="DIODE-SCHOTTKY" device="SOD-123" value="MBR120"/>
+<part name="JP2" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_TRACE" device="_LARGE" value=""/>
+<part name="R11" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="30K"/>
+<part name="U$1" library="microbuilder" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11398,6 +11401,8 @@ and Element14's LTC Library</text>
 <text x="141.732" y="143.002" size="1.778" layer="91">+5.3V / +4.8V</text>
 <text x="70.612" y="84.582" size="1.778" layer="91">+5.3V</text>
 <text x="70.612" y="76.962" size="1.778" layer="91">+4.8V</text>
+<text x="85.852" y="84.582" size="1.778" layer="91">150mA</text>
+<text x="98.552" y="84.582" size="1.778" layer="91">60mA</text>
 </plain>
 <instances>
 <instance part="FRAME4" gate="G$1" x="0" y="0"/>
@@ -11405,8 +11410,8 @@ and Element14's LTC Library</text>
 <instance part="C12" gate="G$1" x="68.58" y="109.22"/>
 <instance part="U3" gate="G$1" x="124.46" y="116.84"/>
 <instance part="C15" gate="G$1" x="91.44" y="121.92"/>
-<instance part="R2" gate="G$1" x="88.9" y="101.6" rot="R90"/>
-<instance part="U$20" gate="G$1" x="88.9" y="93.98"/>
+<instance part="R2" gate="G$1" x="88.9" y="73.66" rot="R90"/>
+<instance part="U$20" gate="G$1" x="88.9" y="63.5"/>
 <instance part="U$22" gate="G$1" x="99.06" y="93.98"/>
 <instance part="U$23" gate="G$1" x="68.58" y="99.06"/>
 <instance part="C16" gate="G$1" x="162.56" y="132.08"/>
@@ -11419,6 +11424,9 @@ and Element14's LTC Library</text>
 <instance part="U$4" gate="G$1" x="93.98" y="137.16"/>
 <instance part="U$26" gate="G$1" x="68.58" y="91.44"/>
 <instance part="U$32" gate="G$1" x="68.58" y="71.12"/>
+<instance part="JP2" gate="G$1" x="96.52" y="81.28" rot="R270"/>
+<instance part="R11" gate="G$1" x="104.14" y="73.66" rot="R90"/>
+<instance part="U$1" gate="G$1" x="104.14" y="63.5"/>
 </instances>
 <busses>
 </busses>
@@ -11450,6 +11458,7 @@ and Element14's LTC Library</text>
 <segment>
 <pinref part="R2" gate="G$1" pin="1"/>
 <pinref part="U$20" gate="G$1" pin="GND"/>
+<wire x1="88.9" y1="66.04" x2="88.9" y2="68.58" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U3" gate="G$1" pin="GND"/>
@@ -11481,12 +11490,10 @@ and Element14's LTC Library</text>
 <pinref part="JP1" gate="G$1" pin="1"/>
 <wire x1="68.58" y1="73.66" x2="68.58" y2="76.2" width="0.1524" layer="91"/>
 </segment>
-</net>
-<net name="N$11" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="PROG"/>
-<pinref part="R2" gate="G$1" pin="2"/>
-<wire x1="104.14" y1="106.68" x2="88.9" y2="106.68" width="0.1524" layer="91"/>
+<pinref part="R11" gate="G$1" pin="1"/>
+<pinref part="U$1" gate="G$1" pin="GND"/>
+<wire x1="104.14" y1="68.58" x2="104.14" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="LTC3225_VOUT" class="0">
@@ -11562,6 +11569,32 @@ and Element14's LTC Library</text>
 <wire x1="81.28" y1="81.28" x2="73.66" y2="81.28" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="N$11" class="0">
+<segment>
+<pinref part="U3" gate="G$1" pin="PROG"/>
+<wire x1="104.14" y1="106.68" x2="91.44" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="106.68" x2="91.44" y2="88.9" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="88.9" x2="96.52" y2="88.9" width="0.1524" layer="91"/>
+<pinref part="JP2" gate="G$1" pin="2"/>
+<wire x1="96.52" y1="88.9" x2="96.52" y2="86.36" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$17" class="0">
+<segment>
+<pinref part="JP2" gate="G$1" pin="3"/>
+<wire x1="91.44" y1="81.28" x2="88.9" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="R2" gate="G$1" pin="2"/>
+<wire x1="88.9" y1="81.28" x2="88.9" y2="78.74" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$18" class="0">
+<segment>
+<pinref part="JP2" gate="G$1" pin="1"/>
+<wire x1="101.6" y1="81.28" x2="104.14" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="R11" gate="G$1" pin="2"/>
+<wire x1="104.14" y1="81.28" x2="104.14" y2="78.74" width="0.1524" layer="91"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
@@ -11586,9 +11619,11 @@ Added reset supervisor U1</text>
 
 Power: 3 x AA batteries in Keystone 92 clips
 GNSS: u-blox MAX-M8Q with SMA antenna
-WS2812B LED
-LT1634-1,25BMCMS8 voltage reference to allow low battery voltages to be measured
+Added WS2812B LED
+Added LT1634-1,25BMCMS8 voltage reference to allow low battery voltages to be measured
 SMA antenna for 9603N
+Added protection diode for USB power
+Added split pad to select supercapacitor charge current
 
 </text>
 </plain>
@@ -11628,9 +11663,6 @@ LTC3225 requires 3V to 5.5V (absolute max 6V).
 Solar panel must not produce more than 6V (open circuit) under full sun.
 (Quoted open circuit voltage for PowerFilm Solar MPT3.6-150 is 4.8V)
 
-BUT! Don't forget that VBUS is connected directly to the USB port. If VBUS is higher than 5V, it will attempt to
-deliver power to anything connected to the USB port. For safety, always use a USB Power Break cable if
-there is any chance of VBUS going higher than 5V. (Three new Energiser cells will deliver approx. 5.4V)
 
 </text>
 </plain>
@@ -11655,6 +11687,7 @@ there is any chance of VBUS going higher than 5V. (Three new Energiser cells wil
 <approved hash="104,4,121.92,109.22,U4,CAP,N$12,,,"/>
 <approved hash="104,4,121.92,104.14,U4,VDDIO,3V3SW,,,"/>
 <approved hash="104,5,104.14,127,U3,VIN,VBUS,,,"/>
+<approved hash="104,2,241.3,144.78,CON1,VBUS,N$16,,,"/>
 <approved hash="104,2,119.38,129.54,U1,VSS,GND,,,"/>
 <approved hash="104,2,119.38,134.62,U1,VDD,+3V3,,,"/>
 <approved hash="104,1,215.9,73.66,BAT1,-,N$8,,,"/>
