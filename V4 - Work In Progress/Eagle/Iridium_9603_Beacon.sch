@@ -11619,9 +11619,9 @@ Added reset supervisor U1</text>
 
 Power: 3 x AA batteries in Keystone 92 clips
 GNSS: u-blox MAX-M8Q with SMA antenna
+SMA antenna for 9603N
 Added WS2812B LED
 Added LT1634-1,25BMCMS8 voltage reference to allow low battery voltages to be measured
-SMA antenna for 9603N
 Added protection diode for USB power
 Added split pad to select supercapacitor charge current
 
