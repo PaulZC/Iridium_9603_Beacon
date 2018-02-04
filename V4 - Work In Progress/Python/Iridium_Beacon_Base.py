@@ -84,9 +84,9 @@ class BeaconBase(object):
       self.frame_width = 640 # Google Static Map window height
       self.delta_limit_pixels = 200 # If base to beacon angle (delta) exceeds this many pixels, decrease the zoom level accordingly
       self.map_type = 'hybrid' # Maps can be: roadmap , satellite , terrain or hybrid
-      self.base_choice = '1\r' # Send this choice to the beacon base to request the base GNSS position etc.
-      self.beacon_choice = '3\r' # Send this choice to the beacon base to request the beacon data via Iridium
-      self.flush_mt_choice = '4\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
+      self.base_choice = '2\r' # Send this choice to the beacon base to request the base GNSS position etc.
+      self.beacon_choice = '4\r' # Send this choice to the beacon base to request the beacon data via Iridium
+      self.flush_mt_choice = '5\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
       self.enable_clicks = False # Are mouse clicks enabled? False until first map has been loaded
       self.beacons = 0 # How many beacons are currently being tracked
       self.max_beacons = 8 # Track up to this many beacons
@@ -206,6 +206,16 @@ class BeaconBase(object):
                      self.tile_lons.append(float(fields[6]))
                      self.tile_num += 1 # increment the tile number
       print 'Found',self.tile_num,'offline map tiles'
+      print
+
+      # Create and clear the console log file
+      tn = time.localtime() # Extract the time and date as strings
+      date_str = str(tn[0])+str(tn[1]).zfill(2)+str(tn[2]).zfill(2)
+      time_str = str(tn[3]).zfill(2)+str(tn[4]).zfill(2)+str(tn[5]).zfill(2)
+      self.console_log_file = 'Base_Console_Log_' + date_str + '_' + time_str + '.txt'
+      self.fp = open(self.console_log_file, 'wb') # Create / clear the file
+      self.fp.close()
+      print 'Logging console messages to:',self.console_log_file
       print
 
       # Set up Tkinter GUI
@@ -572,11 +582,19 @@ class BeaconBase(object):
          except:
             pass
          if len(resp) >= 8: # Check length is non-trivial
-            if (resp[0:5] != 'ERROR'): # Check if an error message was received
-               # If the response wasn't an error:
+            if (resp[0:5] != 'ERROR') and (resp[0:5] != 'FLUSH'): # Check if an error message or an echo of FLUSH_MT was received
+               # If the response wasn't an error or an echo of FLUSH_MT:
                try:
                   parse = resp[:-2].split(',') # Try parsing the response
-                  # If the parse was successful, check that the length of the first field (DateTime) is correct
+                  # If the parse was successful:
+                  # Check if the first field is prefixed with "RBnnnnnnn"
+                  if (len(parse[0]) == 23):
+                     if (parse[0][0:2] == "RB"):
+                        # If it is, remove it
+                        parse[0] = parse[0][9:]
+                        # and remove it from resp too
+                        resp = resp[9:]
+                  # Now check that the length of the first field (DateTime) is correct
                   if (len(parse) >= 14) and (len(parse[0]) == 14): # DateTime should always be 14 characters
                      # If DateTime is the correct length, assume the rest of the response contains valid data
                      # Update beacon Mobile Terminated Queue length
@@ -688,7 +706,20 @@ class BeaconBase(object):
                except:
                   self.writeToConsole(self.console_1, 'Serial parse failed!') # Update message console
             else:
-               self.writeToConsole(self.console_1, 'ERROR received!') # Update message console
+               if (resp[0:5] == 'ERROR'):
+                  self.writeToConsole(self.console_1, 'ERROR received!') # Update message console
+               if (resp[0:5] == 'FLUSH'):
+                  self.writeToConsole(self.console_1, 'FLUSH_MT and MTQ received') # Update message console
+                  try:
+                     parse = resp[:-2].split(',') # Try parsing the response
+                     if (len(parse) >= 2):
+                        # Update beacon Mobile Terminated Queue length
+                        self.beacon_MTQ.config(state='normal')
+                        self.beacon_MTQ.delete(0, tk.END)
+                        self.beacon_MTQ.insert(0, parse[1])
+                        self.beacon_MTQ.config(state='readonly')
+                  except:
+                     self.writeToConsole(self.console_1, 'Serial parse failed!') # Update message console
          else:
             # len(resp) is non-zero and less than 8 so it could contain (only) an mtq
             mtq = -1
@@ -1037,6 +1068,9 @@ class BeaconBase(object):
       console.insert('end', msg) # Append the message
       console.configure(state = 'disabled') # Lock the console
       self.window.update() # Update the window
+      self.fp = open(self.console_log_file, 'ab') # Open log file for append in binary mode
+      self.fp.write(msg+'\n') # Write the console message to the log file
+      self.fp.close() # Close the log file
     
    def writeWait(self, data, delay):
       ''' Write data to serial; wait for up to delay seconds for a reply '''
@@ -1073,6 +1107,7 @@ class BeaconBase(object):
          print 'Beacon data was logged to:'
          for beacon in range(self.beacons):
             print self.beacon_log_files[beacon]
+      print 'Console messages were logged to:',self.console_log_file
 
 if __name__ == "__main__":
    try:

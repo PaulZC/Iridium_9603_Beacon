@@ -5,6 +5,10 @@
 // Written for the Iridium Beacon V4
 // This code acts as a 'base station'. When connected to a laptop, allows messages from other Iridium Beacon V4s to be received via RockBLOCK
 
+// Message delivery is via Rock7's RockBLOCK:
+// http://www.rock7mobile.com/products-rockblock-9603
+// http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf (see last page)
+
 // Assumptions:
 // Power will be provided by USB. No battery voltage monitoring is necessary.
 // No sleep functionality is required. Base beacon is always on.
@@ -70,10 +74,6 @@
 // Green: iridium session successful
 // Red: iridium session failed
 // WB2812B blue LED has the highest forward voltage and is slightly dim at 3.3V. The red and green values are adapted accordingly (222 instead of 255).
-
-// Message delivery is via Rock7's RockBLOCK:
-// http://www.rock7mobile.com/products-rockblock-9603
-// http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf (see last page)
 
 #include <IridiumSBD.h> // Requires V2: https://github.com/mikalhart/IridiumSBD
 #include <TinyGPS.h> // NMEA parsing: http://arduiniana.org
@@ -178,7 +178,7 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 // Loop Steps
 #define init          0
 #define start_LTC3225 1
-#define menu_choice     2
+#define menu_choice   2
 #define read_GPS      3
 #define read_pressure 4
 #define start_9603    5
@@ -191,6 +191,10 @@ byte month, day, hour, minute, second, hundredths;
 unsigned long dateFix, locationFix;
 float latitude, longitude;
 long altitude;
+float speed;
+short satellites;
+long course;
+long hdop;
 bool fixFound = false;
 bool charsSeen = false;
 int loop_step = init;
@@ -351,7 +355,7 @@ void loop()
 
       // Start the serial console
       Serial.begin(115200);
-      delay(10000); // Wait 10 secs - allow time for user to open serial monitor
+      delay(5000); // Wait 5 secs - allow time for user to open serial monitor
     
       // Send welcome message
       Serial.println("Iridium 9603N Beacon V4 Base:");
@@ -360,7 +364,7 @@ void loop()
       // (attachConsole and attachDiags methods have been replaced with ISBDConsoleCallback and ISBDDiagsCallback)
       isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Change power profile to "low current"
       isbd.useMSSTMWorkaround(false); // Redundant?
-      isbd.adjustSendReceiveTimeout(60); // Default is 300 seconds!
+      isbd.adjustSendReceiveTimeout(60); // Default is 300 seconds
 
       // Start the GPS serial port
       ssGPS.begin(9600);
@@ -477,11 +481,11 @@ void loop()
       Serial.println("Menu:");
       Serial.println("=====");
       Serial.println();
-      Serial.println("0: Read Battery");
-      Serial.println("1: Read GNSS");
-      Serial.println("2: Read Pressure and Temperature");
-      Serial.println("3: Check for an Iridium Message");
-      Serial.println("4: Flush MT queue (RockBLOCK only)");
+      Serial.println("1: Read Battery");
+      Serial.println("2: Read GNSS");
+      Serial.println("3: Read Pressure and Temperature");
+      Serial.println("4: Check for an Iridium Message");
+      Serial.println("5: Flush MT queue (RockBLOCK only)");
       Serial.println();
       
       loop_step = menu_choice;
@@ -498,12 +502,12 @@ void loop()
       
       choice = Serial.parseInt();
 
-      if (choice == 0) loop_step = read_battery;
-      else if (choice == 1) loop_step = read_GPS;
-      else if (choice == 2) loop_step = read_pressure;
-      else if (choice == 3) loop_step = start_9603;
-      else if (choice == 4) loop_step = flush_queue;
-      else Serial.println("ERROR: invalid menu choice");
+      if (choice == 1) loop_step = read_battery;
+      else if (choice == 2) loop_step = read_GPS;
+      else if (choice == 3) loop_step = read_pressure;
+      else if (choice == 4) loop_step = start_9603;
+      else if (choice == 5) loop_step = flush_queue;
+      else Serial.println("ERROR: invalid menu choice"); // Comment this line out to ignore invalid choices or extra CR LF
       }
       break;
 
@@ -511,6 +515,7 @@ void loop()
       {
       while(ssGPS.available()){ssGPS.read();} // Flush RX buffer so we get a fresh fix
       fixFound = false; // Clear fixFound so we get a fresh fix
+      charsSeen = false; // Clear charsSeen
 
       // Look for GPS signal for up to 30 seconds
       for (tnow = millis(); !fixFound && millis() - tnow < 1UL * 30UL * 1000UL;)
@@ -531,9 +536,17 @@ void loop()
             tinygps.f_get_position(&latitude, &longitude, &locationFix);
             tinygps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &dateFix);
             altitude = tinygps.altitude(); // Altitude in cm (long)
+            speed = tinygps.f_speed_mps(); // Get speed - checks that we have received an RMC message
+            satellites = tinygps.satellites(); // Get number of satellites
+            course = tinygps.course(); // Get course over ground
+            hdop = tinygps.hdop(); // Get horizontal dilution of precision
             fixFound = locationFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        dateFix != TinyGPS::GPS_INVALID_FIX_TIME && 
                        altitude != TinyGPS::GPS_INVALID_ALTITUDE &&
+                       speed != TinyGPS::GPS_INVALID_F_SPEED &&
+                       satellites != TinyGPS::GPS_INVALID_SATELLITES &&
+                       course != TinyGPS::GPS_INVALID_ANGLE &&
+                       hdop != TinyGPS::GPS_INVALID_HDOP &&
                        year != 2000;
           }
         }
@@ -557,13 +570,13 @@ void loop()
         str.print(",");
         str.print(altitude / 100); // Convert altitude from cm to m
         str.print(",");
-        str.print(tinygps.f_speed_mps(), 1); // Speed in metres per second
+        str.print(speed, 1); // Speed in metres per second
         str.print(",");
-        str.print(tinygps.course() / 100); // Convert from 1/100 degree to degrees
+        str.print(course / 100); // Convert from 1/100 degree to degrees
         str.print(",");
-        str.print((((float)tinygps.hdop()) / 100),1); // Convert from 1/100 m to m
+        str.print((((float)hdop) / 100),1); // Convert from 1/100 m to m
         str.print(",");
-        str.print(tinygps.satellites());
+        str.print(satellites);
         Serial.println(outBuffer);
       }
       else {
@@ -637,14 +650,22 @@ void loop()
       err = isbd.sendSBDText(txBuffer);
       if (err == ISBD_SUCCESS) {
         LED_green(); // Set LED to Green for 2 seconds
-        delay(2000);
+        //delay(2000);
         Serial.println(isbd.getWaitingMessageCount());
       }
       else {
         LED_red(); // Set LED to Red for 2 seconds
-        delay(2000);          
+        //delay(2000);          
         Serial.print("ERROR: sendSBDText failed with error ");
         Serial.println(err);
+      }
+
+      // Very messy work-around to clear MO buffer so start_9603 doesn't send FLUSH_MT again!
+      ssIridium.println("AT+SBDD0");
+      delay(5000);
+      while(ssIridium.available()) { // Flush RX buffer
+        ssIridium.read(); // Discard anything in the buffer
+        //Serial.write(ssIridium.read()); // Or use this for debugging
       }
 
       loop_step = menu_choice;
