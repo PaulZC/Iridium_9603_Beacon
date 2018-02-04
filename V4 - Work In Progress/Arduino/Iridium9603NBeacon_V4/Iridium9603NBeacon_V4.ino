@@ -88,6 +88,9 @@
 // https://www.rock7.com/shop-product-detail?productId=50
 // http://www.rock7mobile.com/products-rockblock-9603
 // http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf (see last page)
+// Note: the RockBLOCK gateway does not remove the destination RockBLOCK address from the SBD message
+// so, in this code, it is included as a full CSV field
+
 //#define RockBLOCK // Uncomment this line to enable delivery to another RockBLOCK
 #ifdef RockBLOCK
 #define destination "RB0001234" // Serial number of the destination RockBLOCK with 'RB' prefix
@@ -769,7 +772,7 @@ void loop()
         if (fixFound)
         {
 #ifdef RockBLOCK
-          sprintf(outBuffer, "%s%d%02d%02d%02d%02d%02d,", destination, year, month, day, hour, minute, second);
+          sprintf(outBuffer, "%s,%d%02d%02d%02d%02d%02d,", destination, year, month, day, hour, minute, second);
 #else
           sprintf(outBuffer, "%d%02d%02d%02d%02d%02d,", year, month, day, hour, minute, second);
 #endif
@@ -806,7 +809,7 @@ void loop()
         {
           // No GPS fix found!
 #ifdef RockBLOCK
-          sprintf(outBuffer, "%s19700101000000,0.0,0.0,0,0.0,0,0.0,0,", destination);
+          sprintf(outBuffer, "%s,19700101000000,0.0,0.0,0,0.0,0,0.0,0,", destination);
 #else
           sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,0.0,0,");
 #endif

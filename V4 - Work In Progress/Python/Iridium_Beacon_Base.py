@@ -587,13 +587,13 @@ class BeaconBase(object):
                try:
                   parse = resp[:-2].split(',') # Try parsing the response
                   # If the parse was successful:
-                  # Check if the first field is prefixed with "RBnnnnnnn"
-                  if (len(parse[0]) == 23):
+                  # Check if the first field is "RBnnnnnnn"
+                  if (len(parse[0]) == 9):
                      if (parse[0][0:2] == "RB"):
                         # If it is, remove it
-                        parse[0] = parse[0][9:]
+                        parse = parse[1:]
                         # and remove it from resp too
-                        resp = resp[9:]
+                        resp = resp[10:]
                   # Now check that the length of the first field (DateTime) is correct
                   if (len(parse) >= 14) and (len(parse[0]) == 14): # DateTime should always be 14 characters
                      # If DateTime is the correct length, assume the rest of the response contains valid data
