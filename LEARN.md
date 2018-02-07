@@ -44,7 +44,7 @@ And here's how it looks from underneath when configured for battery power:
 The key components of V4 of the Iridium 9603N Beacon are:
 
 ### Iridium 9603N Module
-![V4_Beacon_Assembly.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Assembly.JPG)
+![V4_Beacon_Assembly.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Assembly.JPG)
 
 Available (in the UK) from:
 - https://www.rock7.com/shop-product-detail?productId=50
@@ -324,6 +324,7 @@ This project wouldn’t have been possible without the open source designs and cod
    Creative Commons Attribution, Share-Alike license
 
    The MPL3115A2 library
+   The NeoPixel library
 
    Sercom examples:
    - https://learn.adafruit.com/using-atsamd21-sercom-to-add-more-spi-i2c-serial-ports/creating-a-new-serial

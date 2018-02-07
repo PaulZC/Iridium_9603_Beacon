@@ -29,10 +29,10 @@ I’ve tried to keep the beacon ‘general purpose’ and so you could use it for many
 
 ## The Design
 
-See [Iridium_9603_Beacon_V3.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon_V3.pdf) for the schematic,
+See [Iridium_9603_Beacon_V3.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/Iridium_9603_Beacon_V3.pdf) for the schematic,
 layout and Bill Of Materials.
 
-The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Eagle) directory contains the schematic and pcb design files.
+The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V3/Eagle) directory contains the schematic and pcb design files.
 
 Here's how the completed PCB looks when configured for solar power (using 10F super capacitors):
 
@@ -64,7 +64,7 @@ Make sure you purchase the 9603N and not the older 9603. The 9603N will run from
 Available from e.g. Mouser (Part# 960-IP1621254A02)
 
 This is mounted on a small PCB above the 9603N:
-- https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Eagle/Iridium_9603_Antenna.brd
+- https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/Eagle/Iridium_9603_Antenna.brd
 
 and is connected to the 9603N with a short Molex uFL cable (part number 73412-0508, available from Farnell / Element14 (1340201))
 
@@ -183,7 +183,7 @@ Please see the [V2 documentation](https://github.com/PaulZC/Iridium_9603_Beacon/
 ## IO Pins
 ![V3_Beacon_IO.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_IO.JPG)
 
-**SWCLK** and **SWDIO** are used during [programming of the SAMD bootloader](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md#how-do-i-install-the-atsamd21g18-bootloader)
+**SWCLK** and **SWDIO** are used during [programming of the SAMD bootloader](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/LEARN.md#how-do-i-install-the-atsamd21g18-bootloader)
 
 **3V3SW** is the 3.3V power rail switched by Q1 and which provides power for the SAM-M8Q GNSS and MPL3115A2 altitude sensor.
 You can use this pin to provide power for a peripheral which you want to be able to disable to save power.
@@ -202,7 +202,7 @@ As a minimum, I’d recommend applying a coat of acrylic protective lacquer to the
 If you’re using an aerosol, be careful to mask off the connectors, switch and the pressure sensor first.
 
 ## Arduino Code
-The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory contains the Arduino code.
+The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V3/Arduino) directory contains the Arduino code.
 
 The code is based extensively on Mikal Hart’s IridiumSBD Beacon example:
 - https://github.com/mikalhart/IridiumSBD/tree/master/examples/Beacon
