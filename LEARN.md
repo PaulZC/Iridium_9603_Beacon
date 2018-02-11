@@ -88,6 +88,8 @@ Available as a bare chip from e.g. Farnell / Element14 (1715231)
 
 - https://www.u-blox.com/en/product/max-m8-series
 
+Connect an antenna (e.g. the Maxtena M1516HCT-P-SMA, available from Farnell / Element 14 (2484960)) using the SMA connector. 3V power for an active antenna is provided.
+
 ### MCP111T-240 Reset Supervisor
 ![V4_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_ResetSupervisor.JPG)
 
@@ -179,6 +181,20 @@ Available (in the UK) from e.g.:
 
 You will want to angle the solar panels at +/- 45 degrees with respect to the circuit board so that at least one panel will collect sunlight while the sun is low in the sky.
 When the sun is overhead, both panels will collect sunlight.
+
+### Do the batteries really work at altitude?
+
+Yes. Version 1 of the beacon was powered by three Energiser® Ultimate Lithium AAA batteries and sent updates
+[from the UK all the way to China](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V2/Iridium_9603_Beacon.pdf).
+
+Here are the results of a 24 hour cold test on version 4 using dry ice. Messages were sent every 15 minutes. You can see that the AA battery voltage does vary with temperature
+but at close to -40C the batteries are still providing ample voltage. There was still plenty of battery capacity remaining when I terminated the test after 24 hours (to save on message costs!).
+
+![V4_Cold_Test.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Cold_Test.JPG)
+
+### Do I need to be careful around the battery clips?
+
+Yes! The clips are of course conductive. If you place the beacon battery-side down on a conductive surface **BAD THINGS WILL HAPPEN!**
 
 ### Why do you need the Super Capacitors?
 The Iridium 9603 module draws an average current of 145mA and a peak current of 1.3A when transmitting its short data bursts. That’s too much for the solar panels to provide.
