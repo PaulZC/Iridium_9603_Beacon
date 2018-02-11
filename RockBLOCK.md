@@ -104,8 +104,8 @@ Every 'update' seconds the GUI talks to the base beacon and:
 - starts an IridiumSBD session and downloads a packet from the mobile terminated queue (if any are present).
 
 You are charged each time you check for new messages, so make sure you set 'update' to a sensible value. If your beacon is transmitting messages every 10 minutes,
-then set the update period to 10 minutes too. If there is a backlog of messages you want to download, then reduce update. But remember to set it back to 10 minutes
-afterwards to avoid being charged unnecessarily. If you are tracking two beacons each sending messages every 10 minutes, then set update to 5 minutes.
+then set the update period to 10 minutes (600 seconds) too. If there is a backlog of messages you want to download, then reduce update. But remember to set it back to 10 minutes
+afterwards to avoid being charged unnecessarily. If you are tracking two beacons each sending messages every 10 minutes, then set update to 5 minutes (300 seconds).
 
 The GUI and base provide access to the RockBLOCK FLUSH_MT function, so an excess of unread Mobile Terminated messages can be discarded if required
 (note that you are still charged from these messages!).
