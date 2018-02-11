@@ -163,7 +163,10 @@ Running from solar power, the total weight would be approximately 74g:
 V4 of the Iridium 9603N Beacon can draw power from: the solar panels; three AA batteries; or USB.
 It is possible to connect all three or any two simultaneously, the beacon will simply draw power from whichever is providing the higher voltage.
 
-If you are going to use solar power, use 10F super capacitors and a charge current of 60mA.
+If you are going to use solar power, use 10F super capacitors and a charge current of 60mA. Install the capacitors on the underside of the PCB, carefully
+bending the legs to fit. Here is how they look on version 3 of the PCB:
+
+![V3_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V3_Beacon_Bottom.JPG)
 
 If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice with the default charge current of 150mA.
 
