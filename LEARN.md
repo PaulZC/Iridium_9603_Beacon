@@ -55,6 +55,8 @@ Other UK and International distributors can be found at:
 Make sure you purchase the 9603N and not the older 9603. The 9603N will run from 5V ± 0.5V which is important as the super capacitor charger is set to produce 5.3V; the older 9603 is only rated to 5V ± 0.2V.
 If you do have the older 9603, you can change the super capacitor voltage to 4.8V by reconfiguring the split pads next to the super capacitors.
 
+![V4_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Split_Pads.JPG)
+
 ### SMA Iridium Antenna
 ![V4_Beacon_Iridium.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Iridium.JPG)
 
@@ -163,9 +165,11 @@ It is possible to connect all three or any two simultaneously, the beacon will s
 
 If you are going to use solar power, use 10F super capacitors and a charge current of 60mA.
 
-If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice with a charge current of 150mA.
+If you are going to run exclusively from batteries or USB, then 1F super capacitors will suffice with the default charge current of 150mA.
 
 The charge current can be changed by reconfiguring the split pads next to the super capacitors.
+
+![V4_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Split_Pads.JPG)
 
 (The LTC3225 draws approximately _twice_ the chosen charge current. 300mA would be way too much for the PowerFilm solar panels.)
 
