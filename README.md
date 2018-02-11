@@ -15,7 +15,7 @@ Version 4 now includes:
 
 **See [LEARN.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md) for more details.**
 
-**See [RockBLOCK.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md) for details on how to track your beacon from _anywhere_ using Rock7 RockBLOCK messaging.**
+**See [RockBLOCK.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md) for details on how to track your beacon from _anywhere_ using Rock7 RockBLOCK Gateway messaging.**
 
 See [Iridium_9603_Beacon_V4.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon_V4.pdf) for the schematic, layout and Bill Of Materials.
 

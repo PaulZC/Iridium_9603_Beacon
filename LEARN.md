@@ -46,7 +46,7 @@ The key components of V4 of the Iridium 9603N Beacon are:
 ### Iridium 9603N Module
 ![V4_Beacon_Assembly.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Assembly.JPG)
 
-Available (in the UK) from:
+Available from:
 - https://www.rock7.com/shop-product-detail?productId=50
 
 Other UK and International distributors can be found at:
@@ -133,6 +133,27 @@ of two 100K resistors configured as a voltage divider. The voltage measured by t
 
 By adding a 1.25V voltage reference and connecting it to a second analog pin, its constant voltage will appear to increase as the regulator voltage starts to collapse.
 This voltage increase can be used to correct the power voltage measurement.
+
+## How much does the V4 beacon weigh?
+
+Configured for battery operation, including three Energiser® Ultimate Lithium AA batteries and the Maxtena SMA antennas listed in the BOM, it weighs 110.4g.
+
+![V4_Beacon_Weight.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Weight.JPG)
+
+The weight breaks down as follows:
+- Batteries: 45.3g
+- Populated PCB with 1F supercapacitors and battery clips: 27.3g
+- Iridium module with mounting hardware and uFL cable: 13.0g
+- Iridium antenna: 12.5g
+- GNSS antenna: 12.3g
+
+Running from solar power, the total weight would be approximately 74g:
+- Populated PCB with 10F supercapacitors: 25.0g
+- Iridium module with mounting hardware and uFL cable: 13.0g
+- Iridium antenna: 12.5g
+- GNSS antenna: 12.3g
+- Solar panels (2): 6.3g
+- Support hardware for the solar panels: 5g
 
 ## Power Options 
 V4 of the Iridium 9603N Beacon can draw power from: the solar panels; three AA batteries; or USB.

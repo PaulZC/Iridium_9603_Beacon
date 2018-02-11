@@ -153,7 +153,7 @@ class BeaconMapper(object):
          if len(files) > 0:
             #if root != ".": # Ignore files in this directory - only process subdirectories
             #if root == ".": # Ignore subdirectories - only process this directory
-               for filename in files:
+               for filename in sorted(files):
                   if filename[-4:] == '.bin': # check for bin file suffix
                      longfilename = os.path.join(root, filename)
                      if (ignore_old_files == 'Y'): self.sbd.append(longfilename) # add the filename to the list
@@ -383,7 +383,7 @@ class BeaconMapper(object):
          if len(files) > 0:
             #if root != ".": # Ignore files in this directory - only process subdirectories
             #if root == ".": # Ignore subdirectories - only process this directory
-               for filename in files:
+               for filename in sorted(files):
                   if (filename[-4:] == '.bin') and (filename[15:16] == '-'): # Does it have the correct format? (imei-momsn.bin)
                      longfilename = os.path.join(root, filename)
                      msnum = filename[16:-4] # Get the momsn

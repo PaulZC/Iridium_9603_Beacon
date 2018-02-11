@@ -10019,8 +10019,6 @@ DIN A4, landscape with location and doc. field</description>
 <part name="U$21" library="microbuilder" deviceset="VBAT" device=""/>
 <part name="U2" library="microbuilder" deviceset="VREG_SOT23-5" device="" value="SPX3819-3.3"/>
 <part name="D1" library="microbuilder" deviceset="DIODE-SCHOTTKY" device="SOD-123" value="MBR120"/>
-<part name="R3" library="microbuilder" deviceset="RESISTOR" device="_0603_NOOUT" value="100k"/>
-<part name="R6" library="microbuilder" deviceset="RESISTOR" device="_0603_NOOUT" value="100K"/>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="U5" library="microbuilder" deviceset="ATSAMD21J" device="_QFN" value="ATSAMD21G18_QFN"/>
 <part name="U$5" library="microbuilder" deviceset="GND" device=""/>
@@ -10096,7 +10094,6 @@ DIN A4, landscape with location and doc. field</description>
 <part name="R5" library="microbuilder" deviceset="RESISTOR" device="_0603_NOOUT" value="1K"/>
 <part name="+3V9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
 <part name="+3V10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
-<part name="C13" library="microbuilder" deviceset="CAP_CERAMIC" device="0603_NO" value="0.1uF"/>
 <part name="JP1" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_TRACE" device="_LARGE" value=""/>
 <part name="U$4" library="microbuilder" deviceset="VBUS" device=""/>
 <part name="U$26" library="microbuilder" deviceset="VBUS" device=""/>
@@ -10156,6 +10153,9 @@ DIN A4, landscape with location and doc. field</description>
 <part name="JP2" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_TRACE" device="_LARGE" value=""/>
 <part name="R11" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="30K"/>
 <part name="U$1" library="microbuilder" deviceset="GND" device=""/>
+<part name="C13" library="microbuilder" deviceset="CAP_CERAMIC" device="0805-NOOUTLINE" value="0.1uF"/>
+<part name="R3" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="100K"/>
+<part name="R6" library="microbuilder" deviceset="RESISTOR" device="0805_NOOUTLINE" value="100K"/>
 </parts>
 <sheets>
 <sheet>
@@ -10429,9 +10429,7 @@ and Element14's LTC Library</text>
 <instance part="U2" gate="G$1" x="63.5" y="149.86"/>
 <instance part="D1" gate="G$1" x="45.72" y="160.02" rot="R270"/>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
-<instance part="R3" gate="G$1" x="30.48" y="154.94" rot="R270"/>
-<instance part="R6" gate="G$1" x="30.48" y="144.78" rot="R270"/>
-<instance part="GND13" gate="1" x="30.48" y="137.16"/>
+<instance part="GND13" gate="1" x="30.48" y="132.08"/>
 <instance part="U5" gate="G$1" x="50.8" y="58.42"/>
 <instance part="U$5" gate="G$1" x="25.4" y="15.24"/>
 <instance part="+3V3" gate="G$1" x="20.32" y="88.9"/>
@@ -10494,6 +10492,8 @@ and Element14's LTC Library</text>
 <instance part="GND9" gate="1" x="223.52" y="45.72" rot="MR0"/>
 <instance part="U$45" gate="G$1" x="243.84" y="160.02"/>
 <instance part="D4" gate="G$1" x="243.84" y="149.86" rot="R90"/>
+<instance part="R3" gate="G$1" x="30.48" y="154.94" rot="R90"/>
+<instance part="R6" gate="G$1" x="30.48" y="142.24" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -10531,8 +10531,9 @@ and Element14's LTC Library</text>
 <pinref part="U$30" gate="G$1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="R6" gate="G$1" pin="2"/>
 <pinref part="GND13" gate="1" pin="GND"/>
+<wire x1="30.48" y1="134.62" x2="30.48" y2="137.16" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="U5" gate="G$1" pin="GNDA"/>
@@ -10786,7 +10787,6 @@ and Element14's LTC Library</text>
 <wire x1="30.48" y1="162.56" x2="40.64" y2="162.56" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="162.56" x2="40.64" y2="152.4" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="152.4" x2="45.72" y2="152.4" width="0.1524" layer="91"/>
-<pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="160.02" x2="30.48" y2="162.56" width="0.1524" layer="91"/>
 <junction x="30.48" y="162.56"/>
 <pinref part="U2" gate="G$1" pin="EN"/>
@@ -10796,6 +10796,7 @@ and Element14's LTC Library</text>
 <pinref part="R7" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="162.56" x2="12.7" y2="162.56" width="0.1524" layer="91"/>
 <wire x1="12.7" y1="162.56" x2="12.7" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="R3" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <pinref part="D2" gate="G$1" pin="C"/>
@@ -10899,11 +10900,12 @@ and Element14's LTC Library</text>
 <label x="109.22" y="76.2" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="R3" gate="G$1" pin="2"/>
-<pinref part="R6" gate="G$1" pin="1"/>
-<wire x1="30.48" y1="149.86" x2="35.56" y2="149.86" width="0.1524" layer="91"/>
-<junction x="30.48" y="149.86"/>
-<label x="35.56" y="149.86" size="1.778" layer="95"/>
+<wire x1="30.48" y1="147.32" x2="35.56" y2="147.32" width="0.1524" layer="91"/>
+<junction x="30.48" y="147.32"/>
+<label x="35.56" y="147.32" size="1.778" layer="95"/>
+<wire x1="30.48" y1="147.32" x2="30.48" y2="149.86" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="2"/>
+<pinref part="R3" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="D8" class="0">
@@ -11308,10 +11310,10 @@ and Element14's LTC Library</text>
 <instance part="R5" gate="G$1" x="160.02" y="116.84" rot="R270"/>
 <instance part="+3V9" gate="G$1" x="152.4" y="152.4" rot="MR0"/>
 <instance part="+3V10" gate="G$1" x="160.02" y="127" rot="MR0"/>
-<instance part="C13" gate="G$1" x="104.14" y="101.6"/>
 <instance part="U$41" gate="G$1" x="91.44" y="106.68"/>
 <instance part="U$18" gate="G$1" x="104.14" y="93.98"/>
 <instance part="U$42" gate="G$1" x="111.76" y="93.98"/>
+<instance part="C13" gate="G$1" x="104.14" y="101.6"/>
 </instances>
 <busses>
 </busses>
@@ -11323,9 +11325,9 @@ and Element14's LTC Library</text>
 <wire x1="91.44" y1="114.3" x2="91.44" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="C13" gate="G$1" pin="2"/>
 <pinref part="U$18" gate="G$1" pin="GND"/>
-<wire x1="104.14" y1="99.06" x2="104.14" y2="96.52" width="0.1524" layer="91"/>
+<pinref part="C13" gate="G$1" pin="2"/>
+<wire x1="104.14" y1="96.52" x2="104.14" y2="99.06" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U4" gate="G$1" pin="GND"/>
@@ -11389,8 +11391,8 @@ and Element14's LTC Library</text>
 <net name="N$12" class="0">
 <segment>
 <pinref part="U4" gate="G$1" pin="CAP"/>
-<pinref part="C13" gate="G$1" pin="1"/>
 <wire x1="121.92" y1="109.22" x2="104.14" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="C13" gate="G$1" pin="1"/>
 <wire x1="104.14" y1="109.22" x2="104.14" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
