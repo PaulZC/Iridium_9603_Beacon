@@ -184,6 +184,7 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define start_9603    5
 #define flush_queue   6
 #define read_battery  7
+#define power_down    8
 
 // Variables used by Loop
 int year;
@@ -486,6 +487,7 @@ void loop()
       Serial.println("3: Read Pressure and Temperature");
       Serial.println("4: Check for an Iridium Message");
       Serial.println("5: Flush MT queue (RockBLOCK only)");
+      Serial.println("6: Power down");
       Serial.println();
       
       loop_step = menu_choice;
@@ -507,6 +509,7 @@ void loop()
       else if (choice == 3) loop_step = read_pressure;
       else if (choice == 4) loop_step = start_9603;
       else if (choice == 5) loop_step = flush_queue;
+      else if (choice == 6) loop_step = power_down;
       else Serial.println("ERROR: invalid menu choice"); // Comment this line out to ignore invalid choices or extra CR LF
       }
       break;
@@ -671,6 +674,19 @@ void loop()
       loop_step = menu_choice;
       }
       break;
+
+    case power_down: // Forcibly shut down the 9603N (isbd.sleep() does not send the AT*F)
+      {
+      ssIridium.println("AT*F"); // Send "flush memory" command
+      delay(2000); // Allow time for the 9603N to flush its memory
+      digitalWrite(IridiumSleepPin, LOW); // Disable the Iridium 9603
+      digitalWrite(LTC3225shutdown, LOW); // Disable the LTC3225 supercapacitor charger
+      digitalWrite(GPS_EN, GPS_OFF); // Disable the GPS and MPL3115A2
+      delay(2000); // Allow two seconds for 9603N voltages to decay
+      LED_red(); // Set LED to Red
+      while (true) ; // Do nothing more... (Wait for reset)
+      }
+      break; // redundant!
   }
 }
 

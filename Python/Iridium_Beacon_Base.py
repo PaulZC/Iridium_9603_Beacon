@@ -87,6 +87,7 @@ class BeaconBase(object):
       self.base_choice = '2\r' # Send this choice to the beacon base to request the base GNSS position etc.
       self.beacon_choice = '4\r' # Send this choice to the beacon base to request the beacon data via Iridium
       self.flush_mt_choice = '5\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
+      self.power_down_choice = '6\r' # Send this choice to the beacon base to power down the 9603N
       self.enable_clicks = False # Are mouse clicks enabled? False until first map has been loaded
       self.beacons = 0 # How many beacons are currently being tracked
       self.max_beacons = 8 # Track up to this many beacons
@@ -1093,6 +1094,10 @@ class BeaconBase(object):
 
    def close(self):
       ''' Close the program: close the serial port; make sure the log file is closed '''
+      try:
+         self.writeWait(self.power_down_choice, 0) # Power down the 9603N
+      except:
+         pass
       try:
          print 'Closing port...'
          self.ser.close() # Close the serial port
