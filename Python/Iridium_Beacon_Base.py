@@ -2,7 +2,7 @@
 
 ## Multi Iridium Beacon Base
 
-## Written by Paul Clark: Dec 2017 - Feb 2018.
+## Written by Paul Clark: Dec 2017 - Mar 2018.
 
 ## This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 ## Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
@@ -43,6 +43,11 @@
 ## to the clipboard.
 ## A second pull-down menu shows the location of the base. Clicking it will center the map on that
 ## location and will copy that location to the clipboard.
+## A third pull-down menu lets you send an SBD message _to_ the chosen beacon to - for example -
+## change its message interval. The message format is:
+## RBxxxxxxx[INTERVAL=yyy]
+## where: xxxxxxx is the 'RockBLOCK' serial number of the 9603 (seven digits;
+## prefix with zeros as necessary); and yyy is the message interval (BEACON_INTERVAL) in _minutes_.
 
 ## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a
 ## premium plan with Google.
@@ -52,6 +57,7 @@
 
 import Tkinter as tk
 import tkMessageBox
+import tkSimpleDialog
 import tkFont
 import serial
 import time
@@ -74,6 +80,7 @@ class BeaconBase(object):
       self._job = None # Keep track of timer calls
       self.zoom = '15' # Default Google Maps zoom (text)
       self.default_interval = 120 # Default update interval (secs)
+      self.default_beacon_interval = 5 # Default beacon mesage interval (mins)
       self.beacon_timeout = 65 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
       self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V4_Base)
       self.console_height = 2 # Console window height in lines
@@ -88,6 +95,7 @@ class BeaconBase(object):
       self.beacon_choice = '4\r' # Send this choice to the beacon base to request the beacon data via Iridium
       self.flush_mt_choice = '5\r' # Send this choice to the beacon base to request a flush of the mobile terminated queue
       self.power_down_choice = '6\r' # Send this choice to the beacon base to power down the 9603N
+      self.send_message_choice = '7\r' # Send this to the beacon prior to sending a message for transmission
       self.enable_clicks = False # Are mouse clicks enabled? False until first map has been loaded
       self.beacons = 0 # How many beacons are currently being tracked
       self.max_beacons = 8 # Track up to this many beacons
@@ -419,6 +427,11 @@ class BeaconBase(object):
       self.sep_4.grid(row=row, columnspan=2)
       row += 1
 
+      # Separator
+      self.sep_5 = tk.Frame(self.toolFrame,height=1,bg='#808080',width=self.sep_width)
+      self.sep_5.grid(row=row, columnspan=2)
+      row += 1
+
       # Message console - used to display status updates
       self.console_1 = tk.Text(self.toolFrame)
       self.console_1.grid(row=row,columnspan=2)
@@ -457,6 +470,11 @@ class BeaconBase(object):
       # Menu to list base location
       self.base_menu = tk.Menu(self.menubar, tearoff=0)
       self.menubar.add_cascade(label="Base Location", menu=self.base_menu)
+      self.window.config(menu=self.menubar)
+
+      # Menu to list beacon messaging
+      self.message_menu = tk.Menu(self.menubar, tearoff=0)
+      self.menubar.add_cascade(label="Beacon Messaging", menu=self.message_menu)
       self.window.config(menu=self.menubar)
 
       # Set up next update
@@ -626,6 +644,7 @@ class BeaconBase(object):
                            # https://stackoverflow.com/q/7542164
                            ser_no = parse[12]
                            self.beacon_menu.add_command(label=ser_no,command=lambda ser_no=ser_no: self.copy_location(ser_no))
+                           self.message_menu.add_command(label=ser_no,command=lambda ser_no=ser_no: self.send_message(ser_no))
                         else:
                            # Return now - maximum has been reached - don't process data from this beacon
                            self.writeToConsole(self.console_1, 'Beacon limit reached!') # Update message console
@@ -691,6 +710,8 @@ class BeaconBase(object):
                      # Update Beacon Location menu
                      label_str = parse[12] + ' : ' + beacon_location
                      self.beacon_menu.entryconfig(self.beacon_serials[parse[12]], label=label_str, background=self.beacon_colours[self.beacon_serials[parse[12]]])
+                     # Update Send Message menu
+                     self.message_menu.entryconfig(self.beacon_serials[parse[12]], background=self.beacon_colours[self.beacon_serials[parse[12]]])
                      # Check if the log file is empty (file name is NULL)
                      if self.beacon_log_files[self.beacon_serials[parse[12]]] == '':
                         # Create and clear the log file
@@ -1057,6 +1078,38 @@ class BeaconBase(object):
          else:
             self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
 
+   def send_message(self, ser_no):
+      ''' Talk to Beacon Base using serial; send message to chosen beacon; process response '''
+      # send_message returns: either (only) the MTQ; or an ERROR
+      # This is RockBLOCK-specific!
+      message = ser_no + "[INTERVAL=" + str(self.default_beacon_interval) + "]" # Assemble default message
+      prompt_msg = "Send message to " + ser_no
+      # Ask user for message
+      message = tkSimpleDialog.askstring("Beacon Messaging", prompt=prompt_msg, parent=self.window, initialvalue=message)
+      if message != None:
+         message = message.strip() # Strip off any whitespace, CR, LF
+         self.writeToConsole(self.console_1, 'Sending message to beacon') # Update message console
+         self.writeToConsole(self.console_1, message) # Update message console
+         message = message + '\r' # Terminate with a CR
+         self.writeNoWait(self.send_message_choice) # Send menu choice '7'
+         resp = self.writeWait(message, self.beacon_timeout) # Send message; wait for response for beacon_timeout seconds
+         mtq = -1
+         if resp != '': # Did we get a response?
+            try:
+               mtq = int(resp) # Try and extract MTQ value
+            except:
+               # ERROR received?
+               mtq = -1
+            if mtq != -1:
+               # Update beacon Mobile Terminated Queue length
+               self.beacon_MTQ.config(state='normal')
+               self.beacon_MTQ.delete(0, tk.END)
+               self.beacon_MTQ.insert(0, str(mtq))
+               self.beacon_MTQ.config(state='readonly')
+               self.writeToConsole(self.console_1, 'Message sent') # Update message console
+         else:
+            self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
+
    def writeToConsole(self, console, msg):
       ''' Write msg to the console; check if console is full; delete oldest entry if it is '''
       console.configure(state = 'normal') # Unlock console
@@ -1085,6 +1138,11 @@ class BeaconBase(object):
          return resp
       else: # else return NULL
          return ''
+
+   def writeNoWait(self, data):
+      ''' Write data to serial; do not wait for a reply '''
+      self.ser.flushInput() # Flush serial RX buffer (delete any old responses)
+      self.ser.write(data) # Send data (command)
 
    def QUIT(self):
       ''' Quit the program '''

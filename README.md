@@ -4,12 +4,17 @@ A lightweight Iridium 9603N + GNSS Beacon (Tracker)
 
 Suitable for high altitude ballooning, asset tracking and many other remote monitoring applications.
 
-Version 4 now includes:
+New hardware features for Version 4:
 - Revised power options: solar; USB; or 3xAA battery
 - u-blox MAX-M8Q GNSS with SMA antenna
 - SMA antenna for the 9603N
 - NeoPixel for status feedback
 - Voltage reference so lower power voltages can be measured
+
+New software features for Version 4:
+- Beacon can be tracked from _anywhere_ with Iridium-Iridium messaging via the Rock7 RockBLOCK Gateway
+- BEACON_INTERVAL is now stored in non-volatile (flash) memory
+- BEACON_INTERVAL can be updated during a flight via a Mobile Terminated SBD message
 
 ![Iridium_9603_Beacon_V4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V4_Top.JPG)
 

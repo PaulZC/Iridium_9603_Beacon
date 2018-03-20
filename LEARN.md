@@ -4,12 +4,17 @@ A lightweight Iridium 9603N + GNSS Beacon (Tracker)
 
 Suitable for high altitude ballooning, asset tracking and many other remote monitoring applications.
 
-Version 4 now includes:
+New hardware features for Version 4:
 - Revised power options: solar; USB; or 3xAA battery
 - u-blox MAX-M8Q GNSS with SMA antenna
 - SMA antenna for the 9603N
 - NeoPixel for status feedback
 - Voltage reference so lower power voltages can be measured
+
+New software features for Version 4:
+- Beacon can be tracked from _anywhere_ with Iridium-Iridium messaging via the Rock7 RockBLOCK Gateway
+- BEACON_INTERVAL is now stored in non-volatile (flash) memory
+- BEACON_INTERVAL can be updated during a flight via a Mobile Terminated SBD message
 
 ![Iridium_9603_Beacon_V4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V4_Top.JPG)
 
@@ -270,6 +275,8 @@ The main loop is structured around a large switch / case statement which:
 
 If the solar panel voltage falls below a useful level at any time, the code jumps to the sleep case and waits for the next alarm interrupt.
 
+The BEACON_INTERVAL is stored in non-volatile (flash) memory internal to the SAMD21 processor and can be updated via a Mobile Terminated (MT) SBD message.
+
 ### How do I upload the Arduino code?
 The 9603 Beacon is based on the Adafruit Feather M0 (Adalogger):
 - https://www.adafruit.com/products/2796
@@ -282,6 +289,9 @@ You can follow Lady Ada’s excellent instructions:
 The main one is Mikal Hart’s Iridium SBD library (V2.0) written for the Rock7 RockBLOCK:
 - http://arduiniana.org/libraries/iridiumsbd/
 - https://github.com/mikalhart/IridiumSBD
+
+The code uses Cristian Maglie's FlashStorage library to store and retrieve the BEACON_INTERVAL setting:
+- https://github.com/cmaglie/FlashStorage
 
 You will also need:
 - https://github.com/mikalhart/TinyGPS

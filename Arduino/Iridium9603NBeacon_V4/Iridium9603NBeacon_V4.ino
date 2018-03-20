@@ -2,7 +2,10 @@
 // # Iridium 9603N Beacon V4 #
 // ###########################
 
-// An update of the Iridium 9603N Beacon (V3):
+// This version uses Cristian Maglie's FlashStorage library to store the BEACON_INTERVAL setting
+// https://github.com/cmaglie/FlashStorage
+// BEACON_INTERVAL can be updated via an Iridium Mobile Terminated message (e.g. from RockBLOCK Operations or a Beacon Base)
+
 // Power can be provided by: two PowerFilm MPT3.6-150 solar panels; USB; 3 x Energiser Ultimate Lithium AA batteries
 // GNSS data is provided by u-blox MAX-M8Q
 // WB2812B NeoPixel is connected to D13 in parallel with a standard Red LED (for the bootloader)
@@ -109,7 +112,18 @@ RTCZero rtc; // Create an rtc object
 // Define how often messages are sent in MINUTES (max 1440)
 // This is the _quickest_ messages will be sent. Could be much slower than this depending on:
 // capacitor charge time; gnss fix time; Iridium timeout; etc.
-int BEACON_INTERVAL = 2;
+// The default value will be overwritten with the one stored in Flash - if one exists
+int BEACON_INTERVAL = 5;
+
+// Flash Storage
+#include <FlashStorage.h>
+typedef struct { // Define a struct to hold the flash variable(s)
+  int PREFIX; // Flash storage prefix (0xB5); used to test if flash has been written to before 
+  int INTERVAL; // Message interval in minutes
+  int CSUM; // Flash storage checksum; the modulo-256 sum of PREFIX and INTERVAL; used to check flash data integrity
+} FlashVarsStruct;
+FlashStorage(flashVarsMem, FlashVarsStruct); // Reserve memory for the flash variables
+FlashVarsStruct flashVars; // Define the global to hold the variables
 
 // MPL3115A2
 #include <Wire.h>
@@ -413,16 +427,6 @@ void sendUBX(const uint8_t *message, const int len) {
 
 void setup()
 {
-  rtc.begin(); // Start the RTC
-  rtc.setAlarmSeconds(rtc.getSeconds()); // Initialise RTC Alarm Seconds
-  alarmMatch(); // Set next alarm time
-  rtc.enableAlarm(rtc.MATCH_HHMMSS); // Alarm Match on hours, minutes and seconds
-  rtc.attachInterrupt(alarmMatch); // Attach alarm interrupt
-  
-  pixels.begin(); // This initializes the NeoPixel library.
-  pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
-  LED_off(); // Turn NeoPixel off
-  
   pinMode(LTC3225shutdown, OUTPUT); // LTC3225 supercapacitor charger shutdown pin
   digitalWrite(LTC3225shutdown, LOW); // Disable the LTC3225 supercapacitor charger
   pinMode(LTC3225PGOOD, INPUT); // Define an input for the LTC3225 Power Good signal
@@ -434,6 +438,35 @@ void setup()
   digitalWrite(IridiumSleepPin, LOW); // Disable the Iridium 9603
   pinMode(networkAvailable, INPUT); // Define an input for the Iridium 9603 Network Available signal
 
+  pixels.begin(); // This initializes the NeoPixel library.
+  pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
+  LED_off(); // Turn NeoPixel off
+  
+  // See if BEACON_INTERVAL has already been stored in flash
+  // If it has, read it. If not, initialise it.
+  flashVars = flashVarsMem.read(); // Read the flash memory
+  int csum = flashVars.PREFIX + flashVars.INTERVAL; // Sum the prefix and data
+  csum = csum & 0xff; // Limit checksum to 8-bits
+  if ((flashVars.PREFIX == 0xB5) and (csum == flashVars.CSUM)) { // Check prefix and checksum match
+    // Flash data is valid so update BEACON_INTERVAL using the stored value
+    BEACON_INTERVAL = flashVars.INTERVAL;
+  }
+  else {
+    // Flash data is corrupt or hasn't been initialised so do that now
+    flashVars.PREFIX = 0xB5; // Initialise the prefix
+    flashVars.INTERVAL = BEACON_INTERVAL; // Initialise the beacon interval
+    csum = flashVars.PREFIX + flashVars.INTERVAL; // Initialise the checksum
+    csum = csum & 0xff;
+    flashVars.CSUM = csum;
+    flashVarsMem.write(flashVars); // Write the flash variables
+  }
+
+  rtc.begin(); // Start the RTC now that BEACON_INTERVAL has been updated
+  rtc.setAlarmSeconds(rtc.getSeconds()); // Initialise RTC Alarm Seconds
+  alarmMatch(); // Set next alarm time using updated BEACON_INTERVAL
+  rtc.enableAlarm(rtc.MATCH_HHMMSS); // Alarm Match on hours, minutes and seconds
+  rtc.attachInterrupt(alarmMatch); // Attach alarm interrupt
+  
   iterationCounter = 0; // Make sure iterationCounter is set to zero (indicating a reset)
   loop_step = init; // Make sure loop_step is set to init
 
@@ -463,6 +496,11 @@ void loop()
     
       // Send welcome message
       Serial.println("Iridium 9603N Beacon V4");
+
+      // Echo the BEACON_INTERVAL
+      Serial.print("Using a BEACON_INTERVAL of ");
+      Serial.print(BEACON_INTERVAL);
+      Serial.println(" minutes");
       
       // Setup the IridiumSBD
       // (attachConsole and attachDiags methods have been replaced with ISBDConsoleCallback and ISBDDiagsCallback)
@@ -831,8 +869,44 @@ void loop()
         Serial.print("Transmitting message '");
         Serial.print(outBuffer);
         Serial.println("'");
-        if (isbd.sendSBDText(outBuffer) == ISBD_SUCCESS) {
-          ;
+        uint8_t mt_buffer[50]; // Buffer to store Mobile Terminated SBD message
+        size_t mtBufferSize = sizeof(mt_buffer); // Size of MT buffer
+
+        if (isbd.sendReceiveSBDText(outBuffer, mt_buffer, mtBufferSize) == ISBD_SUCCESS) { // Send the message; download an MT message if there is one
+          if (mtBufferSize > 0) { // Was an MT message received?
+            // Check message content
+            mt_buffer[mtBufferSize] = 0; // Make sure message is NULL terminated
+            String mt_str = String((char *)mt_buffer); // Convert message into a String
+            Serial.print("Received a MT message: "); Serial.println(mt_str);
+
+            // Check if the message contains a correctly formatted BEACON_INTERVAL: "[INTERVAL=nnn]"
+            int new_interval = 0;
+            int starts_at = 0;
+            int ends_at = 0;
+            starts_at = mt_str.indexOf("[INTERVAL="); // See is message contains "[INTERVAL="
+            if (starts_at >= 0) { // If it does:
+              ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
+              if (ends_at > starts_at) { // If the message contains both "[INTERVAL=" and "]"
+                String new_interval_str = mt_str.substring((starts_at + 10),ends_at); // Extract the value after the "="
+                Serial.print("Extracted an INTERVAL of: "); Serial.println(new_interval_str);
+                new_interval = (int)new_interval_str.toInt(); // Convert it to int
+              }
+            }
+            if ((new_interval > 0) and (new_interval <= 1440)) { // Check new interval is valid
+              Serial.print("New BEACON_INTERVAL received. Setting BEACON_INTERVAL to ");
+              Serial.print(new_interval);
+              Serial.println(" minutes.");
+              BEACON_INTERVAL = new_interval; // Update BEACON_INTERVAL
+              // Update flash memory
+              flashVars.PREFIX = 0xB5; // Reset the prefix (hopefully redundant!)
+              flashVars.INTERVAL = new_interval; // Store the new beacon interval
+              int csum = flashVars.PREFIX + flashVars.INTERVAL; // Update the checksum
+              csum = csum & 0xff;
+              flashVars.CSUM = csum;
+              flashVarsMem.write(flashVars); // Write the flash variables
+            }
+            
+          }
 #ifndef NoLED
           LED_green(); // Set LED to Green for 2 seconds
           delay(2000);

@@ -185,6 +185,7 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define flush_queue   6
 #define read_battery  7
 #define power_down    8
+#define send_message  9
 
 // Variables used by Loop
 int year;
@@ -488,6 +489,11 @@ void loop()
       Serial.println("4: Check for an Iridium Message");
       Serial.println("5: Flush MT queue (RockBLOCK only)");
       Serial.println("6: Power down");
+      Serial.println("7: Send an Iridium Message");
+      Serial.println();
+      Serial.println("If you are using Serial Monitor to send commands: set the line ending to Carriage Return");
+      Serial.println();
+      Serial.println("For option 7: send 7 followed by CR; then the message followed by CR");
       Serial.println();
       
       loop_step = menu_choice;
@@ -498,11 +504,27 @@ void loop()
       {
       LED_cyan(); // Set LED to Cyan
 
-      while(Serial.available()==0) {
-        ;
+      // Wait for the arrival of a one (or two digit) int menu choice followed by a CR
+      int choice = 0;
+      char receivedChars[3];
+      while(Serial.available()==0) ; // Wait for first character
+      receivedChars[0] = Serial.read(); // Read the first character
+      if (isDigit(receivedChars[0])) { // Check if first character is a number
+        while(Serial.available()==0) ; // Wait for second character
+        receivedChars[1] = Serial.read(); // Read the second character
+        if (isDigit(receivedChars[1])) { // Check if second character is a number
+          while(Serial.available()==0) ; // Wait for third character
+          receivedChars[2] = Serial.read(); // Read the third character
+          if (receivedChars[2] == '\r') { // If the third character is CR
+            receivedChars[2] = 0; // NULL-terminate the number
+            choice = atoi(receivedChars); // Convert to int
+          }
+        }
+        else if (receivedChars[1] == '\r') { // Second character was not a number so check if it is a CR
+            receivedChars[1] = 0; // Second character was a CR so NULL-terminate the number
+            choice = atoi(receivedChars); // Convert to int
+        }
       }
-      
-      choice = Serial.parseInt();
 
       if (choice == 1) loop_step = read_battery;
       else if (choice == 2) loop_step = read_GPS;
@@ -510,6 +532,7 @@ void loop()
       else if (choice == 4) loop_step = start_9603;
       else if (choice == 5) loop_step = flush_queue;
       else if (choice == 6) loop_step = power_down;
+      else if (choice == 7) loop_step = send_message;
       else Serial.println("ERROR: invalid menu choice"); // Comment this line out to ignore invalid choices or extra CR LF
       }
       break;
@@ -650,7 +673,7 @@ void loop()
       char txBuffer[20];
       sprintf(txBuffer, "FLUSH_MT");
 
-      err = isbd.sendSBDText(txBuffer);
+      err = isbd.sendSBDText(txBuffer); // Send the message
       if (err == ISBD_SUCCESS) {
         LED_green(); // Set LED to Green for 2 seconds
         //delay(2000);
@@ -687,6 +710,57 @@ void loop()
       while (true) ; // Do nothing more... (Wait for reset)
       }
       break; // redundant!
+
+    case send_message:
+      {
+      LED_white(); // Set LED to White
+
+      char txBuffer[51]; // Buffer for outgoing message [50 chars plus NULL]
+      byte ptr = 0; // Buffer pointer
+      bool keep_going = true; // Flag to keep going
+      char rc; // Serial received character
+
+      while (keep_going) { // Keep going until \r or 50 characters have been received
+        if (Serial.available() > 0) { // Are there any characters waiting?
+          rc = Serial.read(); // Read a single character
+          if (rc != '\r') { // Check for a carriage return
+            txBuffer[ptr] = rc; // Copy character into txBuffer
+            ptr++; // Increment pointer
+          }
+          else {
+            // carriage return has been received so don't keep going
+            keep_going = false;
+          }
+          txBuffer[ptr] = 0; // Ensure string is NULL terminated
+          if (ptr == 50) keep_going = false; // If 50 characters have been received then don't keep going
+        }
+      }
+
+      err = isbd.sendSBDText(txBuffer);
+      if (err == ISBD_SUCCESS) {
+        LED_green(); // Set LED to Green
+        //delay(2000);
+        Serial.println(isbd.getWaitingMessageCount());
+      }
+      else {
+        LED_red(); // Set LED to Red
+        //delay(2000);          
+        Serial.print("ERROR: sendSBDText failed with error ");
+        Serial.println(err);
+      }
+
+      // Very messy work-around to clear MO buffer so start_9603 doesn't send the same message again!
+      ssIridium.println("AT+SBDD0");
+      delay(5000);
+      while(ssIridium.available()) { // Flush RX buffer
+        ssIridium.read(); // Discard anything in the buffer
+        //Serial.write(ssIridium.read()); // Or use this for debugging
+      }
+
+      loop_step = menu_choice;
+      }
+      break;
+
   }
 }
 

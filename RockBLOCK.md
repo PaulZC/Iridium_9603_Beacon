@@ -27,7 +27,12 @@ beacon is located:
 
 ![RockBLOCK_Operations_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_3.JPG)
 
-Or...
+If you want to change the beacon transmission interval (BEACON_INTERVAL) during a flight, you can do this through RockBLOCK Operations using the _Send a Message_
+function. Select the RockBLOCK serial numbers of the beacon(s) you want to update and send a plain text message using the format _[INTERVAL=nnn]_ where _nnn_
+is the message interval in _minutes_. The interval will be updated after the next alarm timer interrupt. The interval is stored in non-volatile (flash) memory
+and so will be retained even if the Beacon is reset.
+
+![RockBLOCK_Operations_4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_4.JPG)
 
 ## Tracking your beacon with an internet connection
 
@@ -72,6 +77,8 @@ The GUI uses 640x480 pixel map images. Higher resolution images are available if
 The GUI has been tested with Python 2.7 on 64-bit Windows and on Linux on Raspberry Pi. You will need to install the Python libraries listed below.
 
 ## Tracking your beacon **without** an internet connection
+
+![Iridium_Beacon_Base_1](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_1.JPG)
 
 Another reason I really like Rock7 is that if you prefix your SBD message with the serial number of another 'RockBLOCK', they will automatically forward
 your message to that module. This means the messages from your mobile Iridium Beacon can be automatically forwarded to another Iridium Beacon acting as a 'base'.
@@ -125,6 +132,13 @@ A pull-down menu lists the locations of all the beacons being tracked. Clicking 
 the location to the clipboard.
 
 A second pull-down menu shows the location of the base. Clicking it will center the map on that location and will copy that location to the clipboard.
+
+A third pull-down menu lets you change the transmission interval (BEACON_INTERVAL) of each beacon. Select the beacon you want to update using the pull-down menu.
+A dialog box will appear allowing you to edit the message before it is sent. Change the default value of '5' (minutes) to whatever you want the new interval to be.
+Click 'OK' and the base will send the message to the RockBLOCK Gateway where it will be automatically forwarded to the chosen beacon. The beacon will download and
+store the new value when during its next transmit cycle. The new value will take effect after the _following_ transmission.
+
+![Iridium_Beacon_Base_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_3.JPG)
 
 The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a premium plan with Google.
 
