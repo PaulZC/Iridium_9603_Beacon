@@ -78,7 +78,7 @@ The GUI has been tested with Python 2.7 on 64-bit Windows and on Linux on Raspbe
 
 ## Tracking your beacon **without** an internet connection
 
-![Iridium_Beacon_Base_1](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_1.JPG)
+![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
 
 Another reason I really like Rock7 is that if you prefix your SBD message with the serial number of another 'RockBLOCK', they will automatically forward
 your message to that module. This means the messages from your mobile Iridium Beacon can be automatically forwarded to another Iridium Beacon acting as a 'base'.

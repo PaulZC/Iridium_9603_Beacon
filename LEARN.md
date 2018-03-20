@@ -410,6 +410,11 @@ This project wouldn’t have been possible without the open source designs and cod
    Sercom examples:
    - https://forum.arduino.cc/index.php?topic=341054.msg2443086#msg2443086
 
+- Cristian Maglie:
+
+   FlashStorage library:
+   - https://github.com/cmaglie/FlashStorage
+
 ## Licence
 
 This project is distributed under a Creative Commons Share-alike 4.0 licence.
