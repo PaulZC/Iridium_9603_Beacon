@@ -161,7 +161,7 @@ from YYYYMMDDHHMMSS format into DD/MM/YY,HH:MM:SS format, making the message tim
 
 [Iridium_Beacon_BIN_to_KML_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_BIN_to_KML_RockBLOCK.py) will convert the .bin SBD attachments downloaded by
 [Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) into .kml files which can be opened in Google Earth.
-The path of the beacon can be shown as a: 2D (course over ground) or 3D (course and altitude) linestring; points (including message sequence numbers); and arrows (indicating the heading of the beacon).
+The path of the beacon can be shown as: 2D (course over ground) or 3D (course and altitude) linestring; points (labelled with message sequence numbers); and arrows (indicating the heading of the beacon).
 
 ## Required Python 2.7 Libraries
 
@@ -178,6 +178,12 @@ To get the tools to run successfully you will need to install the following libr
 ### Matplotlib
 
 - sudo apt-get install python-matplotlib
+
+### Kyle Lancaster's simplekml
+
+- http://simplekml.readthedocs.io/en/latest/index.html
+- https://pypi.python.org/pypi/simplekml
+- pip install simplekml
 
 Enjoy!
 
