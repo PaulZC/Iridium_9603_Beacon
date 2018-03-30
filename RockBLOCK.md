@@ -126,7 +126,7 @@ The software makes extensive use of the Google Static Map API:
 - The zoom level is set automatically when a new beacon is displayed to show both beacon and base.
 - The zoom can be changed using the buttons.
 
-Each beacon's path is displayed as a coloured line on the map. The oldest waypoints may be deleted as the map URL is limited to 8192 characters.
+When you are online, the path of each beacon is displayed as a coloured line on the map. The oldest waypoints may be deleted as the map URL is limited to 8192 characters.
 
 A pull-down menu lists the locations of all the beacons being tracked. Clicking on a menu entry will center the map on that location and will copy
 the location to the clipboard.
@@ -149,6 +149,19 @@ When you are online, the user interface will look like this:
 When you are offline, the software will use the map tiles from the Tiler. Base and beacon locations will be shown on the offline maps but not path information
 
 ![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
+
+## Extras
+
+[Iridium_Beacon_Stitcher_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Stitcher_RockBLOCK.py) will stitch the .bin SBD attachments downloaded by
+[Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) together into a single .csv
+(Comma Separated Value) file which can be opened by (e.g.) Microsoft Excel.
+
+[Iridium_Beacon_CSV_DateTime.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_CSV_DateTime.py) will convert the first column of the stitched .csv file
+from YYYYMMDDHHMMSS format into DD/MM/YY,HH:MM:SS format, making the message timing easier to interpret using Excel.
+
+[Iridium_Beacon_BIN_to_KML_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_BIN_to_KML_RockBLOCK.py) will convert the .bin SBD attachments downloaded by
+[Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) into .kml files which can be opened in Google Earth.
+The path of the beacon can be shown as a: 2D (course over ground) or 3D (course and altitude) linestring; points (including message sequence numbers); and arrows (indicating the heading of the beacon).
 
 ## Required Python 2.7 Libraries
 
