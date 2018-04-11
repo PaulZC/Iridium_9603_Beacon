@@ -439,6 +439,7 @@ void setup()
   pinMode(networkAvailable, INPUT); // Define an input for the Iridium 9603 Network Available signal
 
   pixels.begin(); // This initializes the NeoPixel library.
+  delay(100); // Seems necessary to make the NeoPixel start reliably 
   pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
   LED_off(); // Turn NeoPixel off
   

@@ -326,6 +326,7 @@ void sendUBX(const uint8_t *message, const int len) {
 void setup()
 {
   pixels.begin(); // This initializes the NeoPixel library.
+  delay(100); // Seems necessary to make the NeoPixel start reliably 
   pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
   LED_off(); // Turn NeoPixel off
   
