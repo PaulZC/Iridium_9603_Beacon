@@ -33,7 +33,7 @@ See [Iridium_9603_Beacon_V5_BOM.xls](https://github.com/PaulZC/Iridium_9603_Beac
 
 The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Eagle) directory contains the schematic and pcb design files.
 
-Here's how the completed PCB looks when configured for USB power (using 1F super capacitors):
+Here's how the completed PCB looks when configured for USB or battery power (using 1F super capacitors):
 
 ![V5_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Top.JPG)
 
@@ -154,19 +154,19 @@ during a flight. So, V5 of the beacon contains an additional P-MOSFET (Q4) to di
 
 ## How much does the V5 beacon weigh?
 
-Configured for battery operation, including three Energiser® Ultimate Lithium AA batteries and the Maxtena SMA antennas listed in the BOM, it weighs 110.4g.
+Configured for battery operation, including three Energiser® Ultimate Lithium AA batteries and the Maxtena SMA antennas listed in the BOM, it weighs 112.8g.
 
 ![V5_Beacon_Weight.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Weight.JPG)
 
 The weight breaks down as follows:
 - Batteries: 45.3g
-- Populated PCB with 1F supercapacitors and battery clips: 27.3g
+- Populated PCB with 1F supercapacitors and battery clips: 29.7g
 - Iridium module with mounting hardware and uFL cable: 13.0g
 - Iridium antenna: 12.5g
 - GNSS antenna: 12.3g
 
-Running from solar power, the total weight would be approximately 74g:
-- Populated PCB with 10F supercapacitors: 25.0g
+Running from solar power, the total weight would be approximately 76.5g:
+- Populated PCB with 10F supercapacitors: 27.4g
 - Iridium module with mounting hardware and uFL cable: 13.0g
 - Iridium antenna: 12.5g
 - GNSS antenna: 12.3g
@@ -261,6 +261,10 @@ Any peripherals connected to this will be continuously powered when power is ava
 
 **MISO**, **SCK**, **MOSI** and **SD_CS** are the SPI bus data, clock and enable connections.
 You could use these to connect SD storage or another SPI peripheral.
+
+**BAT-** is connected to the negative battery terminal. A link on the top layer of the PCB connects the BAT- pad to the adjacent GND pad.
+If you want the beacon to have a true on/off switch when running on battery power: cut the link between the BAT- and GND pads;
+wire a SPST switch to the two pads.
 
 ## Do you recommend coating the board once it is populated?
 As a minimum, I’d recommend applying a coat of acrylic protective lacquer to the processor and surrounding components (especially the crystal).
@@ -469,7 +473,7 @@ This project wouldn’t have been possible without the open source designs and cod
 ## Licence
 
 This project is distributed under a Creative Commons Share-alike 4.0 licence.
-Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
+Please refer to section 5 of the licence for the "Disclaimer of Warranties and Limitation of Liability".
   
 
 Enjoy!

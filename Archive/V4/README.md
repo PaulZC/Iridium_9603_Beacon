@@ -18,15 +18,15 @@ New software features for Version 4:
 
 ![Iridium_9603_Beacon_V4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V4_Top.JPG)
 
-**See [LEARN.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/LEARN.md) for more details.**
+**See [LEARN.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V4/LEARN.md) for more details.**
 
 **See [RockBLOCK.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md) for details on how to track your beacon from _anywhere_ using Rock7 RockBLOCK Gateway messaging.**
 
-See [Iridium_9603_Beacon_V4.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/Iridium_9603_Beacon_V4.pdf) for the schematic, layout and Bill Of Materials.
+See [Iridium_9603_Beacon_V4.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V4/Iridium_9603_Beacon_V4.pdf) for the schematic, layout and Bill Of Materials.
 
-The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V3/Eagle) directory contains the schematic and pcb design files.
+The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V4/Eagle) directory contains the schematic and pcb design files.
 
-The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V3/Arduino) directory contains the Arduino code.
+The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V4/Arduino) directory contains the Arduino code.
 
 The [Python](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Python) directory contains tracking/mapping software based on the Google Static Maps API.
 
