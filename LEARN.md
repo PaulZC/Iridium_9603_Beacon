@@ -11,7 +11,7 @@ New hardware features for Version 5:
 New software features for Version 5:
 - Relay can be configured during a flight via a Mobile Terminated SBD message
 
-![Iridium_9603_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5_Top.JPG)
+![Iridium_9603N_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5.JPG)
 
 ## Background
 
@@ -156,7 +156,7 @@ during a flight. So, V5 of the beacon contains an additional P-MOSFET (Q4) to di
 
 Configured for battery operation, including three Energiser® Ultimate Lithium AA batteries and the Maxtena SMA antennas listed in the BOM, it weighs 110.4g.
 
-![V4_Beacon_Weight.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Weight.JPG)
+![V5_Beacon_Weight.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Weight.JPG)
 
 The weight breaks down as follows:
 - Batteries: 45.3g
