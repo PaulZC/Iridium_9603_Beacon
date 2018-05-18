@@ -4,47 +4,52 @@ A lightweight Iridium 9603N + GNSS Beacon (Tracker)
 
 Suitable for high altitude ballooning, asset tracking and many other remote monitoring applications.
 
-New hardware features for Version 5:
-- Includes an OMRON G6SK relay to allow the beacon to control external equipment (e.g. a cut-down device)
-- 9603N EXT_PWR is now switched via a P-MOSFET
+New hardware features for Version 4:
+- Revised power options: solar; USB; or 3xAA battery
+- u-blox MAX-M8Q GNSS with SMA antenna
+- SMA antenna for the 9603N
+- NeoPixel for status feedback
+- Voltage reference so lower power voltages can be measured
 
-New software features for Version 5:
-- Relay can be configured during a flight via a Mobile Terminated SBD message
+New software features for Version 4:
+- Beacon can be tracked from _anywhere_ with Iridium-Iridium messaging via the Rock7 RockBLOCK Gateway
+- BEACON_INTERVAL is now stored in non-volatile (flash) memory
+- BEACON_INTERVAL can be updated during a flight via a Mobile Terminated SBD message
 
-![Iridium_9603_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5_Top.JPG)
+![Iridium_9603_Beacon_V4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V4_Top.JPG)
 
 ## Background
 
-In response to feedback received from balloon enthusiasts, version 5 of the Iridium 9603N Beacon provides:
-an OMRON G6SK bistable relay to allow the beacon to control external equipment (e.g. a cut-down device);
-Iridium 9603n EXT_PWR power switching via a P-MOSFET.
+In response to feedback received from balloon enthusiasts, version 4 of the Iridium 9603N Beacon provides:
+robust SMA antenna connections so helical antennas can be fitted to both the u-blox MAX-M8Q GNSS and Iridium 9603N;
+extended battery power from three AA Energiser® Ultimate Lithium batteries;
+a tri-colour NeoPixel LED for better status feedback.
 
-Version 5 is slightly heavier than version 3. So, if you are looking for a very lightweight (60g) solar tracker for your long-duration high alitude balloon
+Version 4 is slightly heavier than version 3. So, if you are looking for a very lightweight (60g) solar tracker for your long-duration high alitude balloon
 flight, you might be better off with [version 3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V3/README.md). If you want a more robust
 tracker for shorter-duration, battery-powered flights where the tracker stands a better chance of continuing to transmit while on the ground,
-then version 5 is probably for you.
+then version 4 is probably for you.
 
 ## The Design
 
-See [Iridium_9603_Beacon_V5.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon_V5.pdf) for the schematic,
+See [Iridium_9603_Beacon_V4.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V4/Iridium_9603_Beacon_V4.pdf) for the schematic,
 layout and Bill Of Materials.
 
-See [Iridium_9603_Beacon_V5_BOM.xls](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Iridium_9603_Beacon_V5_BOM.xls) for the Bill Of Materials in Excel format.
-
-The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Eagle) directory contains the schematic and pcb design files.
+The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V4/Eagle) directory contains the schematic and pcb design files.
 
 Here's how the completed PCB looks when configured for USB power (using 1F super capacitors):
 
-![V5_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Top.JPG)
+![V4_Beacon_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Top.JPG)
+![V4_Beacon_Bottom.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Bottom.JPG)
 
 And here's how it looks from underneath when configured for battery power:
 
-![V5_Assembly_13.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Assembly_13.JPG)
+![Iridium_9603_Beacon_V4_Bottom](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V4_Bottom.JPG)
 
-The key components of V5 of the Iridium 9603N Beacon are:
+The key components of V4 of the Iridium 9603N Beacon are:
 
 ### Iridium 9603N Module
-![V5_Assembly_15.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Assembly_15.JPG)
+![V4_Beacon_Assembly.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Assembly.JPG)
 
 Available from:
 - https://www.rock7.com/shop-product-detail?productId=50
@@ -55,15 +60,15 @@ Other UK and International distributors can be found at:
 Make sure you purchase the 9603N and not the older 9603. The 9603N will run from 5V ± 0.5V which is important as the super capacitor charger is set to produce 5.3V; the older 9603 is only rated to 5V ± 0.2V.
 If you do have the older 9603, you can change the super capacitor voltage to 4.8V by reconfiguring the split pads next to the super capacitors.
 
-![V5_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Split_Pads.JPG)
+![V4_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Split_Pads.JPG)
 
 ### SMA Iridium Antenna
-![V5_Beacon_Iridium.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Iridium.JPG)
+![V4_Beacon_Iridium.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Iridium.JPG)
 
 An Iridium SMA helical antenna (e.g. the Maxtena M1621HCT-SMA, available from Farnell / Element 14 (2281619)) can be connected to the 9603N with a short Molex uFL cable (part number 73412-0508, available from Farnell / Element14 (1340201))
 
 ### Atmel ATSAMD21G18 Processor
-![V5_Beacon_SAMD.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_SAMD.JPG)
+![V4_Beacon_SAMD.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_SAMD.JPG)
 
 As used on the Adafruit Feather M0:
 - https://www.adafruit.com/products/2772
@@ -71,7 +76,7 @@ As used on the Adafruit Feather M0:
 Available from e.g. Farnell / Element14 (2460544)
 
 ### MPL3115A2 Altitude/Pressure sensor:
-![V5_Beacon_Sensor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Sensor.JPG)
+![V4_Beacon_Sensor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Sensor.JPG)
 
 As used on the Sparkfun SEN-11084
 - https://www.sparkfun.com/products/11084
@@ -79,21 +84,21 @@ As used on the Sparkfun SEN-11084
 Available as a bare chip from e.g. Farnell / Element14 (2009084)
 
 ### Linear Technology LTC3225EDDB SuperCapacitor Charger
-![V5_Beacon_SuperCap.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_SuperCap.JPG)
+![V4_Beacon_SuperCap_Top.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_SuperCap.JPG)
 
 - http://www.linear.com/product/LTC3225
 
 Available as a bare chip from e.g. Farnell / Element14 (1715231)
 
 ### u-blox MAX-M8Q GNSS
-![V5_Beacon_GNSS.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_GNSS.JPG)
+![V4_Beacon_GNSS.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_GNSS.JPG)
 
 - https://www.u-blox.com/en/product/max-m8-series
 
 Connect an antenna (e.g. the Maxtena M1516HCT-P-SMA, available from Farnell / Element 14 (2484960)) using the SMA connector. 3V power for an active antenna is provided.
 
 ### MCP111T-240 Reset Supervisor
-![V5_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_ResetSupervisor.JPG)
+![V4_Beacon_ResetSupervisor.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_ResetSupervisor.JPG)
 
 The SAMD21G18 has a built-in power-on reset and brown-out detector circuit, but it doesn't work properly if the supply voltage rises very slowly.
 The SAMD21G18 datasheet isn’t much help here. Section 8.2.4.1 specifies:
@@ -108,7 +113,7 @@ As the solar panel voltage will ramp up very slowly at sunrise, I've included a 
 The Microchip MCP111-240 has an open drain output which holds the processor in reset until the supply rises above 2.4V, ensuring a clean start.
 
 ### SPX3819-3.3 Voltage Regulator
-![V5_Beacon_Regulator.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Regulator.JPG)
+![V4_Beacon_Regulator.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Regulator.JPG)
 
 The SPX3819-3.3 Voltage Regulator regulates the output from the two solar panels, or the batteries, or the USB port, providing 3.3V for the processor, GNSS and pressure sensor.
 
@@ -117,7 +122,7 @@ The LTC3225EDDB SuperCapacitor Charger draws its power directly from the solar p
 MBR120 diodes protect the solar panels, USB port and the batteries from each other.
 
 ### WS2812B "NeoPixel"
-![V5_Beacon_NeoPixel.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_NeoPixel.JPG)
+![V4_Beacon_NeoPixel.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_NeoPixel.JPG)
 
 A tri-colour NeoPixel has been included on Version 4 to show the status of the beacon:
 - Magenta at power up (loop_step == init) (~10 seconds)
@@ -129,7 +134,7 @@ A tri-colour NeoPixel has been included on Version 4 to show the status of the b
 - LED will flash Red after: Iridium transmission (successful or failure); low battery detected; no GNSS data; supercapacitors failed to charge
 
 ### LT1634BCMS8-1.25 1.25V Voltage Reference
-![V5_Beacon_Reference.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Reference.JPG)
+![V4_Beacon_Reference.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Reference.JPG)
 
 The SAMD21G18 processor is powered from a low drop-out 3.3V regulator. The solar / USB / battery voltage is measured via an analog pin connected to the mid point
 of two 100K resistors configured as a voltage divider. The voltage measured by the analog pin is relative to the regulator voltage. When the power voltage drops below approximately
@@ -138,21 +143,7 @@ of two 100K resistors configured as a voltage divider. The voltage measured by t
 By adding a 1.25V voltage reference and connecting it to a second analog pin, its constant voltage will appear to increase as the regulator voltage starts to collapse.
 This voltage increase can be used to correct the power voltage measurement.
 
-## Iridum 9603N Power Switching
-
-The datasheet for the 9603N contains a note which says:
-
-_When a transceiver has been turned off, Product Developers should not reapply power on a unit until more than 2 seconds has elapsed after power has reached 0V. Additionally, if a unit does not respond to AT commands, power off the module, wait for 2 seconds and then power it back on._
-
-_When a 9603 is powered off the power on reset circuit requires 2 seconds for voltages to decay. If the 2 second wait time is not adhered to the reset circuit may not operate and the modem could be placed in a non-operational state. The state is not permanent and can be rectified by the above procedure._
-
-I have seen a 9603N go into this non-operational state only twice across the ten beacons I have in operation. Unfortunately, with the previous versions of the beacon design,
-the only way to completely remove power to the 9603N was to manually discharge the super capacitors with a 10 Ohm resistor. Obviously it would be disastrous if this happened
-during a flight. So, V5 of the beacon contains an additional P-MOSFET (Q4) to disconnect the power to the 9603N.
-
-![V5_9603N_Power.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_9603N_Power.JPG)
-
-## How much does the V5 beacon weigh?
+## How much does the V4 beacon weigh?
 
 Configured for battery operation, including three Energiser® Ultimate Lithium AA batteries and the Maxtena SMA antennas listed in the BOM, it weighs 110.4g.
 
@@ -174,7 +165,7 @@ Running from solar power, the total weight would be approximately 74g:
 - Support hardware for the solar panels: 5g
 
 ## Power Options 
-V5 of the Iridium 9603N Beacon can draw power from: the solar panels; three AA batteries; or USB.
+V4 of the Iridium 9603N Beacon can draw power from: the solar panels; three AA batteries; or USB.
 It is possible to connect all three or any two simultaneously, the beacon will simply draw power from whichever is providing the higher voltage.
 
 If you are going to use solar power, use 10F super capacitors and a charge current of 60mA. Install the capacitors on the underside of the PCB, carefully
@@ -186,14 +177,14 @@ If you are going to run exclusively from batteries or USB, then 1F super capacit
 
 The charge current can be changed by reconfiguring the split pads next to the super capacitors.
 
-![V5_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Split_Pads.JPG)
+![V4_Split_Pads.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Split_Pads.JPG)
 
 (The LTC3225 draws approximately _twice_ the chosen charge current. 300mA would be way too much for the PowerFilm solar panels.)
 
 ### Two PowerFilm Solar MPT3.6-150 solar panels
 ![Iridium_9603N_Beacon_Solar.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_Solar.JPG)
 
-![V5_Beacon_Solar.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_Solar.JPG)
+![V4_Beacon_Solar.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_Solar.JPG)
 
 - http://www.powerfilmsolar.com/products/?mpt36150&show=product&productID=271537&productCategoryIDs=6573
 
@@ -246,9 +237,9 @@ Energiser® Ultimate Lithium batteries. These are rated down to -40°C but tests I
 Please see the [V2 documentation](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V2/Iridium_9603_Beacon.pdf) for further details.
 
 ## IO Pins
-![V5_Beacon_IO.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Beacon_IO.JPG)
+![V4_Beacon_IO.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V4_Beacon_IO.JPG)
 
-**SWCLK** and **SWDIO** are used during [programming of the SAMD bootloader](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md#how-do-i-install-the-atsamd21g18-bootloader)
+**SWCLK** and **SWDIO** are used during [programming of the SAMD bootloader](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Archive/V2/LEARN.md#how-do-i-install-the-atsamd21g18-bootloader)
 
 **3V3SW** is the 3.3V power rail switched by Q1 and which provides power for the MAX-M8Q GNSS and MPL3115A2 altitude sensor.
 You can use this pin to provide power for a peripheral which you want to be able to disable to save power.
@@ -266,10 +257,8 @@ You could use these to connect SD storage or another SPI peripheral.
 As a minimum, I’d recommend applying a coat of acrylic protective lacquer to the processor and surrounding components (especially the crystal).
 If you’re using an aerosol, be careful to mask off the connectors, switch and the pressure sensor first.
 
-![V5_Lacquer.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Lacquer.JPG)
-
 ## Arduino Code
-The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory contains the Arduino code.
+The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Archive/V4/Arduino) directory contains the Arduino code.
 
 The code is based extensively on Mikal Hart’s IridiumSBD Beacon example:
 - https://github.com/mikalhart/IridiumSBD/tree/master/examples/Beacon
@@ -287,56 +276,6 @@ The main loop is structured around a large switch / case statement which:
 If the solar panel voltage falls below a useful level at any time, the code jumps to the sleep case and waits for the next alarm interrupt.
 
 The BEACON_INTERVAL is stored in non-volatile (flash) memory internal to the SAMD21 processor and can be updated via a Mobile Terminated (MT) SBD message.
-
-### How do I install the ATSAMD21G18 bootloader?
-Get yourself a Segger J-Link programmer and connect it according to [Atmel_SAMD21_Programming_Cable.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Atmel_SAMD21_Programming_Cable.pdf).
-
-![Atmel_SAMD21_Programming_Cable](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Atmel_SAMD21_Programming_Cable.JPG)
-
-![V5_Assembly_14](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Assembly_14.JPG)
-
-Ignore the RST connection.
-
-Connect the 5V-Supply output from the J-Link to VBUS to power the board while you configure it (it doesn’t need external power for this bit).
-
-Follow Lady Ada’s excellent instructions:
-- https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/restoring-bootloader
-
-If you are using Atmel's Studio:
-
-![Programming_1](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_1.JPG)
-
-Select Tools \ Device Programming
-
-![Programming_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_2.JPG)
-
-Select J-Link in the Tool pull-down menu
-Select ATSAMD21G18A in the Device pull-down menu
-Select SWD in the Interface pull-down menu
-Then click Apply
-
-![Programming_2a](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_2a.JPG)
-
-Click the J-Link icon to apply target power to the beacon
-
-![Programming_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_3.JPG)
-
-Select the Target Power tab and set Current State to Power On. This will apply 5V power from the J-Link
-to the beacon VBUS
-
-![Programming_4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_4.JPG)
-
-Close the J-Link window. In the Device Programming window click 'Read' to read the Device Signature and Target Voltage
-
-![Programming_5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_5.JPG)
-
-Click 'Memories', click the '...' icon to select the bootloader Flash file
-Click Program to erase, program and verify the device
-
-![Programming_6](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Programming_6.JPG)
-
-Finally, select the J-Link icon again, select the Target Power tab and set Current State to Power Off
-Close Device Programming and Atmel Studio and you are ready to configure the Beacon with the Arduino code
 
 ### How do I upload the Arduino code?
 The 9603 Beacon is based on the Adafruit Feather M0 (Adalogger):
@@ -360,6 +299,16 @@ You will also need:
 - https://github.com/adafruit/Adafruit_MPL3115A2_Library
 - https://github.com/arduino-libraries/RTCZero
 - https://github.com/adafruit/Adafruit_NeoPixel
+
+### How do I install the ATSAMD21G18 bootloader?
+Get yourself a Segger J-Link programmer and connect it according to [Atmel_SAMD21_Programming_Cable.pdf](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Atmel_SAMD21_Programming_Cable.pdf).
+
+Ignore the RST connection.
+
+Connect the 5V-Supply output from the J-Link to VBUS to power the board while you configure it (it doesn’t need external power for this bit).
+
+Follow Lady Ada’s excellent instructions:
+- https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/restoring-bootloader
 
 ## What data will I get back from the beacon?
 

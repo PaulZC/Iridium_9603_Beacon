@@ -29,10 +29,15 @@ beacon is located:
 
 If you want to change the beacon transmission interval (BEACON_INTERVAL) during a flight, you can do this through RockBLOCK Operations using the _Send a Message_
 function. Select the RockBLOCK serial numbers of the beacon(s) you want to update and send a plain text message using the format _[INTERVAL=nnn]_ where _nnn_
-is the message interval in _minutes_. The interval will be updated after the next alarm timer interrupt. The interval is stored in non-volatile (flash) memory
-and so will be retained even if the Beacon is reset.
+is the message interval in _minutes_. The interval will be updated the next time the beacon wakes up for a transmit cycle. The interval is stored in
+non-volatile (flash) memory and so will be retained even if the Beacon is reset.
 
 ![RockBLOCK_Operations_4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_4.JPG)
+
+If you want to change the state of the OMRON relay during a flight, you can do this by including the text _[RELAY=ON]_ or _[RELAY=OFF]_ in the RockBLOCK message.
+The state of the relay will be updated after the next transmit cycle. A future version of the code will make use of the 9603N Ring Indicator signal to
+let the beacon know when a new message is waiting to be downloaded without first needing to go through a full transmit cycle. The code will also be updated to
+allow the relay to be 'pulsed' on (set) then off (reset) which could then be used to trigger e.g. a cut-down device connected to the relay pins.
 
 ## Tracking your beacon with an internet connection
 
@@ -133,10 +138,13 @@ the location to the clipboard.
 
 A second pull-down menu shows the location of the base. Clicking it will center the map on that location and will copy that location to the clipboard.
 
-A third pull-down menu lets you change the transmission interval (BEACON_INTERVAL) of each beacon. Select the beacon you want to update using the pull-down menu.
-A dialog box will appear allowing you to edit the message before it is sent. Change the default value of '5' (minutes) to whatever you want the new interval to be.
+A third pull-down menu lets you send a configuration update message to a beacon. Select the beacon you want to update using the pull-down menu.
+A dialog box will appear allowing you to edit the message before it is sent. If you want to change the transmission interval (BEACON_INTERVAL) of the beacon,
+change the default value of '5' (minutes) to whatever you want the new interval to be. If you want to change the status of the OMRON relay on board the beacon,
+add the text _[RELAY=ON]_ or _[RELAY=OFF]_ to the message.
 Click 'OK' and the base will send the message to the RockBLOCK Gateway where it will be automatically forwarded to the chosen beacon. The beacon will download and
-store the new value when during its next transmit cycle. The new value will take effect after the _following_ transmission.
+process the message during its next transmit cycle. The relay status will be updated at the end of the transmit cycle. The new BEACON_INTERVAL value will
+take effect after the _following_ transmission.
 
 ![Iridium_Beacon_Base_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_3.JPG)
 
