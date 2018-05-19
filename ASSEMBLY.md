@@ -182,7 +182,7 @@ The completed beacon is an almost perfect fit in a [Peli 1015 Micro Case](https:
 ### The Small Print
 
 This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
-Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
+Please refer to section 5 of the licence for the "Disclaimer of Warranties and Limitation of Liability".
 
 Enjoy!
 
