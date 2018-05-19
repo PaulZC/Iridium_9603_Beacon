@@ -1,0 +1,13 @@
+G04 Gerber job file.*
+%TF.FileFunction,JobInfo*%
+%TF.GenerationSoftware,Autodesk,EAGLE,9.0.0*%
+%TF.CreationDate,2018-05-19T07:41:30Z*%
+%TF.Part,Single*%
+%MOMM*%
+%TJ.B_Owner,Paul Clark <paul.clark@durham.ac.uk>*%
+%TJ.B_ID,Iridium_9603_Beacon*%
+%TJ.B_LayerNum,2*%
+%TJ.B_Thickness,1.586000*%
+%TJ.B_Size_X,57.556400*%
+%TJ.B_Size_Y,66.040000*%
+M02*
