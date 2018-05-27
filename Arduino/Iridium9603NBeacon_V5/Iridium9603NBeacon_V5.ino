@@ -8,6 +8,7 @@
 // Set coil is connected to D7 (pull low to energise the relay coil)
 // Reset coil is connected to D2 (pull low to energise the relay coil)
 // The relay can be set/reset via an Iridium Mobile Terminated message (e.g. from RockBLOCK Operations or a Beacon Base)
+// The relay can also be pulsed on (set) for 1-5 seconds via MT message
 
 // Power for the 9603N is switched by a DMG3415 P-channel MOSFET
 // A 2N2222 NPN transistor pulls the MOSFET gate low
@@ -276,6 +277,8 @@ int PGOOD;
 unsigned long tnow;
 bool reset_relay_flag = false;
 bool set_relay_flag = false;
+bool pulse_relay_flag = false;
+int relay_pulse_duration = 0;
 
 // Storage for the average voltage during Iridium callbacks
 const int numReadings = 25;   // number of samples
@@ -961,12 +964,60 @@ void loop()
               flashVarsMem.write(flashVars); // Write the flash variables
             }
 
+            // Check if the message contains a correctly formatted relay pulse command: "[RELAY=1]" to "[RELAY=5]"
+            starts_at = 0;
+            starts_at = mt_str.indexOf("[RELAY=1]"); // See is message contains "[RELAY=1]"
+            if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
+              set_relay_flag = false;
+              reset_relay_flag = false;
+              pulse_relay_flag = true;
+              relay_pulse_duration = 1;
+              Serial.println("[RELAY=1] received.");
+            }
+            starts_at = 0;
+            starts_at = mt_str.indexOf("[RELAY=2]"); // See is message contains "[RELAY=2]"
+            if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
+              set_relay_flag = false;
+              reset_relay_flag = false;
+              pulse_relay_flag = true;
+              relay_pulse_duration = 2;
+              Serial.println("[RELAY=2] received.");
+            }
+            starts_at = 0;
+            starts_at = mt_str.indexOf("[RELAY=3]"); // See is message contains "[RELAY=3]"
+            if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
+              set_relay_flag = false;
+              reset_relay_flag = false;
+              pulse_relay_flag = true;
+              relay_pulse_duration = 3;
+              Serial.println("[RELAY=3] received.");
+            }
+            starts_at = 0;
+            starts_at = mt_str.indexOf("[RELAY=4]"); // See is message contains "[RELAY=4]"
+            if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
+              set_relay_flag = false;
+              reset_relay_flag = false;
+              pulse_relay_flag = true;
+              relay_pulse_duration = 4;
+              Serial.println("[RELAY=4] received.");
+            }
+            starts_at = 0;
+            starts_at = mt_str.indexOf("[RELAY=5]"); // See is message contains "[RELAY=5]"
+            if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
+              set_relay_flag = false;
+              reset_relay_flag = false;
+              pulse_relay_flag = true;
+              relay_pulse_duration = 5;
+              Serial.println("[RELAY=5] received.");
+            }
+
             // Check if the message contains a correctly formatted relay command: "[RELAY=ON]" or "[RELAY=OFF]"
             starts_at = 0;
             starts_at = mt_str.indexOf("[RELAY=ON]"); // See is message contains "[RELAY=ON]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be changed once 9603N is powered down:
               set_relay_flag = true;
               reset_relay_flag = false;
+              pulse_relay_flag = false; // set overrides pulse
               Serial.println("[RELAY=ON] received.");
             }
             starts_at = 0;
@@ -974,6 +1025,7 @@ void loop()
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be changed once 9603N is powered down:
               reset_relay_flag = true;
               set_relay_flag = false; // reset overrides set
+              pulse_relay_flag = false; // reset overrides pulse
               Serial.println("[RELAY=OFF] received.");
             }
 
@@ -1010,17 +1062,23 @@ void loop()
       digitalWrite(Enable_9603N, LOW); // Disable the 9603N
       digitalWrite(LTC3225shutdown, LOW); // Disable the LTC3225 supercapacitor charger
 
-      // Now that power draw has been minimised, set/reset the relay
+      // Now that power draw has been minimised, reset/set/pulse the relay
       if (reset_relay_flag == true) {
         Serial.println("Resetting relay...");
         reset_relay();
         reset_relay_flag = false;
-        set_relay_flag = false; // reset overrides set
       }
       if (set_relay_flag == true) {
         Serial.println("Setting relay...");
         set_relay();
         set_relay_flag = false;
+      }
+      if (pulse_relay_flag == true) {
+        Serial.println("Pulsing relay...");
+        set_relay();
+        delay(relay_pulse_duration * 1000);
+        reset_relay();
+        pulse_relay_flag = false;
       }
 
       // Turn LED off
