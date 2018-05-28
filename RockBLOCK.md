@@ -91,10 +91,10 @@ your message to that module. This means the messages from your mobile Iridium Be
 See the last two pages of the [RockBLOCK-9603-Developers-Guide](http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf) for further information.
 
 In the [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory, you will find Arduino code for both the mobile
-[Iridium9603NBeacon_V4](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V4) and the base
-[Iridium9603NBeacon_V4_Base](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V4_Base).
+[Iridium9603NBeacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5) and the base
+[Iridium9603NBeacon_V5_Base](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5_Base).
 
-To enable message forwarding: edit Iridium9603NBeacon_V4.ino, uncomment the line which says _#define RockBLOCK_ and enter the serial numbers for both
+To enable message forwarding: edit Iridium9603NBeacon_V5.ino, uncomment the line which says _#define RockBLOCK_ and enter the serial numbers for both
 the sending Beacon (_#define source "RB00nnnnn"_) and the destination base (_#define destination "RB00nnnnn"_).
 The serial numbers need to be seven digits long - prefix with zeros if necessary - and include the "RB" prefix.
 
@@ -106,7 +106,7 @@ large areas, 0.1 degree or 0.01 degree for smaller areas.
 
 [Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py) is very similar in its operation to
 Iridium_Beacon_Mapper_RockBLOCK.py except that the beacon data is received via Iridium rather than by email. The software talks to
-Iridium_9603N_Beacon_V4_Base via Serial (over USB) and displays the beacon and base locations using the
+Iridium9603NBeacon_V5_Base via Serial (over USB) and displays the beacon and base locations using the
 [Google Static Maps API](https://developers.google.com/maps/documentation/static-maps/intro).
 
 You will need a Key to access the API. You can create one by following [this link](https://developers.google.com/maps/documentation/static-maps/get-api-key).
