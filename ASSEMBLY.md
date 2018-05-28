@@ -67,7 +67,7 @@ component to position. Take extra time to make sure the legs are centered accura
 Use a reflow oven to heat the circuit board to the correct temperatures to melt the solder. A reflow oven doesn't need to be
 expensive. The one shown below was assembled from:
 
-- Quest 9L 1000W mini-oven
+- Quest 9L 800W mini-oven
 - Inkbird PID temperature controller and 40A solid state relay
 - Type K thermocouple
 

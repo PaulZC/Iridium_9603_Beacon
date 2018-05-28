@@ -36,7 +36,7 @@ non-volatile (flash) memory and so will be retained even if the Beacon is reset.
 
 If you want to change the state of the OMRON relay during a flight, you can do this by including the text _[RELAY=ON]_ or _[RELAY=OFF]_ in the RockBLOCK message.
 The state of the relay will be updated after the next transmit cycle. If you want to pulse the relay on for 1-5 seconds, to trigger e.g. a cut-down device,
-include the text _[RELAY=1]_ to pulse the relay on for 1 second thern off again. _[RELAY=5]_ will pulse the relay on for five seconds then off again.
+include the text _[RELAY=1]_ to pulse the relay on for 1 second then off again. _[RELAY=5]_ will pulse the relay on for five seconds then off again.
 Only integer pulse durations of 1-5 seconds are valid, other values will be ignored. A future version of the code will make use of the 9603N Ring Indicator
 signal to let the beacon know when a new message is waiting to be downloaded without first needing to go through a full transmit cycle.
 

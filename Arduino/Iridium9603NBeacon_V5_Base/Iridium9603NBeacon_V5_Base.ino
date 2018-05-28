@@ -38,7 +38,12 @@
 // D6 (Port A Pin 20) = Enable (Sleep) : Connect to 9603 ON/OFF Pin 5
 // D10 (Port A Pin 18) = Serial2 TX : Connect to 9603 Pin 6
 // D12 (Port A Pin 19) = Serial2 RX : Connect to 9603 Pin 7
-// A3 / D17 (Port A Pin 4) = Network Available : Connect to 9603 Pin 19
+// A3 / D17 (Port A Pin 4) = Ring Indicator : Connect to 9603 Pin 12
+
+// Power to the 9603N is switched by a P-channel MOSFET
+// The MOSFET gate is pulled high by a 10K resistor. The gate is pulled low by a 2N2222 NPN transistor
+// Power is enabled by pulling the base of the transistor high
+// The transistor base is connected to A5 / D19 (Port B Pin 2)
 
 // Iridium 9603 is powered from Linear Technology LTC3225 SuperCapacitor Charger
 // (fitted with 2 x 1F 2.7V caps e.g. Bussmann HV0810-2R7105-R)
@@ -59,6 +64,11 @@
 // D13 (Port A Pin 17) = WB2812B NeoPixel + single Red LED
 // D9 (Port A Pin 7) = AIN 7 : Bus Voltage / 2
 // D14 (Port A Pin 2) = AIN 0 : 1.25V precision voltage reference
+
+// OMRON G6SK relay:
+// Set coil is connected to D7 (pull low to energise the relay coil)
+// Reset coil is connected to D2 (pull low to energise the relay coil)
+// The relay is unused by this version of the base code - but it could be used to provide e.g. a 'message alert' or similar
 
 // As the supply voltage drops, reported VBUS on A7 drops to ~3.4V and then flatlines
 // as the 3.3V rail starts to collapse. The 1.25V reference on A0 allows lower voltages to be measured
@@ -163,9 +173,10 @@ long iterationCounter = 0; // Increment each time a transmission is attempted
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // WB2812B
 #define LED_Brightness 32 // 0 - 255 for WB2812B
 
-static const int networkAvailable = 17; // 9602 Network Available on pin D17
+static const int ringIndicator = 17; // 9602 Ring Indicator on pin D17
 static const int LTC3225shutdown = 5; // LTC3225 ~Shutdown on pin D5
 static const int LTC3225PGOOD = 15; // LTC3225 PGOOD on pin A1 / D15
+static const int Enable_9603N = 19; // 9603N Enable (enables EXT_PWR via P-MOSFET)
 static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define GPS_ON LOW
 #define GPS_OFF HIGH
@@ -174,6 +185,9 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define VBUS_NORM 3.3 // Normal bus voltage for battery voltage calculations
 #define VREF_NORM 1.25 // Normal reference voltage for battery voltage calculations
 #define VBAT_LOW 3.05 // Minimum voltage for LTC3225
+
+static const int set_coil = 7; // OMRON G6SK relay set coil (pull low to energise coil)
+static const int reset_coil = 2; // OMRON G6SK relay reset coil (pull low to energise coil)
 
 // Loop Steps
 #define init          0
@@ -325,11 +339,6 @@ void sendUBX(const uint8_t *message, const int len) {
 
 void setup()
 {
-  pixels.begin(); // This initializes the NeoPixel library.
-  delay(100); // Seems necessary to make the NeoPixel start reliably 
-  pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
-  LED_off(); // Turn NeoPixel off
-  
   pinMode(LTC3225shutdown, OUTPUT); // LTC3225 supercapacitor charger shutdown pin
   digitalWrite(LTC3225shutdown, HIGH); // Enable the LTC3225 supercapacitor charger
   pinMode(LTC3225PGOOD, INPUT); // Define an input for the LTC3225 Power Good signal
@@ -337,10 +346,21 @@ void setup()
   pinMode(GPS_EN, OUTPUT); // GPS & MPL3115A2 enable
   digitalWrite(GPS_EN, GPS_ON); // Enable the GPS and MPL3115A2
   
+  pinMode(Enable_9603N, OUTPUT); // 9603N enable via P-FET and NPN transistor
+  digitalWrite(Enable_9603N, LOW); // Disable the 9603N - wait until the supercapacitors are charged
+  
   pinMode(IridiumSleepPin, OUTPUT); // The call to IridiumSBD should have done this - but just in case
   digitalWrite(IridiumSleepPin, LOW); // Disable the Iridium 9603 - wait until the supercapacitors are charged
-  pinMode(networkAvailable, INPUT); // Define an input for the Iridium 9603 Network Available signal
+  pinMode(ringIndicator, INPUT); // Define an input for the Iridium 9603 Ring Indicator signal
 
+  pinMode(set_coil, INPUT_PULLUP); // Initialise relay set_coil pin
+  pinMode(reset_coil, INPUT_PULLUP); // Initialise relay reset_coil pin
+
+  pixels.begin(); // This initializes the NeoPixel library.
+  delay(100); // Seems necessary to make the NeoPixel start reliably 
+  pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
+  LED_off(); // Turn NeoPixel off
+  
   loop_step = init; // Make sure loop_step is set to init
 }
 
@@ -472,6 +492,10 @@ void loop()
 
       // Start talking to the 9603 and power it up
       Serial.println("Powering on the 9603...");
+      
+      digitalWrite(Enable_9603N, HIGH); // Enable the 9603N
+      delay(2000);
+
       err = isbd.begin(); // isbd.begin powers up the 9603
       if (err != ISBD_SUCCESS) {
         Serial.print("ERROR: isbd.begin failed with error ");
@@ -703,7 +727,8 @@ void loop()
       {
       ssIridium.println("AT*F"); // Send "flush memory" command
       delay(2000); // Allow time for the 9603N to flush its memory
-      digitalWrite(IridiumSleepPin, LOW); // Disable the Iridium 9603
+      digitalWrite(IridiumSleepPin, LOW); // Disable the Iridium 9603N
+      digitalWrite(Enable_9603N, LOW); // Disconnect power to the 9603N
       digitalWrite(LTC3225shutdown, LOW); // Disable the LTC3225 supercapacitor charger
       digitalWrite(GPS_EN, GPS_OFF); // Disable the GPS and MPL3115A2
       delay(2000); // Allow two seconds for 9603N voltages to decay
