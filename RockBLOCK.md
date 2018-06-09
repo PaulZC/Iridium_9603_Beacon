@@ -107,7 +107,8 @@ To enable message forwarding: edit Iridium9603NBeacon_V5.ino, and change the lin
 number of the destination RockBLOCK which is acting as the base. Also change the line which says **#define RB_source 1234** . Replace the 1234 with the serial
 number of the RockBLOCK 9603N you are sending the messages from. That way the beacons will accessible through the _Beacon Messaging_ pull-down menu in 
 [Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py). If you don't want to edit the Arduino code,
-you can configure the RBSOURCE and RBDESTINATION serial numbers by sending messages through RockBLOCK operations.
+you can configure the RBSOURCE and RBDESTINATION serial numbers by
+[sending messages through RockBLOCK operations](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-rockblock-operations).
 
 _You will be charged twice for each message: once to send it from the Beacon (Mobile Originated); and a second time to receive it on the base (Mobile Terminated)._
 
