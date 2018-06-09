@@ -114,7 +114,8 @@ _You will be charged twice for each message: once to send it from the Beacon (Mo
 
 Before you travel, download a set of Google Static Map tiles using
 [Google_Static_Maps_Tiler.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Google_Static_Maps_Tiler.py). 1 degree tiles are useful for
-large areas, 0.1 degree or 0.01 degree for smaller areas.
+large areas, 0.1 degree or 0.01 degree for smaller areas. Put the _StaticMapTile----.png_ files in the same directory as Iridium_Beacon_Base.py. By default, the
+Tiler will ask Google for _roadmap_ map_type images. You can change this to _satellite_, _terrain_ or _hybrid_ by editing the Python code before you run it.
 
 [Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py) is very similar in its operation to
 Iridium_Beacon_Mapper_RockBLOCK.py except that the beacon data is received via Iridium rather than by email. The software talks to
