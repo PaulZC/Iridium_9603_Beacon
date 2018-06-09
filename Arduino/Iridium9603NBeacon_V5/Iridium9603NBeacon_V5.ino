@@ -2,6 +2,11 @@
 // # Iridium 9603N Beacon V5 #
 // ###########################
 
+// Now stores both source and destination RockBLOCK serial numbers in flash.
+// The default values are:
+#define RB_destination 0 // Serial number of the destination RockBLOCK (int). Set to zero to disable RockBLOCK message forwarding
+#define RB_source 1234 // Serial number of this unit (int)
+
 // Updated for the V5 PCB: provides support for an OMRON G6SK relay; 9603N EXT_PWR is switched via a P-MOSFET.
 
 // OMRON G6SK relay:
@@ -103,7 +108,7 @@
 // Cyan when waiting for supercapacitors to charge (loop_step == start_LTC3225 or wait_LTC3225) (could take 7 mins)
 // White during Iridium transmit (loop_step == start_9603) (could take 5 mins)
 // Green flash (2 seconds) indicates successful transmission
-// Red flash (2 seconds) entering sleep
+// Red flash (2+ seconds) entering sleep
 // LED will flash Red after: Iridium transmission (successful or failure); low battery detected; no GNSS data; supercapacitors failed to charge
 // WB2812B blue LED has the highest forward voltage and is slightly dim at 3.3V. The red and green values are adapted accordingly (222 instead of 255).
 
@@ -111,14 +116,11 @@
 // https://www.rock7.com/shop-product-detail?productId=50
 // http://www.rock7mobile.com/products-rockblock-9603
 // http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf (see last page)
+// Change RB_destination (above) to the serial number of the destination RockBLOCK
+// Change RB_source (above) to the serial number of this RockBLOCK
+// Both RBSOURCE and RBDESTINATION can be updated via a MT message.
 // Note: the RockBLOCK gateway does not remove the destination RockBLOCK address from the SBD message
 // so, in this code, it is included as a full CSV field
-
-//#define RockBLOCK // Uncomment this line to enable delivery to another RockBLOCK
-#ifdef RockBLOCK
-#define destination "RB0001234" // Serial number of the destination RockBLOCK with 'RB' prefix
-#define source "RB0001234" // Serial number of this unit with 'RB' prefix
-#endif
 
 #include <IridiumSBD.h> // Requires V2: https://github.com/mikalhart/IridiumSBD
 #include <TinyGPS.h> // NMEA parsing: http://arduiniana.org
@@ -141,10 +143,16 @@ int BEACON_INTERVAL = 5;
 typedef struct { // Define a struct to hold the flash variable(s)
   int PREFIX; // Flash storage prefix (0xB5); used to test if flash has been written to before 
   int INTERVAL; // Message interval in minutes
+  // RockBLOCK source serial number: stored as an int; i.e. the RockBLOCK serial number of the 9603N attached to this beacon
+  int RBSOURCE; 
+  // RockBLOCK destination serial number: stored as an int; i.e. the RockBLOCK serial number of the 9603N you would like the messages delivered _to_
+  int RBDESTINATION; // Set this to zero to disable RockBLOCK gateway message forwarding
   int CSUM; // Flash storage checksum; the modulo-256 sum of PREFIX and INTERVAL; used to check flash data integrity
 } FlashVarsStruct;
 FlashStorage(flashVarsMem, FlashVarsStruct); // Reserve memory for the flash variables
 FlashVarsStruct flashVars; // Define the global to hold the variables
+int RBSOURCE = RB_source;
+int RBDESTINATION = RB_destination;
 
 // MPL3115A2
 #include <Wire.h>
@@ -496,20 +504,24 @@ void setup()
   pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
   LED_off(); // Turn NeoPixel off
   
-  // See if BEACON_INTERVAL has already been stored in flash
-  // If it has, read it. If not, initialise it.
+  // See if global variables have already been stored in flash
+  // If they have, read them. If not, initialise them.
   flashVars = flashVarsMem.read(); // Read the flash memory
-  int csum = flashVars.PREFIX + flashVars.INTERVAL; // Sum the prefix and data
+  int csum = flashVars.PREFIX + flashVars.INTERVAL + flashVars.RBSOURCE + flashVars.RBDESTINATION; // Sum the prefix and data
   csum = csum & 0xff; // Limit checksum to 8-bits
   if ((flashVars.PREFIX == 0xB5) and (csum == flashVars.CSUM)) { // Check prefix and checksum match
-    // Flash data is valid so update BEACON_INTERVAL using the stored value
+    // Flash data is valid so update globals using the stored values
     BEACON_INTERVAL = flashVars.INTERVAL;
+    RBSOURCE = flashVars.RBSOURCE;
+    RBDESTINATION = flashVars.RBDESTINATION;
   }
   else {
     // Flash data is corrupt or hasn't been initialised so do that now
     flashVars.PREFIX = 0xB5; // Initialise the prefix
     flashVars.INTERVAL = BEACON_INTERVAL; // Initialise the beacon interval
-    csum = flashVars.PREFIX + flashVars.INTERVAL; // Initialise the checksum
+    flashVars.RBSOURCE = RBSOURCE; // Initialise the source RockBLOCK serial number
+    flashVars.RBDESTINATION = RBDESTINATION; // Initialise the destination RockBLOCK serial number
+    csum = flashVars.PREFIX + flashVars.INTERVAL + flashVars.RBSOURCE + flashVars.RBDESTINATION; // Initialise the checksum
     csum = csum & 0xff;
     flashVars.CSUM = csum;
     flashVarsMem.write(flashVars); // Write the flash variables
@@ -557,6 +569,12 @@ void loop()
       Serial.print(BEACON_INTERVAL);
       Serial.println(" minutes");
       
+      // Echo RBDESTINATION and RBSOURCE
+      Serial.print("Using an RBDESTINATION of ");
+      Serial.println(RBDESTINATION);
+      Serial.print("Using an RBSOURCE of ");
+      Serial.println(RBSOURCE);
+
       // Setup the IridiumSBD
       // (attachConsole and attachDiags methods have been replaced with ISBDConsoleCallback and ISBDDiagsCallback)
       isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Change power profile to "low current"
@@ -867,11 +885,12 @@ void loop()
     
         if (fixFound)
         {
-#ifdef RockBLOCK
-          sprintf(outBuffer, "%s,%d%02d%02d%02d%02d%02d,", destination, year, month, day, hour, minute, second);
-#else
-          sprintf(outBuffer, "%d%02d%02d%02d%02d%02d,", year, month, day, hour, minute, second);
-#endif
+          if (RBDESTINATION > 0) {
+            sprintf(outBuffer, "RB%07d,%d%02d%02d%02d%02d%02d,", RBDESTINATION, year, month, day, hour, minute, second);
+          }
+          else {
+            sprintf(outBuffer, "%d%02d%02d%02d%02d%02d,", year, month, day, hour, minute, second);
+          }
           int len = strlen(outBuffer);
           PString str(outBuffer + len, sizeof(outBuffer) - len);
           str.print(latitude, 6);
@@ -895,20 +914,23 @@ void loop()
           str.print(vbat, 2);
           str.print(",");
           str.print(float(iterationCounter), 0);
-#ifdef RockBLOCK // Append source serial number (as text) to the end of the message
-          str.print(",");
-          str.print(source);
-#endif RockBLOCK
+          if (RBDESTINATION > 0) { // Append source RockBLOCK serial number (as text) to the end of the message
+            char sourceBuffer[12];
+            sprintf(sourceBuffer, "RB%07d", RBSOURCE);
+            str.print(",");
+            str.print(sourceBuffer);
+          }
         }
     
         else
         {
           // No GPS fix found!
-#ifdef RockBLOCK
-          sprintf(outBuffer, "%s,19700101000000,0.0,0.0,0,0.0,0,0.0,0,", destination);
-#else
-          sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,0.0,0,");
-#endif
+          if (RBDESTINATION > 0) {
+            sprintf(outBuffer, "RB%07d,19700101000000,0.0,0.0,0,0.0,0,0.0,0,", RBDESTINATION);
+          }
+          else {
+            sprintf(outBuffer, "19700101000000,0.0,0.0,0,0.0,0,0.0,0,");
+          }
           int len = strlen(outBuffer);
           PString str(outBuffer + len, sizeof(outBuffer) - len);
           str.print(pascals, 0);
@@ -918,16 +940,18 @@ void loop()
           str.print(vbat, 2);
           str.print(",");
           str.print(float(iterationCounter), 0);
-#ifdef RockBLOCK // Append source serial number (as text) to the end of the message
-          str.print(",");
-          str.print(source);
-#endif RockBLOCK
+          if (RBDESTINATION > 0) { // Append source RockBLOCK serial number (as text) to the end of the message
+            char sourceBuffer[12];
+            sprintf(sourceBuffer, "RB%07d", RBSOURCE);
+            str.print(",");
+            str.print(sourceBuffer);
+          }
         }
 
         Serial.print("Transmitting message '");
         Serial.print(outBuffer);
         Serial.println("'");
-        uint8_t mt_buffer[50]; // Buffer to store Mobile Terminated SBD message
+        uint8_t mt_buffer[100]; // Buffer to store Mobile Terminated SBD message
         size_t mtBufferSize = sizeof(mt_buffer); // Size of MT buffer
 
         if (isbd.sendReceiveSBDText(outBuffer, mt_buffer, mtBufferSize) == ISBD_SUCCESS) { // Send the message; download an MT message if there is one
@@ -958,7 +982,59 @@ void loop()
               // Update flash memory
               flashVars.PREFIX = 0xB5; // Reset the prefix (hopefully redundant!)
               flashVars.INTERVAL = new_interval; // Store the new beacon interval
-              int csum = flashVars.PREFIX + flashVars.INTERVAL; // Update the checksum
+              int csum = flashVars.PREFIX + flashVars.INTERVAL + flashVars.RBSOURCE + flashVars.RBDESTINATION; // Update the checksum
+              csum = csum & 0xff;
+              flashVars.CSUM = csum;
+              flashVarsMem.write(flashVars); // Write the flash variables
+            }
+
+            // Check if the message contains a correctly formatted RBSOURCE: "[RBSOURCE=nnnnn]"
+            int new_source = -1;
+            starts_at = 0;
+            ends_at = 0;
+            starts_at = mt_str.indexOf("[RBSOURCE="); // See is message contains "[RBSOURCE="
+            if (starts_at >= 0) { // If it does:
+              ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
+              if (ends_at > starts_at) { // If the message contains both "[RBSOURCE=" and "]"
+                String new_source_str = mt_str.substring((starts_at + 10),ends_at); // Extract the value after the "="
+                Serial.print("Extracted an RBSOURCE of: "); Serial.println(new_source_str);
+                new_source = (int)new_source_str.toInt(); // Convert it to int
+              }
+            }
+            if (new_source > 0) { // If new_source was received
+              Serial.print("New RBSOURCE received. Setting RBSOURCE to ");
+              Serial.println(new_source);
+              RBSOURCE = new_source; // Update RBSOURCE
+              // Update flash memory
+              flashVars.PREFIX = 0xB5; // Reset the prefix (hopefully redundant!)
+              flashVars.RBSOURCE = new_source; // Store the new RockBLOCK source serial number
+              int csum = flashVars.PREFIX + flashVars.INTERVAL + flashVars.RBSOURCE + flashVars.RBDESTINATION; // Update the checksum
+              csum = csum & 0xff;
+              flashVars.CSUM = csum;
+              flashVarsMem.write(flashVars); // Write the flash variables
+            }
+
+            // Check if the message contains a correctly formatted RBDESTINATION: "[RBDESTINATION=nnnnn]"
+            int new_destination = -1;
+            starts_at = 0;
+            ends_at = 0;
+            starts_at = mt_str.indexOf("[RBDESTINATION="); // See is message contains "[RBDESTINATION="
+            if (starts_at >= 0) { // If it does:
+              ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
+              if (ends_at > starts_at) { // If the message contains both "[RBDESTINATION=" and "]"
+                String new_destination_str = mt_str.substring((starts_at + 15),ends_at); // Extract the value after the "="
+                Serial.print("Extracted an RBDESTINATION of: "); Serial.println(new_destination_str);
+                new_destination = (int)new_destination_str.toInt(); // Convert it to int
+              }
+            }
+            if (new_destination > 0) { // If new_destination was received
+              Serial.print("New RBDESTINATION received. Setting RBDESTINATION to ");
+              Serial.println(new_destination);
+              RBDESTINATION = new_destination; // Update RBDESTINATION
+              // Update flash memory
+              flashVars.PREFIX = 0xB5; // Reset the prefix (hopefully redundant!)
+              flashVars.RBDESTINATION = new_destination; // Store the new RockBLOCK destination serial number
+              int csum = flashVars.PREFIX + flashVars.INTERVAL + flashVars.RBSOURCE + flashVars.RBDESTINATION; // Update the checksum
               csum = csum & 0xff;
               flashVars.CSUM = csum;
               flashVarsMem.write(flashVars); // Write the flash variables

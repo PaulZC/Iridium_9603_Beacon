@@ -27,6 +27,8 @@ beacon is located:
 
 ![RockBLOCK_Operations_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_3.JPG)
 
+## Configuring your Beacon via RockBLOCK Operations
+
 If you want to change the beacon transmission interval (BEACON_INTERVAL) during a flight, you can do this through RockBLOCK Operations using the _Send a Message_
 function. Select the RockBLOCK serial numbers of the beacon(s) you want to update and send a plain text message using the format _[INTERVAL=nnn]_ where _nnn_
 is the message interval in _minutes_. The interval will be updated the next time the beacon wakes up for a transmit cycle. The interval is stored in
@@ -37,8 +39,15 @@ non-volatile (flash) memory and so will be retained even if the Beacon is reset.
 If you want to change the state of the OMRON relay during a flight, you can do this by including the text _[RELAY=ON]_ or _[RELAY=OFF]_ in the RockBLOCK message.
 The state of the relay will be updated after the next transmit cycle. If you want to pulse the relay on for 1-5 seconds, to trigger e.g. a cut-down device,
 include the text _[RELAY=1]_ to pulse the relay on for 1 second then off again. _[RELAY=5]_ will pulse the relay on for five seconds then off again.
-Only integer pulse durations of 1-5 seconds are valid, other values will be ignored. A future version of the code will make use of the 9603N Ring Indicator
-signal to let the beacon know when a new message is waiting to be downloaded without first needing to go through a full transmit cycle.
+Only integer pulse durations of 1-5 seconds are valid, other values will be ignored.
+
+If you want to enable message forwarding via the RockBLOCK Gateway, you can do this by including the text _[RBDESTINATION=nnnnn]_ in the RockBLOCK message where _nnnnn_
+is the serial number of the destination RockBLOCK. You can disable message forwarding by sending a message containing _[RBDESTINATION=0]_. You can change the source
+serial number which is included in the messages by including the text _[RBSOURCE=nnnnn]_ in the RockBLOCK message where _nnnnn_ is the serial number of the
+RockBLOCK 9603N you are sending the messages from.
+
+A future version of the code will make use of the 9603N Ring Indicator signal to let the beacon know when a new message is waiting to be downloaded without
+first needing to go through a full transmit cycle.
 
 ## Tracking your beacon with an internet connection
 
@@ -94,9 +103,11 @@ In the [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Ardui
 [Iridium9603NBeacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5) and the base
 [Iridium9603NBeacon_V5_Base](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5_Base).
 
-To enable message forwarding: edit Iridium9603NBeacon_V5.ino, uncomment the line which says _#define RockBLOCK_ and enter the serial numbers for both
-the sending Beacon (_#define source "RB00nnnnn"_) and the destination base (_#define destination "RB00nnnnn"_).
-The serial numbers need to be seven digits long - prefix with zeros if necessary - and include the "RB" prefix.
+To enable message forwarding: edit Iridium9603NBeacon_V5.ino, and change the line which says **#define RB_destination 0** . Change the zero to the the serial
+number of the destination RockBLOCK which is acting as the base. Also change the line which says **#define RB_source 1234** . Replace the 1234 with the serial
+number of the RockBLOCK 9603N you are sending the messages from. That way the beacons will accessible through the _Beacon Messaging_ pull-down menu in 
+[Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py). If you don't want to edit the Arduino code,
+you can configure the RBSOURCE and RBDESTINATION serial numbers by sending messages through RockBLOCK operations.
 
 _You will be charged twice for each message: once to send it from the Beacon (Mobile Originated); and a second time to receive it on the base (Mobile Terminated)._
 

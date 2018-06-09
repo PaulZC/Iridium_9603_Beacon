@@ -10,6 +10,8 @@ New hardware features for Version 5:
 
 New software features for Version 5:
 - Relay can be configured during a flight via a Mobile Terminated SBD message
+- Relay can be 'pulsed' on for 1-5 seconds or turned on/off indefinitely
+- RockBLOCK Gateway message forwarding can be enabled/disabled via a Mobile Terminated SBD message
 
 ![Iridium_9603N_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5.JPG)
 
