@@ -2,12 +2,12 @@
 
 ## Multi Iridium Beacon Base
 
-## Written by Paul Clark: Dec 2017 - Mar 2018.
+## Written by Paul Clark: Dec 2017 - July 2018.
 
 ## This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 ## Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
 
-## Talks to an Iridium_9603N_Beacon_V4_Base via Serial.
+## Talks to an Iridium_9603N_Beacon_V5_Base via Serial over USB.
 ## Displays beacon and base locations using the Google Static Maps API:
 ## https://developers.google.com/maps/documentation/static-maps/intro
 ## You will need a Key to access the API. You can create one by following this link:
@@ -15,7 +15,7 @@
 ## Copy and paste it into a file called Google_Static_Maps_API_Key.txt
 
 ## Each beacon sends a data packet to the base via Iridium, forwarded by Rock7's RockBLOCK network.
-## The serial number of the destination base is set in Iridium9603NBeacon_V4.ino
+## The serial number of the destination base can be set using the "Beacon Messaging" option (see below).
 
 ## Every 'update' seconds the GUI talks to the base beacon and:
 ## requests its GNSS data including time, position and altitude;
@@ -41,13 +41,23 @@
 ## A pull-down menu lists the locations of all the beacons being tracked.
 ## Clicking on a menu entry will center the map on that location and will copy the location
 ## to the clipboard.
+
 ## A second pull-down menu shows the location of the base. Clicking it will center the map on that
 ## location and will copy that location to the clipboard.
-## A third pull-down menu lets you send an SBD message _to_ the chosen beacon to - for example -
+
+## The "Beacon Messaging" pull-down menu lets you send an SBD message _to_ the chosen beacon to - for example -
 ## change its message interval. The message format is:
 ## RBxxxxxxx[INTERVAL=yyy]
-## where: xxxxxxx is the 'RockBLOCK' serial number of the 9603 (seven digits;
+## where: xxxxxxx is the 'RockBLOCK' serial number of the 9603N (seven digits;
 ## prefix with zeros as necessary); and yyy is the message interval (BEACON_INTERVAL) in _minutes_.
+## To operate a cut-down unit attached to that beacon, send the message
+## RBxxxxxxx[RELAY=1]
+## To enable message forwarding from the beacon to the base, send the message
+## RBxxxxxxx[RBDESTINATION=yyyyy]
+## where yyyyy is the RockBLOCK serial number of the _Base_ Iridium 9603N.
+## To disable message forwarding, send the message
+## RBxxxxxxx[RBDESTINATION=0]
+## For more details, see https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md
 
 ## The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a
 ## premium plan with Google.
@@ -78,11 +88,13 @@ class BeaconBase(object):
 
       # Default values
       self._job = None # Keep track of timer calls
+      self.message_boxes_open = 0 # How many message boxes are open? (Used to disable updates)
       self.zoom = '15' # Default Google Maps zoom (text)
-      self.default_interval = 120 # Default update interval (secs)
+      self.default_interval = 300 # Default update interval (secs)
+      self.update_intervals = [ 30, 45, 60, 75, 90, 120, 150, 180, 240, 300, 450, 600, 900, 1200, 1500, 1800, 2400, 3600, 5400, 7200, 10800 ] # Update intervals
       self.default_beacon_interval = 5 # Default beacon mesage interval (mins)
-      self.beacon_timeout = 65 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
-      self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V4_Base)
+      self.beacon_timeout = 90 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
+      self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V5_Base)
       self.console_height = 2 # Console window height in lines
       self.sep_width = 304 # Separator width in pixels
       self.map_lat = 0.0 # Map latitude (degrees)
@@ -196,6 +208,7 @@ class BeaconBase(object):
       self.ser.flushInput() # Flush RX buffer
 
       # Check for offline map tiles
+      print 'Looking for offline map tiles...'
       self.tile_num = 0 # tile number
       self.tile_filenames = [] # tile long filenames
       self.tile_lats = [] # tile latitudes
@@ -225,6 +238,12 @@ class BeaconBase(object):
       self.fp = open(self.console_log_file, 'wb') # Create / clear the file
       self.fp.close()
       print 'Logging console messages to:',self.console_log_file
+      print
+
+      # Wait until Base is ready
+      print 'The tri-colour LED on the Base should go from Magenta to Blue and then to Cyan.'
+      print 'Please wait until the LED is Cyan (Green + Blue) then press Enter to continue...'
+      raw_input()
       print
 
       # Set up Tkinter GUI
@@ -257,7 +276,7 @@ class BeaconBase(object):
       self.interval.grid(row=row, column=1) # Assign its position
       self.interval.delete(0, tk.END) # Delete any existing text (redundant?)
       self.interval.insert(0, str(self.default_interval)) # Insert default value
-      self.interval.config(justify=tk.CENTER,width=22) # Configure
+      self.interval.config(justify=tk.CENTER,width=22, state='readonly') # Configure
       self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (s)',width=20) # Create text label
       self.interval_txt.grid(row=row, column=0) # Assign its position
       row += 1
@@ -476,10 +495,21 @@ class BeaconBase(object):
       self.message_menu = tk.Menu(self.menubar, tearoff=0)
       self.menubar.add_cascade(label="Beacon Messaging", menu=self.message_menu)
       self.window.config(menu=self.menubar)
+      # Add a dummy entry so messages can be sent to a beacon _before_ a message has been received from that beacon
+      self.message_menu.add_command(label="RB0000000",command=lambda ser_no="RB0000000": self.send_message(ser_no))
+
+      # Menu to list update intervals
+      self.interval_menu = tk.Menu(self.menubar, tearoff=0)
+      self.menubar.add_cascade(label="Set Update Interval", menu=self.interval_menu)
+      self.window.config(menu=self.menubar)
+      # Add intervals
+      for update_interval in self.update_intervals:
+         interval_str = str(update_interval)
+         self.interval_menu.add_command(label=interval_str,command=lambda interval_str=interval_str: self.set_update_interval(interval_str))
 
       # Set up next update
       self.last_update_at = time.time() # Last time an update was requested
-      self.next_update_at = self.last_update_at #+ self.default_interval # Do first update after this many seconds
+      self.first_update = True # Flag to indicate if an update has been performed
 
       # Timer
       self.window.after(2000,self.timer) # First timer event after 2 secs
@@ -489,35 +519,31 @@ class BeaconBase(object):
 
    def timer(self):
       ''' Timer function - calls itself repeatedly to schedule data collection and map updates '''
-      do_update = False # Initialise is it time to do an update?
-      now = time.time() # Get the current time
+      do_update = False # Flag to indicate if an update is required
+      now = time.time() # Get the current time      
       self.time_since_last_update.configure(state='normal') # Unlock entry box
       time_since_last_update = now - self.last_update_at # Calculate interval since last update
       self.time_since_last_update.delete(0, tk.END) # Delete existing value
-      if (now < self.next_update_at): # Is it time for the next update?
-         # If it isn't yet time for an update, update the indicated time since last update
-         self.time_since_last_update.insert(0, str(int(time_since_last_update)))
-      else:
-         # If it is time for an update: reset time since last update; set time for next update
-         try: # Try and read the update interval
-            interval = float(self.interval.get())
-         except:
-            #self.interval.configure(state='normal') # Unlock entry box
-            self.interval.delete(0, tk.END) # Delete any existing text
-            self.interval.insert(0, str(self.default_interval)) # Insert default value
-            interval = self.default_interval
-            #self.interval.configure(state='readonly') # Lock entry box
-            #raise ValueError('Invalid Interval!')
-         self.time_since_last_update.insert(0, '0') # Reset time since last update
-         self.last_update_at = self.next_update_at # Update time of last update
-         self.next_update_at = self.next_update_at + interval # Set time for next update
-         do_update = True # Do update
+      self.time_since_last_update.insert(0, str(int(time_since_last_update))) # Update the indicated time since last update
       self.time_since_last_update.config(state='readonly') # Lock entry box
+
+      # Check if it is time to do an update
+      # Do an update if it has been at least interval seconds since the last update
+      # and there are no message boxes open
+      # or this is the first update
+      interval = float(self.interval.get())
+      if ((time_since_last_update >= interval) and (self.message_boxes_open == 0)) or (self.first_update == True): 
+         do_update = True # Do update
+         self.first_update = False # Clear flag
+         self.last_update_at = now # Update time of last update
 
       if do_update: # If it is time to do an update
          self.writeToConsole(self.console_1,'Starting update') # Update message console
-         self.get_base_location() # Read 'base_location' from Beacon Base GNSS
-         self.get_beacon_data() # Contact Iridium and download a new message (if available)
+         # Disable Flush_MT and Message_Menu during update
+         self.flush_mt_button.config(state='disabled') # Disable Flush MT button
+         self.menubar.entryconfig("Beacon Messaging", state='disabled') # Disable Beacon Messaging
+         self.get_base_location() # Read 'base_location' from Beacon Base GNSS ** BLOCKING **
+         self.get_beacon_data() # Contact Iridium and download a new message (if available) ** BLOCKING **
          self.distance_between() # Update distance
          self.course_to() # Update heading
          if self.do_zoom: # Do we need to update the zoom?
@@ -526,6 +552,9 @@ class BeaconBase(object):
          if self.do_map_update: # Do we need to update the map?
             self.update_map() # Update the Google Static Maps image
             self.do_map_update = False
+         # Enable Flush_MT and Message_Menu after update
+         self.flush_mt_button.config(state='active') # Enable Flush MT button
+         self.menubar.entryconfig("Beacon Messaging", state='active') # Enable Beacon Messaging
 
       self._job = self.window.after(250, self.timer) # Schedule another timer event in 0.25s
 
@@ -1058,8 +1087,13 @@ class BeaconBase(object):
       ''' Talk to Beacon Base using serial; send flush_mt command; process response '''
       # flush_mt returns: either (only) the MTQ; or an ERROR
       # This is RockBLOCK-specific!
+      self.message_boxes_open = self.message_boxes_open + 1 # Update the number of open message boxes
+      # Disable Flush_MT and Message_Menu during Flush_MT
+      self.flush_mt_button.config(state='disabled') # Disable Flush MT button
+      self.menubar.entryconfig("Beacon Messaging", state='disabled') # Disable Beacon Messaging
       if tkMessageBox.askokcancel("Flush MT Queue", "Are you sure?\nAny messages in the MT queue will be deleted!"):
-         self.writeToConsole(self.console_1, 'Requesting FLUSH_MT') # Update message console      
+         console_message = 'Requesting FLUSH_MT (could take ' + str(self.beacon_timeout) + 's)'
+         self.writeToConsole(self.console_1, console_message) # Update message console      
          resp = self.writeWait(self.flush_mt_choice, self.beacon_timeout) # Send menu choice '4'; wait for response for beacon_timeout seconds
          mtq = -1
          if resp != '': # Did we get a response?
@@ -1077,13 +1111,24 @@ class BeaconBase(object):
                self.writeToConsole(self.console_1, 'Request sent') # Update message console
          else:
             self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
+      # Enable Flush_MT and Message_Menu after Flush_MT
+      self.flush_mt_button.config(state='active') # Enable Flush MT button
+      self.menubar.entryconfig("Beacon Messaging", state='active') # Enable Beacon Messaging
+      self.message_boxes_open = self.message_boxes_open - 1 # Update the number of open message boxes
 
    def send_message(self, ser_no):
       ''' Talk to Beacon Base using serial; send message to chosen beacon; process response '''
       # send_message returns: either (only) the MTQ; or an ERROR
       # This is RockBLOCK-specific!
+      self.message_boxes_open = self.message_boxes_open + 1 # Update the number of open message boxes
+      # Disable Flush_MT and Message_Menu during Send_Message
+      self.flush_mt_button.config(state='disabled') # Disable Flush MT button
+      self.menubar.entryconfig("Beacon Messaging", state='disabled') # Disable Beacon Messaging
       message = ser_no + "[INTERVAL=" + str(self.default_beacon_interval) + "]" # Assemble default message
-      prompt_msg = "Send message to " + ser_no
+      if ser_no == "RB0000000":
+         prompt_msg = "Send message\r\rChange RB0000000 to the serial number of the destination RockBLOCK\r\r"
+      else:
+         prompt_msg = "Send message to " + ser_no
       # Ask user for message
       message = tkSimpleDialog.askstring("Beacon Messaging", prompt=prompt_msg, parent=self.window, initialvalue=message)
       if message != None:
@@ -1109,6 +1154,10 @@ class BeaconBase(object):
                self.writeToConsole(self.console_1, 'Message sent') # Update message console
          else:
             self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
+      # Enable Flush_MT and Message_Menu after Send_Message
+      self.flush_mt_button.config(state='active') # Enable Flush MT button
+      self.menubar.entryconfig("Beacon Messaging", state='active') # Enable Beacon Messaging
+      self.message_boxes_open = self.message_boxes_open - 1 # Update the number of open message boxes
 
    def writeToConsole(self, console, msg):
       ''' Write msg to the console; check if console is full; delete oldest entry if it is '''
@@ -1126,13 +1175,47 @@ class BeaconBase(object):
       self.fp.write(msg+'\n') # Write the console message to the log file
       self.fp.close() # Close the log file
     
+   def writeWaitWithCancel(self, data, delay):
+      ''' Write data to serial; wait for up to delay seconds for a reply '''
+      cancel = tk.Toplevel(self.window)
+      cancel.geometry("%dx%d%+d%+d" % (300, 75, 600, 400))
+      cancel.title("Cancel")
+      msg = tk.Message(cancel, text="Waiting for serial data.\rDo you want to cancel?", aspect=600)
+      msg.pack()
+      button = tk.Button(cancel, text="Cancel", command=cancel.destroy)
+      button.pack()
+      self.ser.flushInput() # Flush serial RX buffer (delete any old responses)
+      self.ser.write(data) # Send data (command)
+      for i in range(4*delay): # Wait for up to delay seconds (timeout is 0.25 secs)
+         try:
+            cancel.update()
+         except:
+            pass
+         try:
+            exists = cancel.winfo_exists()
+         except:
+            exists = 0
+         resp = self.ser.read(200) # Attempt to read a 200 character reply (forcing a timeout)
+         if (resp != '') or (exists == 0): # If the response was non-NULL or cancel window was closed, quit the loop
+            break
+      # If the cancel window is still open, destroy it
+      try:
+         cancel.destroy()
+      except:
+         pass
+      if resp != '': # If the response was non-NULL, return the response
+         return resp
+      else: # else return NULL
+         return ''
+
    def writeWait(self, data, delay):
       ''' Write data to serial; wait for up to delay seconds for a reply '''
       self.ser.flushInput() # Flush serial RX buffer (delete any old responses)
       self.ser.write(data) # Send data (command)
       for i in range(4*delay): # Wait for up to delay seconds (timeout is 0.25 secs)
+         self.window.update() # Update the window
          resp = self.ser.read(200) # Attempt to read a 200 character reply (forcing a timeout)
-         if resp != '': # If the response was non-NULL, quit the loop
+         if (resp != ''): # If the response was non-NULL, quit the loop
             break
       if resp != '': # If the response was non-NULL, return the response
          return resp
@@ -1144,18 +1227,29 @@ class BeaconBase(object):
       self.ser.flushInput() # Flush serial RX buffer (delete any old responses)
       self.ser.write(data) # Send data (command)
 
+   def set_update_interval(self, interval):
+      ''' Update the update interval '''
+      self.interval.configure(state='normal') # Unlock entry box
+      self.interval.delete(0, tk.END) # Delete existing value
+      self.interval.insert(0, interval) # Update the indicated time since last update
+      self.interval.config(state='readonly') # Lock entry box
+
    def QUIT(self):
       ''' Quit the program '''
+      self.message_boxes_open = self.message_boxes_open + 1 # Update the number of open message boxes
       # "finally:" will close the serial port and log file - no need to do it here
       if tkMessageBox.askokcancel("Quit", "Are you sure?"):
+         self.message_boxes_open = self.message_boxes_open - 1 # Probably redundant?
          self.window.destroy() # Destroy the window
+      else:
+         self.message_boxes_open = self.message_boxes_open - 1
 
    def close(self):
       ''' Close the program: close the serial port; make sure the log file is closed '''
-      try:
-         self.writeWait(self.power_down_choice, 0) # Power down the 9603N
-      except:
-         pass
+##      try:
+##         self.writeWait(self.power_down_choice, 0) # Power down the 9603N
+##      except:
+##         pass
       try:
          print 'Closing port...'
          self.ser.close() # Close the serial port

@@ -170,7 +170,12 @@ TinyGPS tinygps;
 static const int ledPin = 13; // WB2812B + Red LED on pin D13
 long iterationCounter = 0; // Increment each time a transmission is attempted
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // WB2812B
+//#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
+#ifdef swap_red_green
+  Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // GRB WB2812B
+#else
+  Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_RGB + NEO_KHZ800); // RGB WB2812B
+#endif
 #define LED_Brightness 32 // 0 - 255 for WB2812B
 
 static const int ringIndicator = 17; // 9602 Ring Indicator on pin D17
@@ -378,7 +383,7 @@ void loop()
 
       // Start the serial console
       Serial.begin(115200);
-      delay(5000); // Wait 5 secs - allow time for user to open serial monitor
+      //delay(5000); // Wait 5 secs - allow time for user to open serial monitor
     
       // Send welcome message
       Serial.println("Iridium 9603N Beacon V5 Base:");
@@ -475,9 +480,9 @@ void loop()
       Serial.println("PGOOD has gone HIGH");
       Serial.println("Allowing extra time to make sure capacitors are charged...");
       
-      // Allow 10 secs for extra charging
+      // Allow 5 secs for extra charging
       PGOOD = digitalRead(LTC3225PGOOD);
-      for (tnow = millis(); PGOOD && millis() - tnow < 1UL * 10UL * 1000UL;)
+      for (tnow = millis(); PGOOD && millis() - tnow < 1UL * 5UL * 1000UL;)
       {
         // 'Flash' the LED
         if ((millis() / 1000) % 2 == 1) {

@@ -13,7 +13,12 @@
 #include <Adafruit_NeoPixel.h> // Support for the WB2812B: https://github.com/adafruit/Adafruit_NeoPixel
 
 static const int ledPin = 13; // WB2812B + Red LED on pin D13
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // WB2812B
+//#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
+#ifdef swap_red_green
+  Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // GRB WB2812B
+#else
+  Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_RGB + NEO_KHZ800); // RGB WB2812B
+#endif
 #define LED_Brightness 128 // 0 - 255 for WB2812B
 
 static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
