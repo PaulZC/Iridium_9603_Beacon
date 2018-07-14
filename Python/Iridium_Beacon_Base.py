@@ -90,8 +90,10 @@ class BeaconBase(object):
       self._job = None # Keep track of timer calls
       self.message_boxes_open = 0 # How many message boxes are open? (Used to disable updates)
       self.zoom = '15' # Default Google Maps zoom (text)
-      self.default_interval = 300 # Default update interval (secs)
-      self.update_intervals = [ 30, 45, 60, 75, 90, 120, 150, 180, 240, 300, 450, 600, 900, 1200, 1500, 1800, 2400, 3600, 5400, 7200, 10800 ] # Update intervals
+      self.default_interval = '00:05:00' # Default update interval
+      self.update_intervals = ['00:00:30', '00:00:45', '00:01:00', '00:01:15', '00:01:30', '00:02:00', '00:02:30', '00:03:00', '00:04:00', '00:05:00',
+                               '00:07:30', '00:10:00', '00:15:00', '00:20:00', '00:30:00', '00:45:00', '01:00:00', '01:30:00',
+                               '02:00:00', '03:00:00', '04:00:00', '06:00:00', '12:00:00'] # Update intervals
       self.default_beacon_interval = 5 # Default beacon mesage interval (mins)
       self.beacon_timeout = 90 # Default timeout for Iridium comms (needs to be > IridiumSBD.adjustSendReceiveTimeout)
       self.gnss_timeout = 35 # Default timeout for GNSS update (needs to be > timeout in Iridium9603NBeacon_V5_Base)
@@ -255,6 +257,9 @@ class BeaconBase(object):
       self.toolFrame = tk.Frame(self.window, height=self.frame_height) # Frame for buttons and entries
       self.toolFrame.pack(side=tk.LEFT)
 
+      # Record the background colour
+      self.background = self.toolFrame.cget('background')
+
       self.imageFrame = tk.Frame(self.window, width=self.frame_width, height=self.frame_height) # Frame for map image
       self.imageFrame.pack(side=tk.RIGHT)
 
@@ -275,19 +280,22 @@ class BeaconBase(object):
       self.interval = tk.Entry(self.toolFrame) # Create an entry
       self.interval.grid(row=row, column=1) # Assign its position
       self.interval.delete(0, tk.END) # Delete any existing text (redundant?)
-      self.interval.insert(0, str(self.default_interval)) # Insert default value
+      self.interval.insert(0, self.default_interval) # Insert default value
       self.interval.config(justify=tk.CENTER,width=22, state='readonly') # Configure
-      self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (s)',width=20) # Create text label
+      self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (hh:mm:ss)',width=20) # Create text label
       self.interval_txt.grid(row=row, column=0) # Assign its position
       row += 1
+
+      # Record the foreground colour
+      self.foreground = self.interval_txt.cget('foreground')
 
       # Time since last update
       self.time_since_last_update = tk.Entry(self.toolFrame)
       self.time_since_last_update.grid(row=row, column=1)
       self.time_since_last_update.delete(0, tk.END)
-      self.time_since_last_update.insert(0, str(0))
+      self.time_since_last_update.insert(0, '00:00:00')
       self.time_since_last_update.config(justify=tk.CENTER,width=22,state='readonly')
-      self.time_since_last_update_txt = tk.Label(self.toolFrame, text = 'Time since last update (s)',width=20)
+      self.time_since_last_update_txt = tk.Label(self.toolFrame, text = 'Time since last update',width=20)
       self.time_since_last_update_txt.grid(row=row, column=0)
       row += 1
 
@@ -521,29 +529,34 @@ class BeaconBase(object):
       ''' Timer function - calls itself repeatedly to schedule data collection and map updates '''
       do_update = False # Flag to indicate if an update is required
       now = time.time() # Get the current time      
-      self.time_since_last_update.configure(state='normal') # Unlock entry box
       time_since_last_update = now - self.last_update_at # Calculate interval since last update
+      last_update_str = time.strftime('%H:%M:%S', time.gmtime(time_since_last_update))
+      self.time_since_last_update.configure(state='normal') # Unlock entry box
       self.time_since_last_update.delete(0, tk.END) # Delete existing value
-      self.time_since_last_update.insert(0, str(int(time_since_last_update))) # Update the indicated time since last update
+      self.time_since_last_update.insert(0, last_update_str) # Update the indicated time since last update
       self.time_since_last_update.config(state='readonly') # Lock entry box
 
       # Check if it is time to do an update
       # Do an update if it has been at least interval seconds since the last update
       # and there are no message boxes open
       # or this is the first update
-      interval = float(self.interval.get())
+      interval = sum(float(n) * m for n, m in zip(reversed(self.interval.get().split(':')), (1, 60, 3600))) # https://stackoverflow.com/a/45971056
       if ((time_since_last_update >= interval) and (self.message_boxes_open == 0)) or (self.first_update == True): 
          do_update = True # Do update
          self.first_update = False # Clear flag
          self.last_update_at = now # Update time of last update
 
       if do_update: # If it is time to do an update
+         self.time_since_last_update.configure(state='normal') # Unlock entry box
+         self.time_since_last_update.delete(0, tk.END) # Delete existing value
+         self.time_since_last_update.insert(0, 'In Progress...') # Update the indicated time since last update
+         self.time_since_last_update.config(state='readonly') # Lock entry box
          self.writeToConsole(self.console_1,'Starting update') # Update message console
          # Disable Flush_MT and Message_Menu during update
          self.flush_mt_button.config(state='disabled') # Disable Flush MT button
          self.menubar.entryconfig("Beacon Messaging", state='disabled') # Disable Beacon Messaging
-         self.get_base_location() # Read 'base_location' from Beacon Base GNSS ** BLOCKING **
-         self.get_beacon_data() # Contact Iridium and download a new message (if available) ** BLOCKING **
+         self.get_base_location() # Read 'base_location' from Beacon Base GNSS
+         self.get_beacon_data() # Contact Iridium and download a new message (if available)
          self.distance_between() # Update distance
          self.course_to() # Update heading
          if self.do_zoom: # Do we need to update the zoom?
@@ -650,6 +663,10 @@ class BeaconBase(object):
                      self.beacon_MTQ.delete(0, tk.END)
                      self.beacon_MTQ.insert(0, parse[13])
                      self.beacon_MTQ.config(state='readonly')
+                     if (int(parse[13]) > 0):
+                        self.beacon_MTQ_txt.config(background='black',foreground='white')
+                     else:
+                        self.beacon_MTQ_txt.config(background=self.background,foreground=self.foreground)
                      # Have we seen data from this beacon before?
                      if self.beacon_serials.has_key(parse[12]):
                         pass # We have seen this one before
@@ -740,7 +757,8 @@ class BeaconBase(object):
                      label_str = parse[12] + ' : ' + beacon_location
                      self.beacon_menu.entryconfig(self.beacon_serials[parse[12]], label=label_str, background=self.beacon_colours[self.beacon_serials[parse[12]]])
                      # Update Send Message menu
-                     self.message_menu.entryconfig(self.beacon_serials[parse[12]], background=self.beacon_colours[self.beacon_serials[parse[12]]])
+                     # Add 1 to parse[12] to account for RB0000000 entry
+                     self.message_menu.entryconfig(self.beacon_serials[parse[12]] + 1, background=self.beacon_colours[self.beacon_serials[parse[12]]])
                      # Check if the log file is empty (file name is NULL)
                      if self.beacon_log_files[self.beacon_serials[parse[12]]] == '':
                         # Create and clear the log file
@@ -769,6 +787,10 @@ class BeaconBase(object):
                         self.beacon_MTQ.delete(0, tk.END)
                         self.beacon_MTQ.insert(0, parse[1])
                         self.beacon_MTQ.config(state='readonly')
+                        if (int(parse[1]) > 0):
+                           self.beacon_MTQ_txt.config(background='black',foreground='white')
+                        else:
+                           self.beacon_MTQ_txt.config(background=self.background,foreground=self.foreground)
                   except:
                      self.writeToConsole(self.console_1, 'Serial parse failed!') # Update message console
          else:
@@ -786,6 +808,10 @@ class BeaconBase(object):
                self.beacon_MTQ.delete(0, tk.END)
                self.beacon_MTQ.insert(0, str(mtq))
                self.beacon_MTQ.config(state='readonly')
+               if (mtq > 0):
+                  self.beacon_MTQ_txt.config(background='black',foreground='white')
+               else:
+                  self.beacon_MTQ_txt.config(background=self.background,foreground=self.foreground)
                self.writeToConsole(self.console_1, 'No beacon data - only MTQ received') # Update message console
       else:
          self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
@@ -1108,6 +1134,10 @@ class BeaconBase(object):
                self.beacon_MTQ.delete(0, tk.END)
                self.beacon_MTQ.insert(0, str(mtq))
                self.beacon_MTQ.config(state='readonly')
+               if (mtq > 0):
+                  self.beacon_MTQ_txt.config(background='black',foreground='white')
+               else:
+                  self.beacon_MTQ_txt.config(background=self.background,foreground=self.foreground)
                self.writeToConsole(self.console_1, 'Request sent') # Update message console
          else:
             self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
@@ -1151,6 +1181,10 @@ class BeaconBase(object):
                self.beacon_MTQ.delete(0, tk.END)
                self.beacon_MTQ.insert(0, str(mtq))
                self.beacon_MTQ.config(state='readonly')
+               if (mtq > 0):
+                  self.beacon_MTQ_txt.config(background='black',foreground='white')
+               else:
+                  self.beacon_MTQ_txt.config(background=self.background,foreground=self.foreground)
                self.writeToConsole(self.console_1, 'Message sent') # Update message console
          else:
             self.writeToConsole(self.console_1, 'No serial data received!') # Update message console
