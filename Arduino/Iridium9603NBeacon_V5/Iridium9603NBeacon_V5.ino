@@ -5,7 +5,7 @@
 // Now stores both source and destination RockBLOCK serial numbers in flash.
 // The default values are:
 #define RB_destination 0 // Serial number of the destination RockBLOCK (int). Set to zero to disable RockBLOCK message forwarding
-#define RB_source 1234 // Serial number of this unit (int)
+#define RB_source 0 // Serial number of this unit (int)
 
 // Updated for the V5 PCB: provides support for an OMRON G6SK relay; 9603N EXT_PWR is switched via a P-MOSFET.
 
@@ -239,7 +239,7 @@ long iterationCounter = 0; // Increment each time a transmission is attempted
 static const int ledPin = 13; // WB2812B + Red LED on pin D13
 
 //#define NoLED // Uncomment this line to disable the LED
-//#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
+#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
 #ifdef swap_red_green
   Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // GRB WB2812B
 #else
@@ -969,8 +969,8 @@ void loop()
 
             // Check if the message contains a correctly formatted BEACON_INTERVAL: "[INTERVAL=nnn]"
             int new_interval = 0;
-            int starts_at = 0;
-            int ends_at = 0;
+            int starts_at = -1;
+            int ends_at = -1;
             starts_at = mt_str.indexOf("[INTERVAL="); // See is message contains "[INTERVAL="
             if (starts_at >= 0) { // If it does:
               ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
@@ -996,8 +996,8 @@ void loop()
 
             // Check if the message contains a correctly formatted RBSOURCE: "[RBSOURCE=nnnnn]"
             int new_source = -1;
-            starts_at = 0;
-            ends_at = 0;
+            starts_at = -1;
+            ends_at = -1;
             starts_at = mt_str.indexOf("[RBSOURCE="); // See is message contains "[RBSOURCE="
             if (starts_at >= 0) { // If it does:
               ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
@@ -1007,7 +1007,9 @@ void loop()
                 new_source = (int)new_source_str.toInt(); // Convert it to int
               }
             }
-            if (new_source > 0) { // If new_source was received
+            // toInt returns zero if the conversion fails, so it is not possible to distinguish between a source of zero and an invalid value!
+            // An invalid value will cause RBSOURCE to be set to zero
+            if (new_source >= 0) { // If new_source was received
               Serial.print("New RBSOURCE received. Setting RBSOURCE to ");
               Serial.println(new_source);
               RBSOURCE = new_source; // Update RBSOURCE
@@ -1022,8 +1024,8 @@ void loop()
 
             // Check if the message contains a correctly formatted RBDESTINATION: "[RBDESTINATION=nnnnn]"
             int new_destination = -1;
-            starts_at = 0;
-            ends_at = 0;
+            starts_at = -1;
+            ends_at = -1;
             starts_at = mt_str.indexOf("[RBDESTINATION="); // See is message contains "[RBDESTINATION="
             if (starts_at >= 0) { // If it does:
               ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
@@ -1033,7 +1035,9 @@ void loop()
                 new_destination = (int)new_destination_str.toInt(); // Convert it to int
               }
             }
-            if (new_destination > 0) { // If new_destination was received
+            // toInt returns zero if the conversion fails, so it is not possible to distinguish between a destination of zero and an invalid value!
+            // An invalid value will cause RBDESTINATION to be set to zero
+            if (new_destination >= 0) { // If new_destination was received
               Serial.print("New RBDESTINATION received. Setting RBDESTINATION to ");
               Serial.println(new_destination);
               RBDESTINATION = new_destination; // Update RBDESTINATION
@@ -1047,7 +1051,7 @@ void loop()
             }
 
             // Check if the message contains a correctly formatted relay pulse command: "[RELAY=1]" to "[RELAY=5]"
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=1]"); // See is message contains "[RELAY=1]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
@@ -1056,7 +1060,7 @@ void loop()
               relay_pulse_duration = 1;
               Serial.println("[RELAY=1] received.");
             }
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=2]"); // See is message contains "[RELAY=2]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
@@ -1065,7 +1069,7 @@ void loop()
               relay_pulse_duration = 2;
               Serial.println("[RELAY=2] received.");
             }
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=3]"); // See is message contains "[RELAY=3]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
@@ -1074,7 +1078,7 @@ void loop()
               relay_pulse_duration = 3;
               Serial.println("[RELAY=3] received.");
             }
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=4]"); // See is message contains "[RELAY=4]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
@@ -1083,7 +1087,7 @@ void loop()
               relay_pulse_duration = 4;
               Serial.println("[RELAY=4] received.");
             }
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=5]"); // See is message contains "[RELAY=5]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
@@ -1094,7 +1098,7 @@ void loop()
             }
 
             // Check if the message contains a correctly formatted relay command: "[RELAY=ON]" or "[RELAY=OFF]"
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=ON]"); // See is message contains "[RELAY=ON]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be changed once 9603N is powered down:
               set_relay_flag = true;
@@ -1102,7 +1106,7 @@ void loop()
               pulse_relay_flag = false; // set overrides pulse
               Serial.println("[RELAY=ON] received.");
             }
-            starts_at = 0;
+            starts_at = -1;
             starts_at = mt_str.indexOf("[RELAY=OFF]"); // See is message contains "[RELAY=OFF]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be changed once 9603N is powered down:
               reset_relay_flag = true;
