@@ -3,15 +3,12 @@
 The Iridium 9603N Beacon can be used to track high altitude balloons and other mobile assets. To the best of my knowledge, it hasn't yet been used
 to track an elephant. But who knows! Time will tell...
 
-The beacon will send periodic Short Burst Data messages containing its location, speed, heading, altitude, pressure and other data. These messages
-are delivered via the Iridium satellite network to the email address you provided to your service provider. Delivery via an HTTP post is possible too but,
-as I find email easier to work with, I won't discuss HTTP options further here.
-
 I have used Iridium 9603N modules provided by other suppliers, but I recommend [Rock7](https://www.rock7.com/shop-product-detail?productId=50) since:
 - They provide excellent customer support and rapid answers to technical queries
 - Their web portal is really easy to use
 - You can top up message credits and the monthly line rental for your modules by credit card (you don't need to set up a monthly 'standing order' payment)
 - They won't charge you line rental for months where you don't make use of your 9603N module
+- They provide message forwarding via their RockBLOCK Gateway which you can use to track your beacon(s) from _anywhere_ using another beacon as a 'base'
 
 ![RockBLOCK_Operations_1](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_1.JPG)
 
@@ -19,35 +16,59 @@ Rock7 also provide the excellent [RockBLOCK](http://www.rock7mobile.com/products
 [RockSTAR](http://www.rock7mobile.com/products-rockstar), [RockFLEET](http://www.rock7mobile.com/products-rockfleet)
 and are responsible for [YB (Yellow Brick)](https://www.ybtracking.com/products-yb3).
 
-Each time the beacon sends a message, the contents of the message will be forwarded to whatever email address(es) you add to RockBLOCK Operations.
-You can simply read the email message contents and copy and paste the position (latitude and longitude) into (e.g.) Google Maps to show where your
-beacon is located:
+The beacon will send Short Burst Data messages containing its location, speed, heading, altitude, pressure and other data every five minutes by default.
+Each message is automatically forwarded to whatever email address(es) you add to RockBLOCK Operations. You can simply read the email message contents and copy
+and paste the position (latitude and longitude) into (e.g.) Google Maps to show where your beacon is located:
 
 ![RockBLOCK_Message](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Message.JPG)
 
 ![RockBLOCK_Operations_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_3.JPG)
 
+If you have an internet connection and you want to use these emails to display the location and route of your beacon(s) on a map, you can do this using the
+Iridium_Beacon_GMail_Downloader_RockBLOCK.py and Iridium_Beacon_Mapper_RockBLOCK.py mapping software
+[described below](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#tracking-your-beacon-with-an-internet-connection).
+
+If you want to be able to track your beacon(s) from somewhere _without_ an internet connection, you can use another beacon as a base, use the RockBLOCK Gateway
+to automatically forward messages from your mobile beacon(s) to the base, and then display the location and route of your beacon(s) on a map using the
+Iridium_Beacon_Base.py mapping software
+[described below](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#tracking-your-beacon-without-an-internet-connection). Map tiles for your
+destination can be downloaded before your travel.
+
+Message delivery via an HTTP post is possible too but, as I find email easier to work with, I won't discuss HTTP options further here.
+
 ## Configuring your Beacon via RockBLOCK Operations
 
-If you want to change the beacon transmission interval (BEACON_INTERVAL) during a flight, you can do this through RockBLOCK Operations using the _Send a Message_
+The beacon uses flash memory inside the ATSAMD21G18 processor to store several settings. As flash memory is non-volatile, the settings are not forgotten if
+the beacon loses power or is reset. The settings are:
+- INTERVAL: the (minimum) interval between messages transmissions. By default, this is set to 5 minutes
+- RBDESTINATION: the serial number of the destination RockBLOCK for messages forwarded via the RockBLOCK Gateway. By default, this is set to zero which disables message forwarding
+- RBSOURCE: the RockBLOCK serial number of the 9603N module on the beacon. By default, this is set to 1234 as it is not required unless you want to use message forwarding to an Iridium Becon Base
+
+If you want to change the beacon transmission interval during a flight, you can do this through RockBLOCK Operations using the _Send a Message_
 function. Select the RockBLOCK serial numbers of the beacon(s) you want to update and send a plain text message using the format _[INTERVAL=nnn]_ where _nnn_
-is the message interval in _minutes_. The interval will be updated the next time the beacon wakes up for a transmit cycle. The interval is stored in
-non-volatile (flash) memory and so will be retained even if the Beacon is reset.
+is the new message interval in _minutes_. The interval will be updated the next time the beacon wakes up for a transmit cycle.
 
 ![RockBLOCK_Operations_4](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/RockBLOCK_Operations_4.JPG)
+
+If you want to enable message forwarding via the RockBLOCK Gateway, you can do this by including the text _[RBDESTINATION=nnnnn]_ in the RockBLOCK message where _nnnnn_
+is the serial number of the destination 'base' RockBLOCK. You can disable message forwarding again by sending a message containing _[RBDESTINATION=0]_. You can change the source
+serial number which is included in the messages by including the text _[RBSOURCE=nnnnn]_ in the RockBLOCK message where _nnnnn_ is the serial number of the
+RockBLOCK 9603N on the beacon.
+
+The _Send a Message_ function can also be used to control the beacon. The commands are:
+- RELAY: this controls the OMRON relay on the beacon. The relay can be switched ON or OFF, or pulsed on for 1-5 seconds
+- RADIO: this allows you to send a radio message from the beacon using the optinal [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board)
 
 If you want to change the state of the OMRON relay during a flight, you can do this by including the text _[RELAY=ON]_ or _[RELAY=OFF]_ in the RockBLOCK message.
 The state of the relay will be updated after the next transmit cycle. If you want to pulse the relay on for 1-5 seconds, to trigger e.g. a cut-down device,
 include the text _[RELAY=1]_ to pulse the relay on for 1 second then off again. _[RELAY=5]_ will pulse the relay on for five seconds then off again.
 Only integer pulse durations of 1-5 seconds are valid, other values will be ignored.
 
-If you want to enable message forwarding via the RockBLOCK Gateway, you can do this by including the text _[RBDESTINATION=nnnnn]_ in the RockBLOCK message where _nnnnn_
-is the serial number of the destination RockBLOCK. You can disable message forwarding by sending a message containing _[RBDESTINATION=0]_. You can change the source
-serial number which is included in the messages by including the text _[RBSOURCE=nnnnn]_ in the RockBLOCK message where _nnnnn_ is the serial number of the
-RockBLOCK 9603N you are sending the messages from.
+If you want to send a message via the radio board, you can do this by including the text _[RADIO=nnnnnnnn]_ in the RockBLOCK message where _nnnnnnnn_ is the
+message you want the eRIC radio module to transmit (e.g. the serial number of a radio-enabled cut-down device, causing it to activate). The radio board is
+optional, the beacon code will work as normal without it.
 
-A future version of the code will make use of the 9603N Ring Indicator signal to let the beacon know when a new message is waiting to be downloaded without
-first needing to go through a full transmit cycle.
+The beacon can also be configured and controlled via messages from an Iridium Beacon Base. 
 
 ## Tracking your beacon with an internet connection
 
@@ -74,7 +95,8 @@ or whenever the GUI isn't able to download map images from the API.
 
 You can find more details about the Google Static Maps API [here](https://developers.google.com/maps/documentation/static-maps/intro). To use the API, you will need to create
 your own API Key, which you can do by following the instructions [here](https://developers.google.com/maps/documentation/static-maps/get-api-key). Copy the Key and save it in a file
-called _Google_Static_Maps_API_Key.txt_ so the mapper can read it.
+called _Google_Static_Maps_API_Key.txt_ so the mapper can read it. You will need to register payment details with Google before they will issue you with a Key,
+but the Standard Plan allows you to download 25,000 map images per day for free before you start being charged.
 
 The intention is that you have Iridium_Beacon_Mapper_RockBLOCK.py and Iridium_Beacon_GMail_Downloader_RockBLOCK.py running simultaneously.
 Start Iridium_Beacon_Mapper_RockBLOCK.py first and allow it to build up a dictionary of any existing .bin files, then start Iridium_Beacon_GMail_Downloader_RockBLOCK.py.
@@ -91,30 +113,33 @@ The GUI uses 640x480 pixel map images. Higher resolution images are available if
 
 The GUI has been tested with Python 2.7 on 64-bit Windows and on Linux on Raspberry Pi. You will need to install the Python libraries listed below.
 
-## Tracking your beacon **without** an internet connection
+## Tracking your beacon _without_ an internet connection
 
 ![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
 
 Another reason I really like Rock7 is that if you prefix your SBD message with the serial number of another 'RockBLOCK', they will automatically forward
-your message to that module. This means the messages from your mobile Iridium Beacon can be automatically forwarded to another Iridium Beacon acting as a 'base'.
-See the last two pages of the [RockBLOCK-9603-Developers-Guide](http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf) for further information.
+your message to that module. This means the messages from your mobile Iridium Beacon can be automatically forwarded to another Iridium Beacon acting as a 'base'
+allowing you to track the beacon from _anywhere_. See the last two pages of the
+[RockBLOCK-9603-Developers-Guide](http://www.rock7mobile.com/downloads/RockBLOCK-9603-Developers-Guide.pdf) for further information.
 
 In the [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory, you will find Arduino code for both the mobile
 [Iridium9603NBeacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5) and the base
 [Iridium9603NBeacon_V5_Base](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5_Base).
 
-To enable message forwarding: edit Iridium9603NBeacon_V5.ino, and change the line which says **#define RB_destination 0** . Change the zero to the the serial
+To enable message forwarding, you can:
+- [Send a message to the beacon from RockBLOCK Operations](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-rockblock-operations)
+- [Send a message to the beacon from an Iridium Beacon Base](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-iridium-beacon-base)
+- Edit the Arduino code before you download it onto the beacon
+
+To enable message forwarding in the Arduino code: edit Iridium9603NBeacon_V5.ino, and change the line which says **#define RB_destination 0** . Change the zero to the the serial
 number of the destination RockBLOCK which is acting as the base. Also change the line which says **#define RB_source 1234** . Replace the 1234 with the serial
-number of the RockBLOCK 9603N you are sending the messages from. That way the beacons will accessible through the _Beacon Messaging_ pull-down menu in 
-[Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py). If you don't want to edit the Arduino code,
-you can configure the RBSOURCE and RBDESTINATION serial numbers by
-[sending messages through RockBLOCK operations](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-rockblock-operations).
+number of the RockBLOCK 9603N you are sending the messages from.
 
 _You will be charged twice for each message: once to send it from the Beacon (Mobile Originated); and a second time to receive it on the base (Mobile Terminated)._
 
 Before you travel, download a set of Google Static Map tiles using
 [Google_Static_Maps_Tiler.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Google_Static_Maps_Tiler.py). 1 degree tiles are useful for
-large areas, 0.1 degree or 0.01 degree for smaller areas. Put the _StaticMapTile----.png_ files in the same directory as Iridium_Beacon_Base.py. By default, the
+large areas, 0.1 degree or 0.01 degree for smaller areas. Put all the _StaticMapTile----.png_ files in the same directory as Iridium_Beacon_Base.py. By default, the
 Tiler will ask Google for _roadmap_ map_type images. You can change this to _satellite_, _terrain_ or _hybrid_ by editing the Python code before you run it.
 
 [Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py) is very similar in its operation to
@@ -122,18 +147,19 @@ Iridium_Beacon_Mapper_RockBLOCK.py except that the beacon data is received via I
 Iridium9603NBeacon_V5_Base via Serial (over USB) and displays the beacon and base locations using the
 [Google Static Maps API](https://developers.google.com/maps/documentation/static-maps/intro).
 
-You will need a Key to access the API. You can create one by following [this link](https://developers.google.com/maps/documentation/static-maps/get-api-key).
-Copy and paste it into a file called Google_Static_Maps_API_Key.txt
+To use the Google Maps API, you will need to create your own API Key, which you can do by following the instructions [here](https://developers.google.com/maps/documentation/static-maps/get-api-key).
+Copy the Key and save it in a file called _Google_Static_Maps_API_Key.txt_ so the mapper can read it. You will need to register payment details with Google before they will issue you with a Key,
+but the Standard Plan allows you to download 25,000 map images per day for free before you start being charged.
+
+Before running the Iridium_Beacon_Base.py code, plug the Iridium Beacon Base into your computer and find out its serial port number:
+- Under Windows, you can run Device Manager from the Control Panel or using the search tool (magnifying glass). Open the entry for _Ports (COM & LPT)_. The base will be listed as a COM port
+- Under Linux (e.g. on Raspberry Pi), you can find the port number by typing _ls /dev_ in a terminal window. The base will usually appear as _/ttyACM0_
 
 Every 'update' seconds the GUI talks to the base beacon and:
 - requests its GNSS data including time, position and altitude;
 - starts an IridiumSBD session and downloads a packet from the mobile terminated queue (if any are present).
 
-You are charged each time you check for new messages, so make sure you set 'update' to a sensible value. If your beacon is transmitting messages every 10 minutes,
-then set the update period to 10 minutes (600 seconds) too. If there is a backlog of messages you want to download, then reduce update. But remember to set it back to 10 minutes
-afterwards to avoid being charged unnecessarily. If you are tracking two beacons each sending messages every 10 minutes, then set update to 5 minutes (300 seconds).
-
-The GUI and base provide access to the RockBLOCK FLUSH_MT function, so an excess of unread Mobile Terminated messages can be discarded if required
+The GUI and base provide access to the RockBLOCK FLUSH_MT function, so an excess of unread Mobile Terminated messages from your beacon(s) can be discarded if required
 (note that you are still charged from these messages!).
 
 The software logs all received packets to CSV log files. Each beacon gets its own log file.
@@ -152,17 +178,14 @@ the location to the clipboard.
 
 A second pull-down menu shows the location of the base. Clicking it will center the map on that location and will copy that location to the clipboard.
 
-A third pull-down menu lets you send a configuration update message to a beacon. Select the beacon you want to update using the pull-down menu.
-A dialog box will appear allowing you to edit the message before it is sent. If you want to change the transmission interval (BEACON_INTERVAL) of the beacon,
-change the default value of '5' (minutes) to whatever you want the new interval to be. If you want to change the status of the OMRON relay on board the beacon,
-add the text _[RELAY=ON]_ or _[RELAY=OFF]_ to the message. If you want to pulse the relay on for 1-5 seconds, to trigger e.g. a cut-down device, add the text
-_[RELAY=1]_ to pulse the relay on for 1 second then off again. _[RELAY=5]_ will pulse the relay on for 5 seconds then off again.
-Only integer pulse durations of 1-5 seconds are valid, other values will be ignored. 
-Click 'OK' and the base will send the message to the RockBLOCK Gateway where it will be automatically forwarded to the chosen beacon. The beacon will download and
-process the message during its next transmit cycle. The relay status will be updated at the end of the transmit cycle. The new BEACON_INTERVAL value will
-take effect after the _following_ transmission.
+A third pull-down menu lets you send a configuration update message to a beacon. See
+[Configuring your Beacon via Iridium Beacon Base](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-iridium-beacon-base)
+for further details.
 
-![Iridium_Beacon_Base_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_3.JPG)
+A fourth pull-down menu lets you set the update interval of the base software. You are charged each time you check for new messages, so make sure you set
+update to a sensible value. If your beacon is transmitting messages every 10 minutes, then set the update interval to 10 minutes too. If there is a backlog
+of messages you want to download, then reduce update accordingly. But remember to set it back to 10 minutes afterwards to avoid being charged unnecessarily.
+If you are tracking two beacons each sending messages every 10 minutes, then set update to 5 minutes.
 
 The GUI uses 640x480 pixel map images. Higher resolution images are available if you have a premium plan with Google.
 
@@ -173,6 +196,53 @@ When you are online, the user interface will look like this:
 When you are offline, the software will use the map tiles from the Tiler. Base and beacon locations will be shown on the offline maps but not path information
 
 ![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
+
+## Configuring your Beacon via Iridium Beacon Base
+
+[Iridium_Beacon_Base.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_Base.py) has a pull-down menu which allows you to send
+a message to one of your beacons so you can control or configure it.
+
+![Iridium_Beacon_Base_3](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_3.JPG)
+
+By default, RBDESTINATION is set to zero in the Iridium Beacon code which disables message forwarding. To enable message forwarding, we need to change the RBDESTINATION
+to the RockBLOCK serial number of the Iridium Beacon Base. Messages from the beacon will then be sent by email as usual, but also automatically forwarded via a second
+Iridium message to the base so the base can track the beacon. You are charged for both messages.
+
+If the base software is not currently tracking any beacons, the Beacon Messaging pull-down menu will only contain a dummy entry for _RB0000000_. Click on that entry
+and a dialogue box will appear containing the text _RB0000000[INTERVAL=5]_. Delete all of the text and replace it with:
+- _RBxxxxx[RBDESTINATION=yyyyy][RBSOURCE=xxxxx]_
+where
+- _xxxxx_ is the RockBLOCK serial number of the 9603N _on the beacon_
+- _yyyyy_ is the RockBLOCK serial number of the 9603N _on the base_
+and then click OK.
+
+Make sure you include the square brackets. Any commands not enclosed in square brackets are ignored.
+
+The message will be sent from the 9603N on the base, through the Iridium network to the RockBLOCK Gateway. The RockBLOCK Gateway will then automatically forward
+the message back through the Iridium network to beacon _xxxxx_. Beacon _xxxxx_ will receive the new RBDESTINATION and RBSOURCE next time it wakes up and transmits a fix.
+
+Now, each time beacon _xxxxx_ sends a message, it will be automatically prefixed with the serial number of the base (_RByyyyy_) and forwarded to the base through
+the RockBLOCK Gateway.
+
+Once the base software has received a message from beacon _xxxxx_, its serial number will appear in the Beacon Messaging pull-down menu to make it easier to send
+more messages to that beacon.
+
+If you want to disable message forwarding, send a message to beacon _xxxxx_ containing the text:
+- _RBxxxxx[RBDESTINATION=0]_
+
+If you want to change the message interval of a beacon, send it a message:
+- _RBxxxxx[INTERVAL=nnn]_
+where
+- _nn_ is the new message interval in _minutes_
+Valid values are 1 to 1440 (once per minute to once per day). The beacon will download and process the message during its next transmit cycle. The new interval will take effect after the _following_ transmission.
+
+If you want to change the status of the OMRON relay on board the beacon, add the text _[RELAY=ON]_ or _[RELAY=OFF]_ to the message. If you want to pulse the
+relay on for 1-5 seconds, to trigger e.g. a cut-down device, add the text _[RELAY=1]_ to pulse the relay on for 1 second then off again. _[RELAY=5]_ will pulse
+the relay on for 5 seconds then off again. Only integer pulse durations of 1-5 seconds are valid, other values will be ignored. 
+The relay status will be updated at the end of the beacon's transmit cycle.
+
+If you want the (optional) radio board to transmit a message, add the text _[RADIO=nnnnnnnn]_ to the message, where _nnnnnnnn_ is the message you want the radio
+board to transmit. Usually _nnnnnnnn_ is the serial number of the eRIC radio module on a cut-down device.
 
 ## Extras
 

@@ -27,9 +27,7 @@ See [Iridium_9603_Beacon_V5_BOM.xls](https://github.com/PaulZC/Iridium_9603_Beac
 
 The [Eagle](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Eagle) directory contains the schematic and pcb design files.
 
-The [Gerber](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Gerber) directory contains the Gerber files for the PCB. Please note that these files have only
-been checked by eye using [gerbv](http://gerbv.geda-project.org/), they haven't (yet) been used directly for manufacture. The PCB shown in the images was manufactured
-by [Multi-CB](https://www.multi-circuit-boards.eu/en/index.html) directly from the Eagle .brd file.
+The [Gerber](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Gerber) directory contains the Gerber files for the PCB. These files have been checked and used to manufacture a batch of circuit boards.
 
 The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory contains the Arduino code.
 
