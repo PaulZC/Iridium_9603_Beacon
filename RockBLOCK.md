@@ -40,7 +40,7 @@ Message delivery via an HTTP post is possible too but, as I find email easier to
 
 The beacon uses flash memory inside the ATSAMD21G18 processor to store several settings. As flash memory is non-volatile, the settings are not forgotten if
 the beacon loses power or is reset. The settings are:
-- INTERVAL: the (minimum) interval between messages transmissions. By default, this is set to 5 minutes
+- INTERVAL: the (minimum) interval between message transmissions. By default, this is set to 5 minutes
 - RBDESTINATION: the serial number of the destination RockBLOCK for messages forwarded via the RockBLOCK Gateway. By default, this is set to zero which disables message forwarding
 - RBSOURCE: the RockBLOCK serial number of the 9603N module on the beacon. By default, this is set to 1234 as it is not required unless you want to use message forwarding to an Iridium Becon Base
 
@@ -57,7 +57,7 @@ RockBLOCK 9603N on the beacon.
 
 The _Send a Message_ function can also be used to control the beacon. The commands are:
 - RELAY: this controls the OMRON relay on the beacon. The relay can be switched ON or OFF, or pulsed on for 1-5 seconds
-- RADIO: this allows you to send a radio message from the beacon using the optinal [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board)
+- RADIO: this allows you to send a radio message from the beacon using the optional [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board)
 
 If you want to change the state of the OMRON relay during a flight, you can do this by including the text _[RELAY=ON]_ or _[RELAY=OFF]_ in the RockBLOCK message.
 The state of the relay will be updated after the next transmit cycle. If you want to pulse the relay on for 1-5 seconds, to trigger e.g. a cut-down device,
@@ -68,7 +68,7 @@ If you want to send a message via the radio board, you can do this by including 
 message you want the eRIC radio module to transmit (e.g. the serial number of a radio-enabled cut-down device, causing it to activate). The radio board is
 optional, the beacon code will work as normal without it.
 
-The beacon can also be configured and controlled via messages from an Iridium Beacon Base. 
+The beacon can also be configured and controlled via [messages from an Iridium Beacon Base](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-iridium-beacon-base). 
 
 ## Tracking your beacon with an internet connection
 
@@ -126,7 +126,10 @@ In the [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Ardui
 [Iridium9603NBeacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5) and the base
 [Iridium9603NBeacon_V5_Base](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino/Iridium9603NBeacon_V5_Base).
 
-To enable message forwarding, you can:
+Connect the Iridium Beacon Base directly to your computer using a USB cable (as if you were going to configure it using the Arduino IDE). The Beacon Base does not need batteries,
+it will draw all of its power from the USB port. The Base Python software has been tested on both a Windows laptop and Raspberry Pi.
+
+To enable message forwarding from beacon to base, you can:
 - [Send a message to the beacon from RockBLOCK Operations](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-rockblock-operations)
 - [Send a message to the beacon from an Iridium Beacon Base](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#configuring-your-beacon-via-iridium-beacon-base)
 - Edit the Arduino code before you download it onto the beacon
@@ -206,20 +209,22 @@ a message to one of your beacons so you can control or configure it.
 
 By default, RBDESTINATION is set to zero in the Iridium Beacon code which disables message forwarding. To enable message forwarding, we need to change the RBDESTINATION
 to the RockBLOCK serial number of the Iridium Beacon Base. Messages from the beacon will then be sent by email as usual, but also automatically forwarded via a second
-Iridium message to the base so the base can track the beacon. You are charged for both messages.
+Iridium message to the base so the base can track the beacon. _You are charged for both messages._
 
 If the base software is not currently tracking any beacons, the Beacon Messaging pull-down menu will only contain a dummy entry for _RB0000000_. Click on that entry
 and a dialogue box will appear containing the text _RB0000000[INTERVAL=5]_. Delete all of the text and replace it with:
 - _RBxxxxx[RBDESTINATION=yyyyy][RBSOURCE=xxxxx]_
+
 where
 - _xxxxx_ is the RockBLOCK serial number of the 9603N _on the beacon_
 - _yyyyy_ is the RockBLOCK serial number of the 9603N _on the base_
+
 and then click OK.
 
 Make sure you include the square brackets. Any commands not enclosed in square brackets are ignored.
 
 The message will be sent from the 9603N on the base, through the Iridium network to the RockBLOCK Gateway. The RockBLOCK Gateway will then automatically forward
-the message back through the Iridium network to beacon _xxxxx_. Beacon _xxxxx_ will receive the new RBDESTINATION and RBSOURCE next time it wakes up and transmits a fix.
+the message back through the Iridium network to beacon _xxxxx_. Beacon _xxxxx_ will receive the new RBDESTINATION and RBSOURCE the next time it wakes up and transmits a fix.
 
 Now, each time beacon _xxxxx_ sends a message, it will be automatically prefixed with the serial number of the base (_RByyyyy_) and forwarded to the base through
 the RockBLOCK Gateway.
@@ -230,10 +235,12 @@ more messages to that beacon.
 If you want to disable message forwarding, send a message to beacon _xxxxx_ containing the text:
 - _RBxxxxx[RBDESTINATION=0]_
 
-If you want to change the message interval of a beacon, send it a message:
+If you want to change the message interval of a beacon, send it a message containing:
 - _RBxxxxx[INTERVAL=nnn]_
+
 where
 - _nn_ is the new message interval in _minutes_
+
 Valid values are 1 to 1440 (once per minute to once per day). The beacon will download and process the message during its next transmit cycle. The new interval will take effect after the _following_ transmission.
 
 If you want to change the status of the OMRON relay on board the beacon, add the text _[RELAY=ON]_ or _[RELAY=OFF]_ to the message. If you want to pulse the
