@@ -12,6 +12,7 @@ New software features for Version 5:
 - Relay can be configured during a flight via a Mobile Terminated SBD message
 - Relay can be 'pulsed' on for 1-5 seconds or turned on/off indefinitely
 - RockBLOCK Gateway message forwarding can be enabled/disabled via a Mobile Terminated SBD message
+- Includes support for the optional [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board)
 
 ![Iridium_9603N_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5.JPG)
 
@@ -35,8 +36,10 @@ The [Python](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Python) d
 
 ![Mapper](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Mapper.JPG)
 
+See [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board) for details of the optional radio board.
+
 This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
-Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
+Please refer to section 5 of the licence for the "Disclaimer of Warranties and Limitation of Liability".
 
 Enjoy!
 

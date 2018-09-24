@@ -2,7 +2,17 @@
 // # Iridium 9603N Beacon V5 #
 // ###########################
 
-// Now stores both source and destination RockBLOCK serial numbers in flash.
+// This version provides support for the Iridium Beacon Radio Board based on the LPRS eRIC4/9
+// eRIC Pin4 Tx (input) is connected to MOSI (Digital Pin 23, Port B Pin 10, SERCOM4 Pad 2, Serial3 Tx)
+// eRIC Pin3 Rx (output) is connected to SCK (Digital Pin 24, Port B Pin 11, SERCOM4 Pad 3, Serial3 Rx)
+// eRIC Pin2 CTS / BUSY (output) is connected to MISO (Digital Pin 22)
+// eRIC Pin22 (wake from low power) is connected to CS (Digital Pin 4)
+// The radio board is optional - the code will work the same with or without it
+// The message to be transmitted by the radio board should be sent in an Iridium Mobile Terminated message
+// (e.g. from RockBLOCK Operations or a Beacon Base) containing [RADIO=nnnnnnnn] where "nnnnnnnn" is
+// the radio message (usually the serial number of the eRIC on a Pyro Cut-Down)
+
+// Stores both source and destination RockBLOCK serial numbers in flash.
 // The default values are:
 #define RB_destination 0 // Serial number of the destination RockBLOCK (int). Set to zero to disable RockBLOCK message forwarding
 #define RB_source 0 // Serial number of this unit (int)
@@ -12,8 +22,10 @@
 // OMRON G6SK relay:
 // Set coil is connected to D7 (pull low to energise the relay coil)
 // Reset coil is connected to D2 (pull low to energise the relay coil)
-// The relay can be set/reset via an Iridium Mobile Terminated message (e.g. from RockBLOCK Operations or a Beacon Base)
-// The relay can also be pulsed on (set) for 1-5 seconds via MT message
+// The relay can be set/reset via an Iridium Mobile Terminated message (e.g. from RockBLOCK Operations or a Beacon Base) containing
+// [RELAY=ON] or [RELAY=OFF]
+// The relay can also be pulsed on (set) for 1-5 seconds via MT message containing
+// [RELAY=1] or [RELAY=2] or [RELAY=3] or [RELAY=4] or [RELAY=5]
 
 // Power for the 9603N is switched by a DMG3415 P-channel MOSFET
 // A 2N2222 NPN transistor pulls the MOSFET gate low
@@ -72,9 +84,12 @@
 
 // Iridium 9603 is powered from Linear Technology LTC3225 SuperCapacitor Charger
 // (fitted with 2 x 10F 2.7V caps e.g. Bussmann HV1030-2R7106-R)
+// (or 2 x 1F 2.7V caps e.g. Bussmann HV0810-2R7105-R)
 // to provide the 1.3A peak current when the 9603 is transmitting.
 // Charging 10F capacitors to 5.3V at 60mA could take ~7 minutes!
 // (~6.5 mins to PGOOD, ~7 mins to full charge)
+// 1F capacitors charge in approx. 1/10 of that time.
+// Setting the charging current to 150mA will reduce the time further.
 // 5.3V is OK as the 9603N has an extended supply voltage range of +5 V +/- 0.5 V
 // http://www.linear.com/product/LTC3225
 // D5 (Port A Pin 15) = LTC3225 ~Shutdown
@@ -168,6 +183,17 @@ Adafruit_MPL3115A2 baro = Adafruit_MPL3115A2();
 Uart Serial2(&sercom1, PIN_SERIAL2_RX, PIN_SERIAL2_TX, PAD_SERIAL2_RX, PAD_SERIAL2_TX);
 HardwareSerial &ssIridium(Serial2);
 
+// Serial3 pin and pad definitions (in Arduino files Variant.h & Variant.cpp)
+// eRIC Tx (input) is connected to MOSI (Digital Pin 23, Port B Pin 10, SERCOM4 Pad 2, Serial3 Tx)
+// eRIC Rx (output) is connected to SCK (Digital Pin 24, Port B Pin 11, SERCOM4 Pad 3, Serial3 Rx)
+#define PIN_SERIAL3_RX       (24ul)               // Pin description number for PIO_SERCOM on D24
+#define PIN_SERIAL3_TX       (23ul)               // Pin description number for PIO_SERCOM on D23
+#define PAD_SERIAL3_TX       (UART_TX_PAD_2)      // SERCOM4 Pad 2 (SC4PAD2)
+#define PAD_SERIAL3_RX       (SERCOM_RX_PAD_3)    // SERCOM4 Pad 3 (SC4PAD3)
+// Instantiate the Serial3 class
+Uart Serial3(&sercom4, PIN_SERIAL3_RX, PIN_SERIAL3_TX, PAD_SERIAL3_RX, PAD_SERIAL3_TX);
+HardwareSerial &sseRIC(Serial3);
+
 #define ssGPS Serial1 // Use M0 Serial1 to interface to the MAX-M8Q
 
 // Leave the "#define GALILEO" uncommented to use: GPS + Galileo + GLONASS + SBAS
@@ -239,7 +265,7 @@ long iterationCounter = 0; // Increment each time a transmission is attempted
 static const int ledPin = 13; // WB2812B + Red LED on pin D13
 
 //#define NoLED // Uncomment this line to disable the LED
-#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
+//#define swap_red_green // Uncomment this line if your WB2812B has red and green reversed
 #ifdef swap_red_green
   Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, ledPin, NEO_GRB + NEO_KHZ800); // GRB WB2812B
 #else
@@ -258,6 +284,11 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 
 static const int set_coil = 7; // OMRON G6SK relay set coil (pull low to energise coil)
 static const int reset_coil = 2; // OMRON G6SK relay reset coil (pull low to energise coil)
+
+// eRIC CTS / BUSY (output) is connected to MISO (Digital Pin 22)
+// eRIC Pin22 (wake from low power) is connected to CS (Digital Pin 4)
+static const int eRIC_BUSY = 22;
+static const int eRIC_WAKE = 4;
 
 // Loop Steps
 #define init          0
@@ -356,6 +387,12 @@ void ISBDDiagsCallback(IridiumSBD *device, char c) { Serial.write(c); }
 void SERCOM1_Handler()
 {
   Serial2.IrqHandler();
+}
+
+// Interrupt handler for SERCOM4 (essential for Serial3 comms)
+void SERCOM4_Handler()
+{
+  Serial3.IrqHandler();
 }
 
 // RTC alarm interrupt
@@ -505,10 +542,17 @@ void setup()
   pinMode(set_coil, INPUT_PULLUP); // Initialise relay set_coil pin
   pinMode(reset_coil, INPUT_PULLUP); // Initialise relay reset_coil pin
 
+  pinMode(eRIC_BUSY, INPUT_PULLUP); // Initialise eRIC CTS / BUSY pin
+  pinMode(eRIC_WAKE, OUTPUT); // Initialise eRIC WAKE pin (PIN22)
+  digitalWrite(eRIC_WAKE, HIGH); // Enable eRIC
+
   pixels.begin(); // This initializes the NeoPixel library.
   delay(100); // Seems necessary to make the NeoPixel start reliably 
   pixels.setBrightness(LED_Brightness); // Initialize the LED brightness
   LED_off(); // Turn NeoPixel off
+#ifndef NoLED
+  LED_magenta(); // Set LED to Magenta
+#endif
   
   // See if global variables have already been stored in flash
   // If they have, read them. If not, initialise them.
@@ -549,6 +593,72 @@ void setup()
   }
   total = numReadings * 822;
   vbat = 5.3;
+
+  // Configure the eRIC then put it into low power mode
+  // Serial data from the eRIC (apart from the serial number) is ignored
+  // so the code won't hang if the radio board is not connected
+  // Start the eRIC serial port
+  sseRIC.begin(19200);
+  delay(1000); // Allow time for the port to open
+  
+  sseRIC.print("ER_CMD#R0"); // Reset Radio
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(500);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+
+  sseRIC.print("ER_CMD#C5"); // Set Channel 5
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(50);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  sseRIC.print("ER_CMD#B0"); // Set Over-Air Baud Rate to 1200
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(50);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  sseRIC.print("ER_CMD#P0"); // Set Transmit Power to 0dBm
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(50);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  sseRIC.print("ER_CMD#D2"); // Set RX Power Saving
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(500);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  sseRIC.print("ER_CMD#d2"); // Set TX Power Saving
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(500);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  sseRIC.print("ER_CMD#L8?"); // Get eRIC serial number
+  delay(50);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  sseRIC.print("ACK"); // Acknowledge
+  delay(500);
+  // Transmit serial number
+  sseRIC.print("Iridium Beacon Radio Board ");
+  while(sseRIC.available()){sseRIC.write(sseRIC.read());} // Send serial number
+  sseRIC.println();
+  // Wait for the data to be transmitted
+  // We should really be checking the CTS/BUSY signal here
+  // but a simple delay won't cause the code to hang if the radio board isn't connected
+  delay(1500);
+
+  // Put eRIC into Low Power Mode 0
+  sseRIC.print("ER_CMD#A21"); // Set Low Power Mode 0
+  delay(50);
+  sseRIC.print("ACK"); // Acknowledge
+  delay(500);
+  while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+  
+  digitalWrite(eRIC_WAKE, LOW); // Disable eRIC
 }
 
 void loop()
@@ -1050,9 +1160,80 @@ void loop()
               flashVarsMem.write(flashVars); // Write the flash variables
             }
 
+            // Check if the message contains a correctly formatted RADIO message: "[RADIO=nnnnnnnn]"
+            String new_radio_str;
+            int new_radio = -1;
+            starts_at = -1;
+            ends_at = -1;
+            starts_at = mt_str.indexOf("[RADIO="); // See is message contains "[RADIO="
+            if (starts_at >= 0) { // If it does:
+              ends_at = mt_str.indexOf("]", starts_at); // Find the following "]"
+              if (ends_at > starts_at) { // If the message contains both "[RADIO=" and "]"
+                new_radio_str = mt_str.substring((starts_at + 7),ends_at); // Extract the value after the "="
+                Serial.print("Extracted a RADIO message of: "); Serial.println(new_radio_str);
+                new_radio = 1;
+              }
+            }
+            if (new_radio == 1) { // If a new radio message was received
+              Serial.print("New RADIO message received. Sending: ");
+              Serial.println(new_radio_str);
+              // Wake up the eRIC
+              digitalWrite(eRIC_WAKE, HIGH); // Enable eRIC
+              // (Re)Start the eRIC serial port
+              sseRIC.begin(19200);
+              delay(2000); // Allow time for the port to open and for eRIC to start
+              // (Re)Configure the eRIC - this should be unnecessary - but just in case!
+              // Serial data from the eRIC is ignored - so the code won't hang
+              // if the radio board is not connected
+              sseRIC.print("ER_CMD#R1"); // Reset Radio
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(500);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              sseRIC.print("ER_CMD#C5"); // Set Channel 5
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(50);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              sseRIC.print("ER_CMD#B0"); // Set Over-Air Baud Rate to 1200
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(50);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              sseRIC.print("ER_CMD#P0"); // Set Transmit Power to 0dBm
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(50);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              sseRIC.print("ER_CMD#D2"); // Set RX Power Saving
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(500);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              sseRIC.print("ER_CMD#d2"); // Set TX Power Saving
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(500);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              // Now send the radio message three times for redundancy
+              sseRIC.print(new_radio_str);
+              delay(1500);
+              sseRIC.print(new_radio_str);
+              delay(1500);
+              sseRIC.print(new_radio_str);
+              delay(1500);
+              // Put eRIC back into Low Power Mode 0
+              sseRIC.print("ER_CMD#A21"); // Set Low Power Mode 0
+              delay(50);
+              sseRIC.print("ACK"); // Acknowledge
+              delay(500);
+              while(sseRIC.available()){sseRIC.read();} // Clear the serial rx buffer
+              digitalWrite(eRIC_WAKE, LOW); // Disable eRIC
+            }
+
             // Check if the message contains a correctly formatted relay pulse command: "[RELAY=1]" to "[RELAY=5]"
             starts_at = -1;
-            starts_at = mt_str.indexOf("[RELAY=1]"); // See is message contains "[RELAY=1]"
+            starts_at = mt_str.indexOf("[RELAY=1]"); // See if message contains "[RELAY=1]"
             if (starts_at >= 0) { // If it does, set the flag to allow relay to be pulsed once 9603N is powered down:
               set_relay_flag = false;
               reset_relay_flag = false;
@@ -1138,8 +1319,9 @@ void loop()
       Serial.println("Putting 9603N and GNSS to sleep...");
       isbd.sleep(); // Put 9603 to sleep
       delay(1000);
-      ssIridium.end(); // Close GPS and Iridium serial ports
+      ssIridium.end(); // Close GPS, Iridium and eRIC serial ports
       ssGPS.end();
+      sseRIC.end();
       delay(1000); // Wait for serial ports to clear
   
       // Disable: GPS; pressure sensor; 9603N; and Iridium supercapacitor charger

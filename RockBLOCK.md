@@ -239,7 +239,7 @@ If you want to change the message interval of a beacon, send it a message contai
 - _RBxxxxx[INTERVAL=nnn]_
 
 where
-- _nn_ is the new message interval in _minutes_
+- _nnn_ is the new message interval in _minutes_
 
 Valid values are 1 to 1440 (once per minute to once per day). The beacon will download and process the message during its next transmit cycle. The new interval will take effect after the _following_ transmission.
 
