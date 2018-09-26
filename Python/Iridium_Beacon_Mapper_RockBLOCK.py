@@ -2,10 +2,10 @@
 
 ## Iridium 9603N Beacon Mapper for RockBLOCK .bin attachments
 
-## Written by Paul Clark: Jan-Feb 2018.
+## Written by Paul Clark: Jan-Feb, Sept 2018.
 
 ## Builds a list of all existing SBD .bin files.
-## Once per minute, checks for the appearance of a new SBD .bin file.
+## Checks periodically for the appearance of a new SBD .bin file.
 ## When one is found, parses the file and displays the beacon position and route
 ## using the Google Static Maps API.
 ## https://developers.google.com/maps/documentation/static-maps/intro
@@ -70,8 +70,10 @@ class BeaconMapper(object):
 
       # Default values
       self._job = None # Keep track of timer calls
+      self.message_boxes_open = 0 # How many message boxes are open? (Used to disable updates)
       self.zoom = '15' # Default Google Maps zoom (text)
-      self.default_interval = 60 # Default update interval (secs)
+      self.default_interval = '00:05:00' # Default update interval
+      self.update_intervals = ['00:00:15', '00:00:30', '00:01:00', '00:01:30', '00:02:00', '00:02:30', '00:03:00', '00:04:00', '00:05:00'] # Update intervals
       self.sep_width = 304 # Separator width in pixels
       self.map_lat = 0.0 # Map latitude (degrees)
       self.map_lon = 0.0 # Map longitude (degrees)
@@ -141,23 +143,31 @@ class BeaconMapper(object):
       # Ask the user if they want to ignore any existing sbd files
       # Answer 'n' to display all sbd files - both existing and new
       try:
-         ignore_old_files = raw_input('Do you want to ignore any existing bin files? (Y/n) : ')
+         ignore_old_files = raw_input('Do you want to ignore any existing SBD .bin files? (Y/n) : ')
       except:
          ignore_old_files = 'Y'
       if (ignore_old_files != 'Y') and (ignore_old_files != 'y') and (ignore_old_files != 'N') and (ignore_old_files != 'n'):
          ignore_old_files = 'Y'
       if (ignore_old_files == 'y'): ignore_old_files = 'Y'
 
-      # Build a list of all existing sbd files
-      for root, dirs, files in os.walk("."):
-         if len(files) > 0:
-            #if root != ".": # Ignore files in this directory - only process subdirectories
-            #if root == ".": # Ignore subdirectories - only process this directory
-               for filename in sorted(files):
-                  if filename[-4:] == '.bin': # check for bin file suffix
-                     longfilename = os.path.join(root, filename)
-                     if (ignore_old_files == 'Y'): self.sbd.append(longfilename) # add the filename to the list
-      print 'Ignoring',len(self.sbd),'existing bin files'
+      if (ignore_old_files == 'Y'):
+         print 'Searching for existing SBD .bin files...'
+         num_files = 0
+         last_num_files = 0
+         # Build a list of all existing sbd files
+         for root, dirs, files in os.walk(".", followlinks=False):
+            if num_files > last_num_files:
+               print 'Found',num_files,'SBD .bin files so far...'
+               last_num_files = num_files
+            if len(files) > 0:
+               #if root != ".": # Ignore files in this directory - only process subdirectories
+               #if root == ".": # Ignore subdirectories - only process this directory
+                  for filename in sorted(files):
+                     if filename[-4:] == '.bin': # check for bin file suffix
+                        num_files += 1
+                        longfilename = os.path.join(root, filename)
+                        self.sbd.append(longfilename) # add the filename to the list
+         print 'Ignoring',len(self.sbd),'existing SBD .bin files'
       print
 
       # Read the Google Static Maps API key
@@ -201,17 +211,20 @@ class BeaconMapper(object):
       self.interval = tk.Entry(self.toolFrame) # Create an entry
       self.interval.grid(row=row, column=1) # Assign its position
       self.interval.delete(0, tk.END) # Delete any existing text (redundant?)
-      self.interval.insert(0, str(self.default_interval)) # Insert default value
-      self.interval.config(justify=tk.CENTER,width=22) # Configure
-      self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (s)',width=20) # Create text label
+      self.interval.insert(0, self.default_interval) # Insert default value
+      self.interval.config(justify=tk.CENTER,width=22, state='readonly') # Configure
+      self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (hh:mm:ss)',width=20) # Create text label
       self.interval_txt.grid(row=row, column=0) # Assign its position
       row += 1
+
+      # Record the foreground colour
+      self.foreground = self.interval_txt.cget('foreground')
 
       # Time since last update
       self.time_since_last_update = tk.Entry(self.toolFrame)
       self.time_since_last_update.grid(row=row, column=1)
       self.time_since_last_update.delete(0, tk.END)
-      self.time_since_last_update.insert(0, str(0))
+      self.time_since_last_update.insert(0, '00:00:00')
       self.time_since_last_update.config(justify=tk.CENTER,width=22,state='readonly')
       self.time_since_last_update_txt = tk.Label(self.toolFrame, text = 'Time since last update (s)',width=20)
       self.time_since_last_update_txt.grid(row=row, column=0)
@@ -332,9 +345,18 @@ class BeaconMapper(object):
       self.menubar.add_cascade(label="Beacon Locations", menu=self.beacon_menu)
       self.window.config(menu=self.menubar)
 
+      # Menu to list update intervals
+      self.interval_menu = tk.Menu(self.menubar, tearoff=0)
+      self.menubar.add_cascade(label="Set Update Interval", menu=self.interval_menu)
+      self.window.config(menu=self.menubar)
+      # Add intervals
+      for update_interval in self.update_intervals:
+         interval_str = str(update_interval)
+         self.interval_menu.add_command(label=interval_str,command=lambda interval_str=interval_str: self.set_update_interval(interval_str))
+
       # Set up next update
       self.last_update_at = time.time() # Last time an update was requested
-      self.next_update_at = self.last_update_at #+ self.default_interval # Do first update after this many seconds
+      self.first_update = True # Flag to indicate if an update has been performed
 
       # Timer
       self.window.after(2000,self.timer) # First timer event after 2 secs
@@ -346,30 +368,29 @@ class BeaconMapper(object):
       ''' Timer function - calls itself repeatedly to schedule map updates '''
       do_update = False # Initialise is it time to do an update?
       now = time.time() # Get the current time
-      self.time_since_last_update.configure(state='normal') # Unlock entry box
+
       time_since_last_update = now - self.last_update_at # Calculate interval since last update
+      last_update_str = time.strftime('%H:%M:%S', time.gmtime(time_since_last_update))
+      self.time_since_last_update.configure(state='normal') # Unlock entry box
       self.time_since_last_update.delete(0, tk.END) # Delete existing value
-      if (now < self.next_update_at): # Is it time for the next update?
-         # If it isn't yet time for an update, update the indicated time since last update
-         self.time_since_last_update.insert(0, str(int(time_since_last_update)))
-      else:
-         # If it is time for an update: reset time since last update; set time for next update
-         try: # Try and read the update interval
-            interval = float(self.interval.get())
-         except:
-            #self.interval.configure(state='normal') # Unlock entry box
-            self.interval.delete(0, tk.END) # Delete any existing text
-            self.interval.insert(0, str(self.default_interval)) # Insert default value
-            interval = self.default_interval
-            #self.interval.configure(state='readonly') # Lock entry box
-            #raise ValueError('Invalid Interval!')
-         self.time_since_last_update.insert(0, '0') # Reset time since last update
-         self.last_update_at = self.next_update_at # Update time of last update
-         self.next_update_at = self.next_update_at + interval # Set time for next update
-         do_update = True # Do update
+      self.time_since_last_update.insert(0, last_update_str) # Update the indicated time since last update
       self.time_since_last_update.config(state='readonly') # Lock entry box
 
+      # Check if it is time to do an update
+      # Do an update if it has been at least interval seconds since the last update
+      # and there are no message boxes open
+      # or this is the first update
+      interval = sum(float(n) * m for n, m in zip(reversed(self.interval.get().split(':')), (1, 60, 3600))) # https://stackoverflow.com/a/45971056
+      if ((time_since_last_update >= interval) and (self.message_boxes_open == 0)) or (self.first_update == True): 
+         do_update = True # Do update
+         self.first_update = False # Clear flag
+         self.last_update_at = now # Update time of last update
+
       if do_update: # If it is time to do an update
+         self.time_since_last_update.configure(state='normal') # Unlock entry box
+         self.time_since_last_update.delete(0, tk.END) # Delete existing value
+         self.time_since_last_update.insert(0, 'In Progress...') # Update the indicated time since last update
+         self.time_since_last_update.config(state='readonly') # Lock entry box
          if self.check_for_files(): # Check for new SBD files
             self.update_map() # Update the Google Static Maps image
 
@@ -380,6 +401,7 @@ class BeaconMapper(object):
       new_files = False # Found any new files?
       # Identify all the sbd files again 
       for root, dirs, files in os.walk("."):
+         self.window.update() # Update the window
          if len(files) > 0:
             #if root != ".": # Ignore files in this directory - only process subdirectories
             #if root == ".": # Ignore subdirectories - only process this directory
@@ -630,10 +652,22 @@ class BeaconMapper(object):
       except:
          pass
 
+   def set_update_interval(self, interval):
+      ''' Update the update interval '''
+      self.interval.configure(state='normal') # Unlock entry box
+      self.interval.delete(0, tk.END) # Delete existing value
+      self.interval.insert(0, interval) # Update the indicated time since last update
+      self.interval.config(state='readonly') # Lock entry box
+
    def QUIT(self):
       ''' Quit the program '''
+      self.message_boxes_open = self.message_boxes_open + 1 # Update the number of open message boxes
+      # "finally:" will close the serial port and log file - no need to do it here
       if tkMessageBox.askokcancel("Quit", "Are you sure?"):
+         self.message_boxes_open = self.message_boxes_open - 1 # Probably redundant?
          self.window.destroy() # Destroy the window
+      else:
+         self.message_boxes_open = self.message_boxes_open - 1
 
 if __name__ == "__main__":
    mapper = BeaconMapper()
