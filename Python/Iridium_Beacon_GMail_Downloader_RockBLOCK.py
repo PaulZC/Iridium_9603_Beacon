@@ -118,6 +118,25 @@ def SaveAttachments(service, user_id, msg_id):
                 f.write(file_data)
                 f.close()
 
+def GetMessageBody(contents):
+    """Save the message body.
+
+    Assumes plaintext message body.
+
+    Gratefully plagiarised from:
+    https://github.com/rtklibexplorer/GMail_RTKLIB/blob/master/email_utils.py
+    """
+    for part in contents['payload']['parts']:
+        if part['mimeType'] == 'text/plain':
+            body = part['body']['data']
+            return base64.urlsafe_b64decode(body.encode('UTF-8')).decode('UTF-8')
+        elif 'parts' in part:
+            # go two levels if necessary
+            for sub_part in part['parts']:
+                if sub_part['mimeType'] == 'text/plain':
+                    body = sub_part['body']['data']
+                    return base64.urlsafe_b64decode(body.encode('UTF-8')).decode('UTF-8')
+
 def SaveMessageBody(service, user_id, msg_id):
     """Save the body from Message with given id.
 
@@ -127,27 +146,8 @@ def SaveMessageBody(service, user_id, msg_id):
         can be used to indicate the authenticated user.
         msg_id: ID of Message.
     """
-    message = service.users().messages().get(userId=user_id, id=msg_id, format='raw').execute()
-    msg_str = base64.urlsafe_b64decode(message['raw'].encode('ASCII'))
-    mime_msg = email.message_from_string(msg_str)
-    messageMainType = mime_msg.get_content_maintype()
-    file_data = ''
-    #print(messageMainType)
-    if messageMainType == 'multipart':
-        for part in mime_msg.get_payload():
-            partType = part.get_content_maintype()
-            #print('...'+partType)
-            if partType == 'multipart':
-                for multipart in part.get_payload():
-                    multipartType = multipart.get_content_maintype()
-                    #print('......'+multipartType)
-                    if multipartType == 'text':
-                        file_data += multipart.get_payload()
-                        break # Only get the first text payload
-            elif partType == 'text':
-                file_data += part.get_payload()
-    elif messageMainType == 'text':
-        file_data += mime_msg.get_payload()
+    message = service.users().messages().get(userId=user_id, id=msg_id).execute()
+    file_data = GetMessageBody(message)
 
     #local_date = datetime.datetime.fromtimestamp(float(message['internalDate'])/1000.)
     #date_str = local_date.strftime("%y-%m-%d_%H-%M-%S_")

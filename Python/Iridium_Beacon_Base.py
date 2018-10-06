@@ -2,7 +2,7 @@
 
 ## Multi Iridium Beacon Base
 
-## Written by Paul Clark: Dec 2017 - July 2018.
+## Written by Paul Clark: Dec 2017 - October 2018.
 
 ## This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 ## Please refer to section 5 of the licence for the “Disclaimer of Warranties and Limitation of Liability”.
@@ -1156,9 +1156,9 @@ class BeaconBase(object):
       self.menubar.entryconfig("Beacon Messaging", state='disabled') # Disable Beacon Messaging
       message = ser_no + "[INTERVAL=" + str(self.default_beacon_interval) + "]" # Assemble default message
       if ser_no == "RB0000000":
-         prompt_msg = "Send message\r\rChange RB0000000 to the serial number of the destination RockBLOCK\r\r"
+         prompt_msg = "Send message\r\rChange RB0000000 to the serial number of the destination RockBLOCK\rSerial number must be seven digits. Prefix with zeros as necessary\r\r"
       else:
-         prompt_msg = "Send message to " + ser_no
+         prompt_msg = "Send message to " + ser_no + "                                 \r\r"
       # Ask user for message
       message = tkSimpleDialog.askstring("Beacon Messaging", prompt=prompt_msg, parent=self.window, initialvalue=message)
       if message != None:
