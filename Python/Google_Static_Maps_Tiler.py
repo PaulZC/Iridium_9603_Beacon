@@ -14,7 +14,7 @@ import numpy as np
 
 frame_height = 480 # Google Static Map window width
 frame_width = 640 # Google Static Map window height
-map_type = 'roadmap' # Maps can be: roadmap , satellite , terrain or hybrid
+map_type = 'hybrid' # Maps can be: roadmap , satellite , terrain or hybrid
 
 # Google static map API pixel scales
 # https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
@@ -140,7 +140,7 @@ for lat in np.arange((min_lat + (tile_size / 2.)), ((min_lat + (tile_size / 2.))
       path_url += key
 
       # Download the API map image from Google
-      filename = ("StaticMapTile_Zoom_%i"%zoom) + ("_Lat_%.2f"%lat) + ("_Lon_%.2f_.png"%lon) # Download map to this file
+      filename = ("StaticMapTile_Zoom_%i"%zoom) + ("_Lat_%.3f"%lat) + ("_Lon_%.3f_.png"%lon) # Download map to this file
       try:
          urllib.urlretrieve(path_url, filename) # Attempt map image download
          print 'Downloaded: ',filename
