@@ -72,6 +72,9 @@ The beacon can also be configured and controlled via [messages from an Iridium B
 
 ## Tracking your beacon with an internet connection
 
+![Beacon with Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_with_Internet.JPG)
+Graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
+
 ![Mapper](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Mapper.JPG)
 
 If you will be tracking your Iridium Beacon from somewhere with a good internet connection, then you can use:
@@ -114,6 +117,9 @@ The GUI uses 640x480 pixel map images. Higher resolution images are available if
 The GUI has been tested with Python 2.7 on 64-bit Windows and on Linux on Raspberry Pi. You will need to install the Python libraries listed below.
 
 ## Tracking your beacon _without_ an internet connection
+
+![Beacon without Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_without_Internet.JPG)
+Graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
 
 ![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
 
@@ -285,6 +291,8 @@ To get the tools to run successfully you will need to install the following libr
 - http://simplekml.readthedocs.io/en/latest/index.html
 - https://pypi.python.org/pypi/simplekml
 - pip install simplekml
+
+###
 
 Enjoy!
 

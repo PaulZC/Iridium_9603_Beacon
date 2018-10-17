@@ -16,6 +16,10 @@ New software features for Version 5:
 
 ![Iridium_9603N_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5.JPG)
 
+![Beacon with Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_with_Internet.JPG)
+
+![Beacon without Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_without_Internet.JPG)
+
 **See [LEARN.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/LEARN.md) for more details.**
 
 **See [ASSEMBLY.md](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/ASSEMBLY.md) for details on how to assemble the PCB.**
@@ -37,6 +41,8 @@ The [Python](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Python) d
 ![Mapper](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Mapper.JPG)
 
 See [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board) for details of the optional radio board.
+
+Vector graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
 
 This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 Please refer to section 5 of the licence for the "Disclaimer of Warranties and Limitation of Liability".
