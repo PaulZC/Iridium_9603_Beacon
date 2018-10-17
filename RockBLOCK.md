@@ -28,11 +28,17 @@ If you have an internet connection and you want to use these emails to display t
 Iridium_Beacon_GMail_Downloader_RockBLOCK.py and Iridium_Beacon_Mapper_RockBLOCK.py mapping software
 [described below](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#tracking-your-beacon-with-an-internet-connection).
 
+![Beacon with Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_with_Internet.JPG)
+
 If you want to be able to track your beacon(s) from somewhere _without_ an internet connection, you can use another beacon as a base, use the RockBLOCK Gateway
 to automatically forward messages from your mobile beacon(s) to the base, and then display the location and route of your beacon(s) on a map using the
 Iridium_Beacon_Base.py mapping software
 [described below](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/RockBLOCK.md#tracking-your-beacon-without-an-internet-connection). Map tiles for your
 destination can be downloaded before your travel.
+
+![Beacon without Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_without_Internet.JPG)
+
+Vector graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
 
 Message delivery via an HTTP post is possible too but, as I find email easier to work with, I won't discuss HTTP options further here.
 
@@ -73,7 +79,6 @@ The beacon can also be configured and controlled via [messages from an Iridium B
 ## Tracking your beacon with an internet connection
 
 ![Beacon with Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_with_Internet.JPG)
-Graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
 
 ![Mapper](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Mapper.JPG)
 
@@ -119,7 +124,6 @@ The GUI has been tested with Python 2.7 on 64-bit Windows and on Linux on Raspbe
 ## Tracking your beacon _without_ an internet connection
 
 ![Beacon without Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_without_Internet.JPG)
-Graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
 
 ![Iridium_Beacon_Base_2](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_Beacon_Base_2.JPG)
 
