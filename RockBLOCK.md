@@ -270,7 +270,11 @@ board to transmit. Usually _nnnnnnnn_ is the serial number of the eRIC radio mod
 [Iridium_Beacon_CSV_DateTime.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_CSV_DateTime.py) will convert the first column of the stitched .csv file
 from YYYYMMDDHHMMSS format into DD/MM/YY,HH:MM:SS format, making the message timing easier to interpret using Excel.
 
-[Iridium_Beacon_BIN_to_KML_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_BIN_to_KML_RockBLOCK.py) will convert the .bin SBD attachments downloaded by
+[Iridium_Beacon_DateTime_CSV_to_KML_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_DateTime_CSV_to_KML_RockBLOCK.py) will convert the .csv file produced by
+[Iridium_Beacon_CSV_DateTime.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_CSV_DateTime.py) into .kml files which can be opened in Google Earth.
+The path of the beacon can be shown as: 2D (course over ground) or 3D (course and altitude) linestring; points (labelled with message sequence numbers); and arrows (indicating the heading of the beacon).
+
+[Iridium_Beacon_BIN_to_KML_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_BIN_to_KML_RockBLOCK.py) will convert the individual .bin SBD attachments downloaded by
 [Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) into .kml files which can be opened in Google Earth.
 The path of the beacon can be shown as: 2D (course over ground) or 3D (course and altitude) linestring; points (labelled with message sequence numbers); and arrows (indicating the heading of the beacon).
 
