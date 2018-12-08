@@ -157,12 +157,19 @@ Screw the GNSS and Iridium antennas onto the SMA connectors
 
 Now that the 9603N has been installed, retest the completed PCB using the [Arduino test code](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino).
 
+### Secure J1 with Epoxy
+
+I recommend securing J1 to the PCB with a small amount of epoxy to make it more robust. 3M Scotch-Weld 2216 is an ideal choice as it remains slightly flexible when cured.
+You will need to temporarily remove the 9603N while you apply the epoxy. Apply the mixed epoxy around the body and legs of J1 using a toothpick,
+taking great care to keep the epoxy clear of the connector opening and pins. Make sure the epoxy is fully cured before re-installing the 9603N.
+
+![V5_Epoxy.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Epoxy.JPG)
+
 ### Lacquer the PCB
 
-I do recommend giving the PCB a coat of lacquer, especially if you are intending to use it to track a balloon flight.
-Cover all of the surface mount components with [Acrylic Protective Lacquer (conformal coating)](https://uk.rs-online.com/web/p/conformal-coatings/3217324/)
-except: U4 (pressure sensor), J1, SW1, CON1, IO pads and split pads. You will need to temporarily remove the 9603N
-while you apply the lacquer.
+I recommend giving the PCB a coat of lacquer, especially if you are intending to use it to track a balloon flight.
+You will need to temporarily remove the 9603N while you apply the lacquer. Cover all of the surface mount components with
+[Acrylic Protective Lacquer (conformal coating)](https://uk.rs-online.com/web/p/conformal-coatings/3217324/) except: U4 (pressure sensor), J1, SW1, CON1, IO pads and split pads.
 
 ![V5_Lacquer.JPG](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/V5_Lacquer.JPG)
 
