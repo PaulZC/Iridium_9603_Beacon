@@ -282,9 +282,9 @@ The path of the beacon can be shown as: 2D (course over ground) or 3D (course an
 
 To get the tools to run successfully you will need to install the following libraries:
 
-### GMail API
+### GMail API and oauth2client
 
-- pip install --upgrade google-api-python-client
+- pip install --upgrade google-api-python-client oauth2client
 
 ### PIL ImageTk
 
