@@ -1,13 +1,24 @@
-G04 Gerber job file.*
-%TF.FileFunction,JobInfo*%
-%TF.GenerationSoftware,Autodesk,EAGLE,9.0.0*%
-%TF.CreationDate,2018-05-19T07:41:30Z*%
-%TF.Part,Single*%
-%MOMM*%
-%TJ.B_Owner,Paul Clark <paul.clark@durham.ac.uk>*%
-%TJ.B_ID,Iridium_9603_Beacon*%
-%TJ.B_LayerNum,2*%
-%TJ.B_Thickness,1.586000*%
-%TJ.B_Size_X,57.556400*%
-%TJ.B_Size_Y,66.040000*%
-M02*
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2019-01-17T14:04:40Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.2.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.586,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "Iridium_9603_Beacon"
+        },
+        "Owner": "Paul Clark <paul.clark@durham.ac.uk>",
+        "Size": {
+            "X": 57.5564,
+            "Y": 66.04
+        }
+    }
+}
