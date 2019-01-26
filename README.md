@@ -36,6 +36,8 @@ The [Gerber](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Gerber) d
 
 The [Arduino](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Arduino) directory contains the Arduino code.
 
+The [OpenSCAD](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/OpenSCAD) directory contains the .stl and .scad files for the 3D-printed covers.
+
 The [Python](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Python) directory contains tracking/mapping software based on the Google Static Maps API.
 
 ![Mapper](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Mapper.JPG)
