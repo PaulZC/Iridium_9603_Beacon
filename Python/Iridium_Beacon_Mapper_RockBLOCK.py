@@ -60,6 +60,7 @@ import numpy as np
 from sys import platform
 import os
 import matplotlib.dates as mdates
+import re
 
 class BeaconMapper(object):
 
@@ -162,7 +163,7 @@ class BeaconMapper(object):
             if len(files) > 0:
                #if root != ".": # Ignore files in this directory - only process subdirectories
                #if root == ".": # Ignore subdirectories - only process this directory
-                  for filename in sorted(files):
+                  for filename in self.sorted_nicely(files):
                      if filename[-4:] == '.bin': # check for bin file suffix
                         num_files += 1
                         longfilename = os.path.join(root, filename)
@@ -405,7 +406,7 @@ class BeaconMapper(object):
          if len(files) > 0:
             #if root != ".": # Ignore files in this directory - only process subdirectories
             #if root == ".": # Ignore subdirectories - only process this directory
-               for filename in sorted(files):
+               for filename in self.sorted_nicely(files):
                   if (filename[-4:] == '.bin') and (filename[15:16] == '-'): # Does it have the correct format? (imei-momsn.bin)
                      longfilename = os.path.join(root, filename)
                      msnum = filename[16:-4] # Get the momsn
@@ -658,6 +659,13 @@ class BeaconMapper(object):
       self.interval.delete(0, tk.END) # Delete existing value
       self.interval.insert(0, interval) # Update the indicated time since last update
       self.interval.config(state='readonly') # Lock entry box
+
+   # https://stackoverflow.com/a/2669120
+   def sorted_nicely(self, l): 
+    """ Sort the given iterable in the way that humans expect.""" 
+    convert = lambda text: int(text) if text.isdigit() else text 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(l, key = alphanum_key)
 
    def QUIT(self):
       ''' Quit the program '''
