@@ -280,7 +280,7 @@ static const int GPS_EN = 11; // GPS & MPL3115A2 Enable on pin D11
 #define VREF A0 // 1.25V precision voltage reference
 #define VBUS_NORM 3.3 // Normal bus voltage for battery voltage calculations
 #define VREF_NORM 1.25 // Normal reference voltage for battery voltage calculations
-#define VBAT_LOW 3.05 // Minimum voltage for LTC3225
+#define VBAT_LOW 2.8 // Minimum voltage for LTC3225
 
 static const int set_coil = 7; // OMRON G6SK relay set coil (pull low to energise coil)
 static const int reset_coil = 2; // OMRON G6SK relay reset coil (pull low to energise coil)
@@ -319,6 +319,7 @@ float vref = VREF_NORM;
 float vrail = VBUS_NORM;
 float pascals, tempC;
 int PGOOD;
+int pgood_count;
 unsigned long tnow;
 bool reset_relay_flag = false;
 bool set_relay_flag = false;
@@ -349,26 +350,8 @@ bool ISBDCallback()
   // Check the 'battery' voltage now we are drawing current for the 9603
   // If voltage is low, stop Iridium send
   // Average voltage over numReadings to smooth out any short dips
+  get_vbat_smooth();
 
-  // Measure the reference voltage and calculate the rail voltage
-  vref = analogRead(VREF) * (VBUS_NORM / 1023.0);
-  vrail = VREF_NORM * VBUS_NORM / vref;
-
-  // subtract the last reading:
-  total = total - readings[readIndex];
-  // read from the sensor:
-  latest_reading = analogRead(VAP);
-  readings[readIndex] = latest_reading;
-  // add the reading to the total:
-  total = total + latest_reading;
-  // advance to the next position in the array:
-  readIndex = readIndex + 1;
-  // if we're at the end of the array...wrap around to the beginning:
-  if (readIndex >= numReadings) readIndex = 0;
-  // calculate the average:
-  average_reading = total / numReadings; // Seems to work OK with integer maths - but total does need to be long int
-  vbat = float(average_reading) * (2.0 * vrail / 1023.0); // Calculate average battery voltage using corrected rail voltage
-  
   if (vbat < VBAT_LOW) {
     Serial.print("***!!! LOW VOLTAGE (ISBDCallback) ");
     Serial.print(vbat,2);
@@ -378,6 +361,8 @@ bool ISBDCallback()
   else {     
     return true;
   }
+
+  delay(1);
 }
 // V2 console and diagnostic callbacks (replacing attachConsole and attachDiags)
 void ISBDConsoleCallback(IridiumSBD *device, char c) { Serial.write(c); }
@@ -411,13 +396,49 @@ void alarmMatch()
   rtc.setAlarmHours(rtc_hours); // Set next alarm time (hours)
 }
 
-// Read 'battery' voltage
+// Read and smooth the 'battery' voltage
+// Average voltage over numReadings to smooth out any short dips
+void get_vbat_smooth() {
+  // Measure the reference voltage and calculate the rail voltage
+  vref = analogRead(VREF) * (VBUS_NORM / 1023.0);
+  vrail = VREF_NORM * VBUS_NORM / vref;
+
+  // subtract the last reading:
+  total = total - readings[readIndex];
+  // read from the sensor:
+  latest_reading = analogRead(VAP);
+  readings[readIndex] = latest_reading;
+  // add the reading to the total:
+  total = total + latest_reading;
+  // advance to the next position in the array:
+  readIndex = readIndex + 1;
+  // if we're at the end of the array...wrap around to the beginning:
+  if (readIndex >= numReadings) readIndex = 0;
+  // calculate the average:
+  average_reading = total / numReadings; // Seems to work OK with integer maths - but total does need to be long int
+  vbat = float(average_reading) * (2.0 * vrail / 1023.0); // Calculate average battery voltage using corrected rail voltage
+}
+
+// Read the instantaneous 'battery' voltage
 void get_vbat() {
   // Measure the reference voltage and calculate the rail voltage
   vref = analogRead(VREF) * (VBUS_NORM / 1023.0);
   vrail = VREF_NORM * VBUS_NORM / vref;
 
   vbat = analogRead(VAP) * (2.0 * vrail / 1023.0); // Read 'battery' voltage from resistor divider, correcting for vrail
+}
+
+// Initialise the smoothed 'battery' voltage
+void init_vbat()
+{
+  // Initialise voltage sample buffer with current readings
+  total = 0;
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = analogRead(VAP);
+    total = total + readings[thisReading];
+    delay(1);
+  }
+  get_vbat_smooth();
 }
 
 void LED_off() // Turn NeoPixel off
@@ -587,13 +608,6 @@ void setup()
   iterationCounter = 0; // Make sure iterationCounter is set to zero (indicating a reset)
   loop_step = init; // Make sure loop_step is set to init
 
-  // Initialise voltage sample buffer to 5.3V
-  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
-    readings[thisReading] = 822; // 5.3V * 1023 / (2 * 3.3)
-  }
-  total = numReadings * 822;
-  vbat = 5.3;
-
   // Configure the eRIC then put it into low power mode
   // Serial data from the eRIC (apart from the serial number) is ignored
   // so the code won't hang if the radio board is not connected
@@ -698,7 +712,7 @@ void loop()
 
       // Check battery voltage
       // If voltage is low, go to sleep
-      get_vbat();
+      init_vbat(); // Use init_vbat to make sure the current true smoothed voltage is used (after coming out of deep sleep)
       if (vbat < VBAT_LOW) {
         Serial.print("***!!! LOW VOLTAGE (init) ");
         Serial.print(vbat,2);
@@ -725,7 +739,7 @@ void loop()
     
       // Check battery voltage now we are drawing current for the GPS
       // If voltage is low, go to sleep
-      get_vbat();
+      init_vbat(); // Use init_vbat to make sure the true smoothed voltage is used
       if (vbat < VBAT_LOW) {
         Serial.print("***!!! LOW VOLTAGE (start_GPS) ");
         Serial.print(vbat,2);
@@ -814,8 +828,8 @@ void loop()
         }
 
         // Check battery voltage now we are drawing current for the GPS
-        // If voltage is low, stop looking for GPS and go to sleep
-        get_vbat();
+        // If voltage is low, stop looking for GNSS and go to sleep
+        get_vbat_smooth();
         if (vbat < VBAT_LOW) {
           break;
         }
@@ -890,24 +904,25 @@ void loop()
       Serial.println("Waiting for PGOOD to go HIGH...");
       digitalWrite(LTC3225shutdown, HIGH); // Enable the LTC3225EDDB supercapacitor charger
       delay(1000); // Let PGOOD stabilise
+      init_vbat(); // init_vbat to make sure the current true smoothed voltage is used now that the LTC3225 is active
       
       // Allow 10 mins for LTC3225 to achieve PGOOD
       PGOOD = digitalRead(LTC3225PGOOD);
-      for (tnow = millis(); !PGOOD && millis() - tnow < 10UL * 60UL * 1000UL;)
+      for (tnow = millis(); !PGOOD && ((millis() - tnow) < 10UL * 60UL * 1000UL);)
       {
 #ifndef NoLED
-      // 'Flash' the LED
-      if ((millis() / 1000) % 2 == 1) {
-        LED_dim_cyan();
-      }
-      else {
-        LED_cyan();
-      }
+        // 'Flash' the LED
+        if ((millis() / 1000) % 2 == 1) {
+          LED_dim_cyan();
+        }
+        else {
+          LED_cyan();
+        }
 #endif
 
         // Check battery voltage now we are drawing current for the LTC3225
         // If voltage is low, stop LTC3225 and go to sleep
-        get_vbat();
+        get_vbat_smooth();
         if (vbat < VBAT_LOW) {
           break;
         }
@@ -939,27 +954,36 @@ void loop()
       Serial.println("Allowing extra time to make sure capacitors are charged...");
       
       // Allow 20s for extra charging
-      PGOOD = digitalRead(LTC3225PGOOD);
-      for (tnow = millis(); PGOOD && millis() - tnow < 1UL * 20UL * 1000UL;)
+      // Exit the loop early if PGOOD has been low for 2000 consecutive milliseconds
+      pgood_count = 2000;
+      for (tnow = millis(); (pgood_count > 0) && ((millis() - tnow) < (1UL * 20UL * 1000UL));)
       {
 #ifndef NoLED
-      // 'Flash' the LED
-      if ((millis() / 1000) % 2 == 1) {
-        LED_dim_cyan();
-      }
-      else {
-        LED_cyan();
-      }
+        // 'Flash' the LED
+        if ((millis() / 1000) % 2 == 1) {
+          LED_dim_cyan();
+        }
+        else {
+          LED_cyan();
+        }
 #endif
 
         // Check battery voltage now we are drawing current for the LTC3225
         // If voltage is low, stop LTC3225 and go to sleep
-        get_vbat();
+        get_vbat_smooth();
         if (vbat < VBAT_LOW) {
           break;
         }
 
         PGOOD = digitalRead(LTC3225PGOOD);
+        if (PGOOD == LOW) {
+          pgood_count--;
+        }
+        else {
+          pgood_count = 2000;
+        }
+
+        delay(1);
       }
 
       // If voltage is low or supercapacitors did not charge then go to sleep
@@ -969,7 +993,7 @@ void loop()
         Serial.println("V !!!***");
         loop_step = zzz;
       }
-      else if (PGOOD == LOW) {
+      else if (pgood_count == 0) {
         Serial.println("***!!! LTC3225 !PGOOD (wait_LTC3225) !!!***");
         loop_step = zzz;
       }
@@ -1069,6 +1093,7 @@ void loop()
         Serial.println("'");
         uint8_t mt_buffer[100]; // Buffer to store Mobile Terminated SBD message
         size_t mtBufferSize = sizeof(mt_buffer); // Size of MT buffer
+        init_vbat(); // init_vbat to make sure the current true smoothed voltage is used now that the 9603N is active
 
         if (isbd.sendReceiveSBDText(outBuffer, mt_buffer, mtBufferSize) == ISBD_SUCCESS) { // Send the message; download an MT message if there is one
           if (mtBufferSize > 0) { // Was an MT message received?
