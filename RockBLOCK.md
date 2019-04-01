@@ -278,6 +278,12 @@ The path of the beacon can be shown as: 2D (course over ground) or 3D (course an
 [Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) into .kml files which can be opened in Google Earth.
 The path of the beacon can be shown as: 2D (course over ground) or 3D (course and altitude) linestring; points (labelled with message sequence numbers); and arrows (indicating the heading of the beacon).
 
+[Iridium_Beacon_habhub_habitat_uploader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_habhub_habitat_uploader_RockBLOCK.py) will parse the data in the .bin SBD attachments
+downloaded by [Iridium_Beacon_GMail_Downloader_RockBLOCK.py](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/Python/Iridium_Beacon_GMail_Downloader_RockBLOCK.py) and upload the data to the excellent
+[HabHub Habitat Tracker](https://tracker.habhub.org). Start the uploader first and allow it to build up a list of any existing SBD .bin files, then start the GMail_Downloader.
+When any new SBD messages arrive in your GMail inbox, they will be downloaded and then uploaded to habitat automatically. You will find the lines that actually upload the data to Habitat are commented out.
+Only uncomment them once you have registered your flight with UKHAS and are ready to upload real data.
+
 ## Required Python 2.7 Libraries
 
 To get the tools to run successfully you will need to install the following libraries:
@@ -299,6 +305,28 @@ To get the tools to run successfully you will need to install the following libr
 - http://simplekml.readthedocs.io/en/latest/index.html
 - https://pypi.python.org/pypi/simplekml
 - pip install simplekml
+
+### CouchDB
+
+- pip install couchdb
+
+or
+
+- Go to https://pypi.org/project/CouchDB/#files
+- Download the source tar.gz
+- Extract it and cd into the folder
+- sudo python setup.py install
+
+### CRCMOD
+
+- pip install crcmod
+
+or
+
+- Go to https://pypi.org/project/crcmod/#files
+- Download the source tar.gz
+- Extract it and cd into the folder
+- sudo python setup.py install
 
 ###
 
