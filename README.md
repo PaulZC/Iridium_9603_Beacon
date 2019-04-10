@@ -4,16 +4,6 @@ A lightweight Iridium 9603N + GNSS Beacon (Tracker)
 
 Suitable for high altitude ballooning, asset tracking and many other remote monitoring applications.
 
-New hardware features for Version 5:
-- Includes an OMRON G6SK relay to allow the beacon to control external equipment (e.g. a cut-down device)
-- 9603N EXT_PWR is now switched via a P-MOSFET
-
-New software features for Version 5:
-- Relay can be configured during a flight via a Mobile Terminated SBD message
-- Relay can be 'pulsed' on for 1-5 seconds or turned on/off indefinitely
-- RockBLOCK Gateway message forwarding can be enabled/disabled via a Mobile Terminated SBD message
-- Includes support for the optional [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board)
-
 ![Iridium_9603N_Beacon_V5](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Iridium_9603N_Beacon_V5.JPG)
 
 ![Beacon with Internet](https://github.com/PaulZC/Iridium_9603_Beacon/blob/master/img/Beacon_with_Internet.JPG)
@@ -45,6 +35,13 @@ The [Python](https://github.com/PaulZC/Iridium_9603_Beacon/tree/master/Python) d
 See [Iridium Beacon Radio Board](https://github.com/PaulZC/Iridium_Beacon_Radio_Board) for details of the optional radio board.
 
 Vector graphics by [Alice Clark](https://www.alicelclark.co.uk/about)
+
+If you have found this project useful and if you are able to, please cite the paper:
+
+P. Clark et al, An open source toolkit for the tracking, termination and recovery of high altitude balloon flights and payloads, 2019 JINST 14 P04003
+[DOI:10.1088/1748-0221/14/04/P04003](https://doi.org/10.1088/1748-0221/14/04/P04003)
+
+The Accepted Manuscript is available on arXiv: http://arxiv.org/abs/1904.04321
 
 This project is distributed under a Creative Commons Attribution + Share-alike (BY-SA) licence.
 Please refer to section 5 of the licence for the "Disclaimer of Warranties and Limitation of Liability".
