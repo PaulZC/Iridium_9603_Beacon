@@ -34,6 +34,14 @@
 import numpy as np
 import matplotlib.dates as mdates
 import os
+import re
+
+# https://stackoverflow.com/a/2669120
+def sorted_nicely(l): 
+  """ Sort the given iterable in the way that humans expect.""" 
+  convert = lambda text: int(text) if text.isdigit() else text 
+  alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+  return sorted(l, key = alphanum_key)
 
 # list of imeis
 imeis = []
@@ -56,7 +64,7 @@ if (overwrite_files == 'o'): overwrite_files = 'O'
 print
 
 # Identify all .bin SBD files
-for root, dirs, files in os.walk("."):
+for root, dirs, files in os.walk(".", followlinks=False):
     
     # Comment out the next two lines to process all files in this directory and its subdirectories
     # Uncomment one or the other to search only this directory or only subdirectories
@@ -72,11 +80,9 @@ for root, dirs, files in os.walk("."):
             valid_files = [afile for afile in files if ((afile[-4:] == '.bin') and (afile[15:16] == '-'))]
         else:
             valid_files = []
+            
         if len(valid_files) > 0:
-        
-            sort_by = lambda num: int(num[16:-4]) # sort numerically by momsn           
-            for filename in sorted(valid_files, key=sort_by):
-
+            for filename in sorted_nicely(valid_files):
                 longfilename = os.path.join(root, filename)
                 momsn = filename[16:-4] # Get the momsn
                 imei = filename[0:15] # Get the imei

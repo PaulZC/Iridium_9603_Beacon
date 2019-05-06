@@ -25,7 +25,7 @@
 # Column 11 = Temperature (C) (float)
 # Column 12 = Battery (V) (float)
 # Column 13 = Iteration Count (int)
-# (Optional) Column 13 = The Beacon's RockBLOCK serial number (see Iridium9603NBeacon_V4.ino)
+# (Optional) Column 14 = The Beacon's RockBLOCK serial number (see Iridium9603NBeacon_V4.ino)
 
 import csv
 import simplekml
@@ -82,19 +82,27 @@ with open(longfilename, "rb") as f:
     reader = csv.reader(f)
     for line in reader:
         if (line[0][:2] == 'RB') : # Does the message payload have an RB prefix?
-            latitude = float(line[3]) # Extract the latitude
-            longitude = float(line[4]) # Extract the longitude
-            altitude = float(line[5]) # Extract the altitude
-            heading = float(line[7]) # Extract the heading
-            pressure = float(line[10]) # Extract the pressure
-            count = line[12] # Extract the message count
+            try:
+                latitude = float(line[3]) # Extract the latitude
+                longitude = float(line[4]) # Extract the longitude
+                altitude = float(line[5]) # Extract the altitude
+                heading = float(line[7]) # Extract the heading
+                pressure = float(line[10]) # Extract the pressure
+                count = line[13] # Extract the message count
+            except:
+                latitude = 0.
+                longitude = 0.
         else:
-            latitude = float(line[2]) # Extract the latitude
-            longitude = float(line[3]) # Extract the longitude
-            altitude = float(line[4]) # Extract the altitude
-            heading = float(line[6]) # Extract the heading
-            pressure = float(line[9]) # Extract the pressure
-            count = line[12] # Extract the message count
+            try:
+                latitude = float(line[2]) # Extract the latitude
+                longitude = float(line[3]) # Extract the longitude
+                altitude = float(line[4]) # Extract the altitude
+                heading = float(line[6]) # Extract the heading
+                pressure = float(line[9]) # Extract the pressure
+                count = line[12] # Extract the message count
+            except:
+                latitude = 0.
+                longitude = 0.
 
         if (latitude == 0.) and (longitude == 0.): # Check lat and lon are valid
             pass
