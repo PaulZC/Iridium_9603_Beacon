@@ -20,9 +20,9 @@
 # https://developers.google.com/gmail/api/quickstart/python
 
 # If modifying these scopes, delete the file token.pickle.
-#SCOPES = 'https://www.googleapis.com/auth/gmail.readonly' # Read only
-SCOPES = 'https://www.googleapis.com/auth/gmail.modify' # Everything except delete
-#SCOPES = 'https://mail.google.com/' # Full permissions
+#SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'] # Read only
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify'] # Everything except delete
+#SCOPES = ['https://mail.google.com/'] # Full permissions
 
 import base64
 import pickle
