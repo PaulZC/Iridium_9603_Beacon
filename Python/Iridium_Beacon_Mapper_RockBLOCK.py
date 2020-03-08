@@ -45,16 +45,13 @@
 # Column 12 = Iteration Count (int)
 # (Optional) Column 13 = The Beacon's RockBLOCK serial number (see Iridium9603NBeacon_V4.ino)
 
-# Converters
-# 0:mdates.strpdate2num('%Y%m%d%H%M%S')
-
-import Tkinter as tk
-import tkMessageBox
-import tkFont
-import serial
+from PyQt5.QtCore import QSettings, QProcess, QTimer, Qt
+from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QGridLayout, QPushButton, \
+    QApplication, QLineEdit, QFileDialog, QPlainTextEdit, QCheckBox, QMessageBox, \
+    QMenuBar
+from PyQt5.QtGui import QCloseEvent, QTextCursor, QPixmap, QClipboard
 import time
-import urllib
-from PIL import Image, ImageTk
+import urllib.request
 import math
 import numpy as np
 from sys import platform
@@ -62,16 +59,17 @@ import os
 import matplotlib.dates as mdates
 import re
 
-class BeaconMapper(object):
+class BeaconMapper(QWidget):
 
-   def __init__(self):
+   def __init__(self, parent: QWidget = None) -> None:
       ''' Init BeaconMapper: check for existing SBD .bin files; read API key; set up the Tkinter window '''
-      print 'Iridium Beacon Mapper for RockBLOCK'
+      super().__init__(parent)
+      
+      print('Iridium Beacon Mapper for RockBLOCK')
       print
 
       # Default values
       self._job = None # Keep track of timer calls
-      self.message_boxes_open = 0 # How many message boxes are open? (Used to disable updates)
       self.zoom = '15' # Default Google Maps zoom (text)
       self.default_interval = '00:05:00' # Default update interval
       self.update_intervals = ['00:00:15', '00:00:30', '00:01:00', '00:01:30', '00:02:00', '00:02:30', '00:03:00', '00:04:00', '00:05:00'] # Update intervals
@@ -144,7 +142,7 @@ class BeaconMapper(object):
       # Ask the user if they want to ignore any existing sbd files
       # Answer 'n' to display all sbd files - both existing and new
       try:
-         ignore_old_files = raw_input('Do you want to ignore any existing SBD .bin files? (Y/n) : ')
+         ignore_old_files = input('Do you want to ignore any existing SBD .bin files? (Y/n) : ')
       except:
          ignore_old_files = 'Y'
       if (ignore_old_files != 'Y') and (ignore_old_files != 'y') and (ignore_old_files != 'N') and (ignore_old_files != 'n'):
@@ -152,13 +150,13 @@ class BeaconMapper(object):
       if (ignore_old_files == 'y'): ignore_old_files = 'Y'
 
       if (ignore_old_files == 'Y'):
-         print 'Searching for existing SBD .bin files...'
+         print('Searching for existing SBD .bin files...')
          num_files = 0
          last_num_files = 0
          # Build a list of all existing sbd files
          for root, dirs, files in os.walk(".", followlinks=False):
             if num_files > last_num_files:
-               print 'Found',num_files,'SBD .bin files so far...'
+               print('Found',num_files,'SBD .bin files so far...')
                last_num_files = num_files
             if len(files) > 0:
                #if root != ".": # Ignore files in this directory - only process subdirectories
@@ -168,7 +166,7 @@ class BeaconMapper(object):
                         num_files += 1
                         longfilename = os.path.join(root, filename)
                         self.sbd.append(longfilename) # add the filename to the list
-         print 'Ignoring',len(self.sbd),'existing SBD .bin files'
+         print('Ignoring',len(self.sbd),'existing SBD .bin files')
       print
 
       # Read the Google Static Maps API key
@@ -178,231 +176,218 @@ class BeaconMapper(object):
             self.key = myfile.read().replace('\n', '')
             myfile.close()
       except:
-         print 'Could not read the Google Static Maps API key!'
-         print 'Create one here: https://developers.google.com/maps/documentation/static-maps/get-api-key'
-         print 'then copy and paste it into a file called Google_Static_Maps_API_Key.txt'
+         print('Could not read the Google Static Maps API key!')
+         print('Create one here: https://developers.google.com/maps/documentation/static-maps/get-api-key')
+         print('then copy and paste it into a file called Google_Static_Maps_API_Key.txt')
          raise ValueError('Could not read API Key!')
 
-      # Set up Tkinter GUI
-      self.window = tk.Tk() # Create main window
-      self.window.wm_title("Iridium Beacon Mapper") # Add a title
-      self.window.config(background="#FFFFFF") # Set background colour to white
+      # Set up UI
+      
+      row = 1 # Leave space for the menubar
 
-      # Set up Frames
-      self.toolFrame = tk.Frame(self.window, height=self.frame_height) # Frame for buttons and entries
-      self.toolFrame.pack(side=tk.LEFT)
-
-      self.imageFrame = tk.Frame(self.window, width=self.frame_width, height=self.frame_height) # Frame for map image
-      self.imageFrame.pack(side=tk.RIGHT)
-
-      # Load default blank image into imageFrame
-      # Image must be self.frame_width x self.frame_height pixels
-      filename = "map_image_blank.png"
-      image = Image.open(filename)
-      photo = ImageTk.PhotoImage(image)
-      self.label = tk.Label(self.imageFrame,image=photo)
-      self.label.pack(fill=tk.BOTH) # Make the image fill the frame
-      self.image = photo # Store the image to avoid garbage collection
-      self.label.bind("<Button-1>",self.left_click) # Left mouse button click event
-      self.label.bind("<Button-3>",self.right_click) # Right mouse button click event
-
-      row = 0
+      layout = QGridLayout()
 
       # Update interval
-      self.interval = tk.Entry(self.toolFrame) # Create an entry
-      self.interval.grid(row=row, column=1) # Assign its position
-      self.interval.delete(0, tk.END) # Delete any existing text (redundant?)
-      self.interval.insert(0, self.default_interval) # Insert default value
-      self.interval.config(justify=tk.CENTER,width=22, state='readonly') # Configure
-      self.interval_txt = tk.Label(self.toolFrame, text = 'Update interval (hh:mm:ss)',width=20) # Create text label
-      self.interval_txt.grid(row=row, column=0) # Assign its position
+      interval_txt = QLabel(self.tr('Update interval (hh:mm:ss)')) # Create the label
+      layout.addWidget(interval_txt, row, 0) # Add it
+      self.interval = QLineEdit() # Create the value box
+      self.interval.clear() # Delete any existing text (redundant?)
+      self.interval.setText('00:00:15') # Initialize it
+      self.interval.setAlignment(Qt.AlignHCenter) # Align it
+      self.interval.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.interval, row, 1) # Add it
       row += 1
-
-      # Record the foreground colour
-      self.foreground = self.interval_txt.cget('foreground')
 
       # Time since last update
-      self.time_since_last_update = tk.Entry(self.toolFrame)
-      self.time_since_last_update.grid(row=row, column=1)
-      self.time_since_last_update.delete(0, tk.END)
-      self.time_since_last_update.insert(0, '00:00:00')
-      self.time_since_last_update.config(justify=tk.CENTER,width=22,state='readonly')
-      self.time_since_last_update_txt = tk.Label(self.toolFrame, text = 'Time since last update (s)',width=20)
-      self.time_since_last_update_txt.grid(row=row, column=0)
-      row += 1
-
-      # Separator
-      self.sep_1 = tk.Frame(self.toolFrame,height=1,bg='#808080',width=self.sep_width)
-      self.sep_1.grid(row=row, columnspan=2)
+      time_since_last_update_txt = QLabel(self.tr('Time since last update (s)')) # Create the label
+      layout.addWidget(time_since_last_update_txt, row, 0) # Add it
+      self.time_since_last_update = QLineEdit() # Create the value box
+      self.time_since_last_update.clear() # Delete any existing text (redundant?)
+      self.time_since_last_update.setText('00:00:00') # Initialize it
+      self.time_since_last_update.setAlignment(Qt.AlignHCenter) # Align it
+      self.time_since_last_update.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.time_since_last_update, row, 1) # Add it
       row += 1
 
       # Beacon imei
-      self.beacon_imei = tk.Entry(self.toolFrame)
-      self.beacon_imei.grid(row=row, column=1)
-      self.beacon_imei.delete(0, tk.END)
-      self.beacon_imei.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_imei_txt = tk.Label(self.toolFrame, text = 'Beacon IMEI',width=20)
-      self.beacon_imei_txt.grid(row=row, column=0)
+      beacon_imei_txt = QLabel(self.tr('Beacon IMEI')) # Create the label
+      layout.addWidget(beacon_imei_txt, row, 0) # Add it
+      self.beacon_imei = QLineEdit() # Create the value box
+      self.beacon_imei.clear() # Delete any existing text (redundant?)
+      self.beacon_imei.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_imei.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_imei, row, 1) # Add it
       row += 1
 
       # Beacon time
-      self.beacon_time = tk.Entry(self.toolFrame)
-      self.beacon_time.grid(row=row, column=1)
-      self.beacon_time.delete(0, tk.END)
-      self.beacon_time.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_time_txt = tk.Label(self.toolFrame, text = 'Beacon time',width=20)
-      self.beacon_time_txt.grid(row=row, column=0)
+      beacon_time_txt = QLabel(self.tr('Beacon time')) # Create the label
+      layout.addWidget(beacon_time_txt, row, 0) # Add it
+      self.beacon_time = QLineEdit() # Create the value box
+      self.beacon_time.clear() # Delete any existing text (redundant?)
+      self.beacon_time.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_time.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_time, row, 1) # Add it
       row += 1
 
       # Beacon location
-      self.beacon_location = tk.Entry(self.toolFrame)
-      self.beacon_location.grid(row=row, column=1)
-      self.beacon_location.delete(0, tk.END)
-      self.beacon_location.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_location_txt = tk.Label(self.toolFrame, text = 'Beacon location',width=20)
-      self.beacon_location_txt.grid(row=row, column=0)
+      beacon_location_txt = QLabel(self.tr('Beacon location')) # Create the label
+      layout.addWidget(beacon_location_txt, row, 0) # Add it
+      self.beacon_location = QLineEdit() # Create the value box
+      self.beacon_location.clear() # Delete any existing text (redundant?)
+      self.beacon_location.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_location.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_location, row, 1) # Add it
       row += 1
 
       # Beacon altitude
-      self.beacon_altitude = tk.Entry(self.toolFrame)
-      self.beacon_altitude.grid(row=row, column=1)
-      self.beacon_altitude.delete(0, tk.END)
-      self.beacon_altitude.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_altitude_txt = tk.Label(self.toolFrame, text = 'Beacon altitude (m)',width=20)
-      self.beacon_altitude_txt.grid(row=row, column=0)
+      beacon_altitude_txt = QLabel(self.tr('Beacon altitude (m)')) # Create the label
+      layout.addWidget(beacon_altitude_txt, row, 0) # Add it
+      self.beacon_altitude = QLineEdit() # Create the value box
+      self.beacon_altitude.clear() # Delete any existing text (redundant?)
+      self.beacon_altitude.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_altitude.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_altitude, row, 1) # Add it
       row += 1
 
       # Beacon speed
-      self.beacon_speed = tk.Entry(self.toolFrame)
-      self.beacon_speed.grid(row=row, column=1)
-      self.beacon_speed.delete(0, tk.END)
-      self.beacon_speed.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_speed_txt = tk.Label(self.toolFrame, text = 'Beacon speed (m/s)',width=20)
-      self.beacon_speed_txt.grid(row=row, column=0)
+      beacon_speed_txt = QLabel(self.tr('Beacon speed (m/s)')) # Create the label
+      layout.addWidget(beacon_speed_txt, row, 0) # Add it
+      self.beacon_speed = QLineEdit() # Create the value box
+      self.beacon_speed.clear() # Delete any existing text (redundant?)
+      self.beacon_speed.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_speed.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_speed, row, 1) # Add it
       row += 1
 
       # Beacon heading
-      self.beacon_heading = tk.Entry(self.toolFrame)
-      self.beacon_heading.grid(row=row, column=1)
-      self.beacon_heading.delete(0, tk.END)
-      self.beacon_heading.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_heading_txt = tk.Label(self.toolFrame, text = ("Beacon track ("+u"\u00b0"+")"),width=20)
-      self.beacon_heading_txt.grid(row=row, column=0)
+      beacon_heading_txt = QLabel(self.tr("Beacon track ("+u"\u00b0"+")")) # Create the label
+      layout.addWidget(beacon_heading_txt, row, 0) # Add it
+      self.beacon_heading = QLineEdit() # Create the value box
+      self.beacon_heading.clear() # Delete any existing text (redundant?)
+      self.beacon_heading.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_heading.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_heading, row, 1) # Add it
       row += 1
 
       # Beacon pressure
-      self.beacon_pressure = tk.Entry(self.toolFrame)
-      self.beacon_pressure.grid(row=row, column=1)
-      self.beacon_pressure.delete(0, tk.END)
-      self.beacon_pressure.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_pressure_txt = tk.Label(self.toolFrame, text = 'Beacon pressure (Pa)',width=20)
-      self.beacon_pressure_txt.grid(row=row, column=0)
+      beacon_pressure_txt = QLabel(self.tr('Beacon pressure (mbar)')) # Create the label
+      layout.addWidget(beacon_pressure_txt, row, 0) # Add it
+      self.beacon_pressure = QLineEdit() # Create the value box
+      self.beacon_pressure.clear() # Delete any existing text (redundant?)
+      self.beacon_pressure.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_pressure.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_pressure, row, 1) # Add it
       row += 1
 
       # Beacon temperature
-      self.beacon_temperature = tk.Entry(self.toolFrame)
-      self.beacon_temperature.grid(row=row, column=1)
-      self.beacon_temperature.delete(0, tk.END)
-      self.beacon_temperature.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_temperature_txt = tk.Label(self.toolFrame, text = ("Beacon temperature ("+u"\u2103"+")"),width=20)
-      self.beacon_temperature_txt.grid(row=row, column=0)
+      beacon_temperature_txt = QLabel(self.tr("Beacon temperature ("+u"\u2103"+")")) # Create the label
+      layout.addWidget(beacon_temperature_txt, row, 0) # Add it
+      self.beacon_temperature = QLineEdit() # Create the value box
+      self.beacon_temperature.clear() # Delete any existing text (redundant?)
+      self.beacon_temperature.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_temperature.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_temperature, row, 1) # Add it
       row += 1
 
       # Beacon voltage
-      self.beacon_voltage = tk.Entry(self.toolFrame)
-      self.beacon_voltage.grid(row=row, column=1)
-      self.beacon_voltage.delete(0, tk.END)
-      self.beacon_voltage.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_voltage_txt = tk.Label(self.toolFrame, text = 'Beacon voltage (V)',width=20)
-      self.beacon_voltage_txt.grid(row=row, column=0)
+      beacon_voltage_txt = QLabel(self.tr('Beacon voltage (V)')) # Create the label
+      layout.addWidget(beacon_voltage_txt, row, 0) # Add it
+      self.beacon_voltage = QLineEdit() # Create the value box
+      self.beacon_voltage.clear() # Delete any existing text (redundant?)
+      self.beacon_voltage.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_voltage.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_voltage, row, 1) # Add it
       row += 1
 
       # Beacon MSN
-      self.beacon_msn = tk.Entry(self.toolFrame)
-      self.beacon_msn.grid(row=row, column=1)
-      self.beacon_msn.delete(0, tk.END)
-      self.beacon_msn.config(justify=tk.CENTER,width=22,state='readonly')
-      self.beacon_msn_txt = tk.Label(self.toolFrame, text = 'Beacon MOMSN',width=20)
-      self.beacon_msn_txt.grid(row=row, column=0)
-      row += 1
-
-      # Separator
-      self.sep_2 = tk.Frame(self.toolFrame,height=1,bg='#808080',width=self.sep_width)
-      self.sep_2.grid(row=row, columnspan=2)
+      beacon_msn_txt = QLabel(self.tr('Beacon MOMSN')) # Create the label
+      layout.addWidget(beacon_msn_txt, row, 0) # Add it
+      self.beacon_msn = QLineEdit() # Create the value box
+      self.beacon_msn.clear() # Delete any existing text (redundant?)
+      self.beacon_msn.setAlignment(Qt.AlignHCenter) # Align it
+      self.beacon_msn.setReadOnly(True) # Make it read-only
+      layout.addWidget(self.beacon_msn, row, 1) # Add it
       row += 1
 
       # Buttons
-      self.boldFont = tkFont.Font(size=9,weight='bold')
-      self.zoom_in_button = tk.Button(self.toolFrame, text="Zoom +", font=self.boldFont, width=20, height=1, command=self.zoom_map_in, state='disabled')
-      self.zoom_in_button.grid(row=row,column=0)
-      self.zoom_out_button = tk.Button(self.toolFrame, text="Zoom -", font=self.boldFont, width=20, height=1, command=self.zoom_map_out, state='disabled')
-      self.zoom_out_button.grid(row=row+1,column=0)
-      self.quit_button = tk.Button(self.toolFrame, text="Quit", font=self.boldFont, width=20, height=2, command=self.QUIT)
-      self.quit_button.grid(row=row,column=1,rowspan=2)
+      self.zoom_in_button = QPushButton(self.tr('Zoom +')) # Create the button
+      self.zoom_in_button.pressed.connect(self.zoom_map_in) # Connect it to the function
+      layout.addWidget(self.zoom_in_button, row, 0) # Add it
+      self.zoom_out_button = QPushButton(self.tr('Zoom -')) # Create the button
+      self.zoom_out_button.pressed.connect(self.zoom_map_out) # Connect it to the function
+      layout.addWidget(self.zoom_out_button, row + 1, 0) # Add it
+      self.quit_button = QPushButton(self.tr('Quit')) # Create the button
+      self.quit_button.pressed.connect(self.close) # Connect it to the function
+      layout.addWidget(self.quit_button, row, 1, 2, 1) # Add it
+      row += 1
+
+      # Map Image
+      self.imageLabel = QLabel()
+      filename = "map_image_blank.png"
+      self.pixmap = QPixmap(filename)
+      self.imageLabel.setPixmap(self.pixmap)
+      layout.addWidget(self.imageLabel, 1, 2, row+1, 1)
+      self.imageLabel.mousePressEvent = self.image_click # https://stackoverflow.com/a/6199330
 
       # Menu to list current beacon locations
-      self.menubar = tk.Menu(self.window)
-      self.beacon_menu = tk.Menu(self.menubar, tearoff=0)
-      self.menubar.add_cascade(label="Beacon Locations", menu=self.beacon_menu)
-      self.window.config(menu=self.menubar)
+      self.menubar = QMenuBar() # Create the menubar
+      layout.addWidget(self.menubar,0,0,1,2) # Add it
+      self.beacon_menu = self.menubar.addMenu('Beacon Locations')
 
       # Menu to list update intervals
-      self.interval_menu = tk.Menu(self.menubar, tearoff=0)
-      self.menubar.add_cascade(label="Set Update Interval", menu=self.interval_menu)
-      self.window.config(menu=self.menubar)
+      self.interval_menu = self.menubar.addMenu('Set Update Interval')
       # Add intervals
       for update_interval in self.update_intervals:
          interval_str = str(update_interval)
-         self.interval_menu.add_command(label=interval_str,command=lambda interval_str=interval_str: self.set_update_interval(interval_str))
+         action = self.interval_menu.addAction(interval_str)
+         action.triggered.connect(lambda state, x=interval_str: self.set_update_interval(x)) # https://stackoverflow.com/a/35821092
+
+      # Set the layout
+      self.setLayout(layout)
 
       # Set up next update
       self.last_update_at = time.time() # Last time an update was requested
       self.first_update = True # Flag to indicate if an update has been performed
 
       # Timer
-      self.window.after(2000,self.timer) # First timer event after 2 secs
+      self.timer = QTimer()
+      self.timer.setInterval(250) # Set the timer interval
+      self.timer.timeout.connect(self.recurring_timer)
+      self.timer.start()
 
       # Start GUI
-      self.window.mainloop()
+      self.show()
 
-   def timer(self):
-      ''' Timer function - calls itself repeatedly to schedule map updates '''
+   def recurring_timer(self):
+      ''' Timer function - handles map updates '''
+      
       do_update = False # Initialise is it time to do an update?
       now = time.time() # Get the current time
 
       time_since_last_update = now - self.last_update_at # Calculate interval since last update
       last_update_str = time.strftime('%H:%M:%S', time.gmtime(time_since_last_update))
-      self.time_since_last_update.configure(state='normal') # Unlock entry box
-      self.time_since_last_update.delete(0, tk.END) # Delete existing value
-      self.time_since_last_update.insert(0, last_update_str) # Update the indicated time since last update
-      self.time_since_last_update.config(state='readonly') # Lock entry box
+      self.time_since_last_update.setText(last_update_str) # Update the indicated time since last update
 
       # Check if it is time to do an update
       # Do an update if it has been at least interval seconds since the last update
       # and there are no message boxes open
       # or this is the first update
-      interval = sum(float(n) * m for n, m in zip(reversed(self.interval.get().split(':')), (1, 60, 3600))) # https://stackoverflow.com/a/45971056
-      if ((time_since_last_update >= interval) and (self.message_boxes_open == 0)) or (self.first_update == True): 
+      interval = sum(float(n) * m for n, m in zip(reversed(self.interval.text().split(':')), (1, 60, 3600))) # https://stackoverflow.com/a/45971056
+      if (time_since_last_update >= interval) or (self.first_update == True): 
          do_update = True # Do update
          self.first_update = False # Clear flag
          self.last_update_at = now # Update time of last update
 
       if do_update: # If it is time to do an update
-         self.time_since_last_update.configure(state='normal') # Unlock entry box
-         self.time_since_last_update.delete(0, tk.END) # Delete existing value
-         self.time_since_last_update.insert(0, 'In Progress...') # Update the indicated time since last update
-         self.time_since_last_update.config(state='readonly') # Lock entry box
+         self.time_since_last_update.setText('In Progress...') # Update the indicated time since last update
          if self.check_for_files(): # Check for new SBD files
             self.update_map() # Update the Google Static Maps image
-
-      self._job = self.window.after(250, self.timer) # Schedule another timer event in 0.25s
 
    def check_for_files(self):
       ''' Check for the appearance of any new SBD .bin files and parse them '''
       new_files = False # Found any new files?
       # Identify all the sbd files again 
       for root, dirs, files in os.walk("."):
-         self.window.update() # Update the window
          if len(files) > 0:
             #if root != ".": # Ignore files in this directory - only process subdirectories
             #if root == ".": # Ignore subdirectories - only process this directory
@@ -426,18 +411,17 @@ class BeaconMapper(object):
                         try: # Messages without RockBLOCK destination
                            gpstime,latitude,longitude,altitude,speed,heading,pressure,temperature,battery = \
                                np.loadtxt(longfilename, delimiter=',', unpack=True, \
-                               usecols=(0,1,2,3,4,5,8,9,10), converters={0:mdates.strpdate2num('%Y%m%d%H%M%S')})
+                               usecols=(0,1,2,3,4,5,8,9,10), converters={0: lambda s: mdates.datestr2num(s.decode())})
                         except: # Messages with RockBLOCK destination
                            try:
                               gpstime,latitude,longitude,altitude,speed,heading,pressure,temperature,battery = \
                                   np.loadtxt(longfilename, delimiter=',', unpack=True, \
-                                  usecols=(1,2,3,4,5,6,9,10,11), converters={1:mdates.strpdate2num('%Y%m%d%H%M%S')})
+                                  usecols=(1,2,3,4,5,6,9,10,11), converters={1: lambda s: mdates.datestr2num(s.decode())})
                            except:
-                              print 'Ignoring',filename
+                              print('Ignoring',filename)
                               ignore_me = True
-
                         if (ignore_me == False):
-                           print 'Found new SBD file from beacon IMEI',imei,'with MOMSN',msnum
+                           print('Found new SBD file from beacon IMEI',imei,'with MOMSN',msnum)
                            
                            pressure = int(round(pressure)) # Convert pressure to integer
                            altitude = int(round(altitude)) # Convert altitude to integer
@@ -445,7 +429,7 @@ class BeaconMapper(object):
                            position_str = "{:.6f},{:.6f}".format(latitude, longitude) # Construct position
 
                            # Check if this new file is from a beacon imei we haven't seen before
-                           if self.beacon_imeis.has_key(imei):
+                           if imei in self.beacon_imeis:
                               pass # We have seen this one before
                            else:
                               # This is a new beacon
@@ -461,18 +445,20 @@ class BeaconMapper(object):
                                  self.map_lon = longitude
                                  # Add it to the Beacon Location menu
                                  # https://stackoverflow.com/q/7542164
-                                 self.beacon_menu.add_command(label=imei,command=lambda imei=imei: self.copy_location(imei))
+                                 # https://stackoverflow.com/a/35821092
+                                 action = self.beacon_menu.addAction(imei)
+                                 action.triggered.connect(lambda state, x=imei: self.copy_location(x))
                               else:
                                  # Maximum has been reached - don't process data from this beacon
-                                 print 'Unable to process file: maximum number of beacons reached!'
+                                 print('Unable to process file: maximum number of beacons reached!')
                                  ignore_me = True # Limit reached so ignore this file
 
                            if (ignore_me == False):
                               # Update beacon location
                               self.beacon_locations[self.beacon_imeis[imei]] = position_str # Update location for this beacon
 
-                              # Change beacon location background colour
-                              self.beacon_location_txt.config(background=self.beacon_colours[self.beacon_imeis[imei]])
+##                              # Change beacon location background colour
+##                              self.beacon_location_txt.setStyleSheet(background=self.beacon_colours[self.beacon_imeis[imei]])
                               
                               # Update beacon path (append this location to the path for this beacon)
                               self.beacon_paths[self.beacon_imeis[imei]] += '|' + position_str
@@ -486,58 +472,28 @@ class BeaconMapper(object):
                                  self.beacon_paths[self.beacon_imeis[imei]] = self.beacon_paths[self.beacon_imeis[imei]][:pipes[1]] + self.beacon_paths[self.beacon_imeis[imei]][pipes[2]:]
                                  
                               # Update imei
-                              self.beacon_imei.config(state='normal') # Unlock beacon_imei
-                              self.beacon_imei.delete(0, tk.END) # Delete old value
-                              self.beacon_imei.insert(0, imei) # Insert new imei
-                              self.beacon_imei.config(state='readonly') # Lock beacon_imei
+                              self.beacon_imei.setText(imei)
                               # Update beacon time
-                              self.beacon_time.config(state='normal') # Unlock beacon_time
-                              self.beacon_time.delete(0, tk.END) # Delete old value
-                              self.beacon_time.insert(0, time_str) # Insert new time
-                              self.beacon_time.config(state='readonly') # Lock beacon_time
+                              self.beacon_time.setText(time_str)
                               # Update beacon location
-                              self.beacon_location.config(state='normal')
-                              self.beacon_location.delete(0, tk.END)
-                              self.beacon_location.insert(0, position_str)
-                              self.beacon_location.config(state='readonly')
+                              self.beacon_location.setText(position_str)
                               # Update beacon_altitude
-                              self.beacon_altitude.config(state='normal')
-                              self.beacon_altitude.delete(0, tk.END)
-                              self.beacon_altitude.insert(0, str(altitude))
-                              self.beacon_altitude.config(state='readonly')
+                              self.beacon_altitude.setText(str(altitude))
                               # Update beacon_speed
-                              self.beacon_speed.config(state='normal')
-                              self.beacon_speed.delete(0, tk.END)
-                              self.beacon_speed.insert(0, str(speed))
-                              self.beacon_speed.config(state='readonly')
+                              self.beacon_speed.setText(str(speed))
                               # Update beacon_heading
-                              self.beacon_heading.config(state='normal')
-                              self.beacon_heading.delete(0, tk.END)
-                              self.beacon_heading.insert(0, str(heading))
-                              self.beacon_heading.config(state='readonly')
+                              self.beacon_heading.setText(str(heading))
                               # Update beacon_pressure
-                              self.beacon_pressure.config(state='normal')
-                              self.beacon_pressure.delete(0, tk.END)
-                              self.beacon_pressure.insert(0, str(pressure))
-                              self.beacon_pressure.config(state='readonly')
+                              self.beacon_pressure.setText(str(pressure))
                               # Update beacon_temperature
-                              self.beacon_temperature.config(state='normal')
-                              self.beacon_temperature.delete(0, tk.END)
-                              self.beacon_temperature.insert(0, str(temperature))
-                              self.beacon_temperature.config(state='readonly')
+                              self.beacon_temperature.setText(str(temperature))
                               # Update beacon_voltage
-                              self.beacon_voltage.config(state='normal')
-                              self.beacon_voltage.delete(0, tk.END)
-                              self.beacon_voltage.insert(0, str(battery))
-                              self.beacon_voltage.config(state='readonly')
+                              self.beacon_voltage.setText(str(battery))
                               # Update beacon_msn
-                              self.beacon_msn.config(state='normal')
-                              self.beacon_msn.delete(0, tk.END)
-                              self.beacon_msn.insert(0, msnum)
-                              self.beacon_msn.config(state='readonly')
-                              # Update Beacon Location menu
-                              label_str = imei + ' : ' + position_str
-                              self.beacon_menu.entryconfig(self.beacon_imeis[imei], label=label_str, background=self.beacon_colours[self.beacon_imeis[imei]])
+                              self.beacon_msn.setText(msnum)
+##                              # Update Beacon Location menu
+##                              label_str = imei + ' : ' + position_str
+##                              self.beacon_menu.entryconfig(self.beacon_imeis[imei], label=label_str, background=self.beacon_colours[self.beacon_imeis[imei]])
 
                               new_files = True # Update new_files now that entire file has been processed
       return new_files
@@ -572,28 +528,23 @@ class BeaconMapper(object):
       # Download the API map image from Google
       filename = "map_image.png" # Download map to this file
       try:
-         urllib.urlretrieve(self.path_url, filename) # Attempt map image download
+         urllib.request.urlretrieve(self.path_url, filename) # Attempt map image download
       except:
          filename = "map_image_blank.png" # If download failed, default to blank image
 
       # Update label using image
-      image = Image.open(filename)
-      photo = ImageTk.PhotoImage(image)
-      self.label.configure(image=photo)
-      self.image = photo
+      self.pixmap = QPixmap(filename)
+      self.imageLabel.setPixmap(self.pixmap)
       
       # Enable zoom buttons and mouse clicks if a map image was displayed
       if filename == "map_image.png":
-         self.zoom_in_button.config(state='normal') # Enable zoom+
-         self.zoom_out_button.config(state='normal') # Enable zoom-
+         self.zoom_in_button.setEnabled(True) # Enable zoom+
+         self.zoom_out_button.setEnabled(True) # Enable zoom-
          self.enable_clicks = True # Enable mouse clicks
       else: # Else disable them again
-         self.zoom_in_button.config(state='disabled') # Disable zoom+
-         self.zoom_out_button.config(state='disabled') # Disable zoom-
+         self.zoom_in_button.setEnabled(False) # Disable zoom+
+         self.zoom_out_button.setEnabled(False) # Disable zoom-
          self.enable_clicks = False # Disable mouse clicks
-
-      # Update window
-      self.window.update()
 
    def zoom_map_in(self):
       ''' Zoom in '''
@@ -609,42 +560,24 @@ class BeaconMapper(object):
          self.zoom = str(int(self.zoom) - 1)
          self.update_map()
 
-   def left_click(self, event):
-      ''' Left mouse click - move map based on click position '''
-      self.image_click(event, 'left')
-
-   def right_click(self, event):
-      ''' Right mouse click - copy map location to clipboard '''
-      self.image_click(event, 'right')
-
-   def image_click(self, event, button):
+   def image_click(self, event):
       ''' Handle mouse click event '''
       if (self.enable_clicks) and (int(self.zoom) > 0) and (int(self.zoom) <= 21): # Are clicks enabled and is zoom 1-21?
-         x_move = event.x - (self.frame_width / 2) # Required x move in pixels
-         y_move = event.y - (self.frame_height / 2) # Required y move in pixels
+         x_move = event.pos().x() - (self.frame_width / 2) # Required x move in pixels
+         y_move = event.pos().y() - (self.frame_height / 2) # Required y move in pixels
          scale_x = self.scales[np.where(int(self.zoom)==self.scales[:,0])][0][1] # Select scale from scales using current zoom
          # Compensate y scale (Mercator projection) using current latitude
          scale_multiplier_lat = math.cos(math.radians(self.map_lat))
          scale_y = scale_x * scale_multiplier_lat # Calculate y scale
          new_lat = self.map_lat - (y_move * scale_y) # Calculate new latitude
          new_lon = self.map_lon + (x_move * scale_x) # Calculate new longitude
-         if button == 'left':
-            self.map_lat = new_lat # Update lat
-            self.map_lon = new_lon # Update lon
-            self.update_map() # Update map
-         else:
-            # Copy the location to the clipboard so it can be pasted into (e.g.) a browser
-            self.window.clipboard_clear() # Clear clipboard
-            loc = ("%.6f"%new_lat) + ',' + ("%.6f"%new_lon) # Construct location
-            self.window.clipboard_append(loc) # Copy location to clipboard
-            self.window.update() # Update window
+         self.map_lat = new_lat # Update lat
+         self.map_lon = new_lon # Update lon
+         self.update_map() # Update map
 
    def copy_location(self, imei):
-      ''' Copy the location of this imei to the clipboard '''
-      self.window.clipboard_clear() # Clear clipboard
+      ''' Move the map to the location of this imei '''
       loc = self.beacon_locations[self.beacon_imeis[imei]] # Get location
-      self.window.clipboard_append(loc) # Copy location to clipboard
-      self.window.update() # Update window
       try:
          lat,lon = loc.split(',')
          self.map_lat = float(lat)
@@ -653,30 +586,27 @@ class BeaconMapper(object):
       except:
          pass
 
-   def set_update_interval(self, interval):
+   def set_update_interval(self, new_interval):
       ''' Update the update interval '''
-      self.interval.configure(state='normal') # Unlock entry box
-      self.interval.delete(0, tk.END) # Delete existing value
-      self.interval.insert(0, interval) # Update the indicated time since last update
-      self.interval.config(state='readonly') # Lock entry box
+      self.interval.setText(new_interval) # Update the indicated time since last update
 
    # https://stackoverflow.com/a/2669120
    def sorted_nicely(self, l): 
-      """ Sort the given iterable in the way that humans expect.""" 
-      convert = lambda text: int(text) if text.isdigit() else text 
-      alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-      return sorted(l, key = alphanum_key)
+    """ Sort the given iterable in the way that humans expect.""" 
+    convert = lambda text: int(text) if text.isdigit() else text 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(l, key = alphanum_key)
 
-   def QUIT(self):
-      ''' Quit the program '''
-      self.message_boxes_open = self.message_boxes_open + 1 # Update the number of open message boxes
-      # "finally:" will close the serial port and log file - no need to do it here
-      if tkMessageBox.askokcancel("Quit", "Are you sure?"):
-         self.message_boxes_open = self.message_boxes_open - 1 # Probably redundant?
-         self.window.destroy() # Destroy the window
-      else:
-         self.message_boxes_open = self.message_boxes_open - 1
+   def closeEvent(self, event: QCloseEvent) -> None:
+      """Handle Close event of the Widget."""
+      #self.timer.stop()
+      event.accept()
 
 if __name__ == "__main__":
-   mapper = BeaconMapper()
+   from sys import exit as sysExit
+   app = QApplication([])
+   app.setOrganizationName('Iridium Beacon')
+   app.setApplicationName('Beacon Mapper')
+   w = BeaconMapper()
+   sysExit(app.exec_())
 

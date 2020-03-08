@@ -19,6 +19,7 @@
 import csv
 from datetime import datetime
 import os
+import codecs
 
 resp = 'N'
 
@@ -33,7 +34,7 @@ for root, dirs, files in os.walk("."):
                 if filename[-4:] == '.csv':
                     longfilename = os.path.join(root, filename)
                     question =  'Open ' + filename + '? (Y/n) : '
-                    resp = raw_input(question)
+                    resp = input(question)
                     if resp == '' or resp == 'Y' or resp == 'y': break
                     longfilename = ''
                 if resp == '' or resp == 'Y' or resp == 'y': break
@@ -44,8 +45,8 @@ if longfilename == '': raise Exception('No file to open!')
 
 outfile = longfilename[:-4] + '_DateTime' + longfilename[-4:]
 
-with open(outfile,"wb") as dest:
-    with open(longfilename, "rb") as source:
+with open(outfile,"w", newline='') as dest:
+    with open(longfilename, "r") as source:
         reader = csv.reader(source)
         writer = csv.writer(dest)
         for line in reader:

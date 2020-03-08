@@ -59,7 +59,7 @@ for root, dirs, files in os.walk("."):
                 if filename[-4:] == '.csv':
                     longfilename = os.path.join(root, filename)
                     question =  'Open ' + filename + '? (Y/n) : '
-                    resp = raw_input(question)
+                    resp = input(question)
                     if resp == '' or resp == 'Y' or resp == 'y': break
                     longfilename = ''
                 if resp == '' or resp == 'Y' or resp == 'y': break
@@ -78,7 +78,7 @@ linestring_kml = simplekml.Kml() # Create an empty kml for the flightpath linest
 course_kml = simplekml.Kml() # Create an empty kml for the COG linestring
 coords = [] # Create coordinates
 
-with open(longfilename, "rb") as f:
+with open(longfilename, "r") as f:
     reader = csv.reader(f)
     for line in reader:
         if (line[0][:2] == 'RB') : # Does the message payload have an RB prefix?

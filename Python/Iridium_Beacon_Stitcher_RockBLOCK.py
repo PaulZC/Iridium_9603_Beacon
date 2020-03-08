@@ -49,7 +49,7 @@ imeis = []
 # csv filenames
 csv_filenames = []
 
-print 'Iridium Beacon Stitcher RockBLOCK'
+print('Iridium Beacon Stitcher RockBLOCK')
 print
 
 # Ask the user if they want to Overwrite or Append existing sbd files
@@ -87,7 +87,7 @@ for root, dirs, files in os.walk(".", followlinks=False):
                 momsn = filename[16:-4] # Get the momsn
                 imei = filename[0:15] # Get the imei
 
-                print 'Found SBD file from beacon IMEI',imei,'with MOMSN',momsn
+                print('Found SBD file from beacon IMEI',imei,'with MOMSN',momsn)
                
                 # Check if this new file is from a beacon imei we haven't seen before
                 if imei in imeis:
